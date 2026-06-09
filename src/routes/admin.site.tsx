@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import SiteManagementDesigner from "@/components/admin/SiteManagementDesigner";
+import { SiteManagementFlow } from "@/components/admin/SiteManagementFlow";
 
 export const Route = createFileRoute("/admin/site")({
-  component: SiteManagementDesigner,
+  component: SiteManagementFlow,
   head: () => ({
     meta: [
-      { title: "Site Designer · CA Aspire BD Admin" },
+      { title: "Site Management · CA Aspire BD Admin" },
       {
         name: "description",
         content:
-          "Webflow-style site designer: 3-panel editor, live preview, version history, and safe publish pipeline.",
+          "Manage CA Aspire BD website pages, homepage sections, theme settings, media, and publishing history.",
       },
     ],
   }),
