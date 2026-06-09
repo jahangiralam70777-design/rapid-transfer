@@ -161,6 +161,9 @@ function RootInner() {
   const queryClient = useQueryClient();
   const { hydrate, user, authVersion } = useAppStore();
   const lastAuthVersion = useRef(authVersion);
+  const isSitePreviewFrame =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("site-preview") === "1";
 
   // Apply user prefs (accent color, font size) to <html> on every mount.
   usePrefs();
@@ -169,13 +172,9 @@ function RootInner() {
   useRealtimeInvalidator(Boolean(user));
 
   useEffect(() => {
-    try {
-      if (window.self !== window.top) return;
-    } catch {
-      return;
-    }
+    if (isSitePreviewFrame) return;
     hydrate();
-  }, [hydrate]);
+  }, [hydrate, isSitePreviewFrame]);
 
   // Install window-level error + unhandled-rejection reporters once.
   useEffect(() => {
