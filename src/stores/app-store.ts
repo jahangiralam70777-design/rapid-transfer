@@ -4,7 +4,7 @@ import type { AppRole } from "@/lib/app-data";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSessionUser, signOut, type AuthUser } from "@/lib/auth-client";
 import { getDemoSession } from "@/lib/demo-auth";
-import { claimNewSession, clearLocalSessionId } from "@/lib/single-session";
+import { claimNewSession, clearLocalSessionId, getLocalSessionId } from "@/lib/single-session";
 import { clearSessionTimers } from "@/lib/session-timeout";
 
 type UserSession = AuthUser | null;
@@ -150,6 +150,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       authSubscribed = true;
       supabase.auth.onAuthStateChange((event, session) => {
         console.debug("[auth] state change", { event, hasSession: !!session });
+        const current = get().user;
         if (event === "SIGNED_OUT") {
           clearLocalSessionId();
           persistAuthSnapshot(null);
@@ -162,20 +163,21 @@ export const useAppStore = create<AppState>((set, get) => ({
         // change via Realtime and force-logout itself.
         if (event === "SIGNED_IN" && session?.user?.id) {
           const uid = session.user.id;
-          void claimNewSession(uid).catch((e) => {
-            console.warn("[single-session] claim error", e);
-          });
+          const isDuplicateForCurrentUser = current?.id === uid && !!getLocalSessionId(uid);
+          if (!isDuplicateForCurrentUser) {
+            void claimNewSession(uid).catch((e) => {
+              console.warn("[single-session] claim error", e);
+            });
+          }
         }
         if (!session) {
-          const current = get().user;
           set({ user: current ?? null, sessionReady: true, authLoading: false, authError: null });
           return;
         }
-        const current = get().user;
         // Skip refetch for token refreshes / user-updates when we already
         // have the same user loaded — avoids the double session fetch.
         if (
-          (event === "TOKEN_REFRESHED" || event === "USER_UPDATED" || event === "INITIAL_SESSION") &&
+          (event === "TOKEN_REFRESHED" || event === "USER_UPDATED" || event === "INITIAL_SESSION" || event === "SIGNED_IN") &&
           current &&
           current.id === session.user.id
         ) {
