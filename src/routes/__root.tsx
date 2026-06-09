@@ -169,6 +169,11 @@ function RootInner() {
   useRealtimeInvalidator(Boolean(user));
 
   useEffect(() => {
+    try {
+      if (window.self !== window.top) return;
+    } catch {
+      return;
+    }
     hydrate();
   }, [hydrate]);
 
