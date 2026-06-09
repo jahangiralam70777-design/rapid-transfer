@@ -206,6 +206,11 @@ export default function SiteManagementDesigner() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const activePage = pages.find((p) => p.id === activePageId) ?? pages[0];
+  const previewSrc = useMemo(() => {
+    const path = activePage?.path ?? "/";
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}site-preview=1`;
+  }, [activePage?.path]);
   const filteredPages = useMemo(
     () =>
       pages.filter((p) => p.name.toLowerCase().includes(pageSearch.toLowerCase())),
@@ -253,7 +258,7 @@ export default function SiteManagementDesigner() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="flex h-[calc(100vh-0px)] flex-col bg-gradient-to-br from-background via-background to-muted/30 text-foreground">
+      <div className="flex h-[calc(100vh-2rem)] min-w-0 flex-col overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background via-background to-muted/30 text-foreground shadow-card-soft">
         <TopBar
           pageName={activePage?.name ?? "Home"}
           version={activePage?.version ?? 1}
@@ -266,7 +271,7 @@ export default function SiteManagementDesigner() {
 
         <div className="flex flex-1 min-h-0">
           {/* LEFT: Pages */}
-          <aside className="w-72 shrink-0 border-r border-border/60 bg-card/40 backdrop-blur-md flex flex-col">
+          <aside className="w-56 shrink-0 border-r border-border/60 bg-card/40 backdrop-blur-md flex flex-col 2xl:w-72">
             <div className="p-4 border-b border-border/60 space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold tracking-tight">Pages</h2>
@@ -318,7 +323,7 @@ export default function SiteManagementDesigner() {
           </aside>
 
           {/* MIDDLE: Structure tree */}
-          <aside className="w-72 shrink-0 border-r border-border/60 bg-card/30 backdrop-blur-md flex flex-col">
+          <aside className="w-56 shrink-0 border-r border-border/60 bg-card/30 backdrop-blur-md flex flex-col 2xl:w-72">
             <div className="p-4 border-b border-border/60 flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold tracking-tight">Structure</h2>
@@ -358,13 +363,13 @@ export default function SiteManagementDesigner() {
               onRefresh={() => setIframeKey((k) => k + 1)}
               path={activePage?.path ?? "/"}
             />
-            <div className="flex-1 min-h-0 overflow-auto p-6">
-              <div className="mx-auto flex justify-center">
+        <div className="flex-1 min-h-0 overflow-auto p-4 2xl:p-6">
+          <div className="mx-auto flex w-full justify-center">
                 <PreviewFrame
                   key={iframeKey}
                   ref={iframeRef}
                   device={device}
-                  src={activePage?.path ?? "/"}
+                  src={previewSrc}
                 />
               </div>
               {selectedSection ? (
@@ -414,7 +419,7 @@ export default function SiteManagementDesigner() {
           </main>
 
           {/* RIGHT: Inspector */}
-          <aside className="w-80 shrink-0 border-l border-border/60 bg-card/40 backdrop-blur-md flex flex-col">
+          <aside className="w-72 shrink-0 border-l border-border/60 bg-card/40 backdrop-blur-md flex flex-col 2xl:w-80">
             <Inspector section={selectedSection} />
           </aside>
         </div>
@@ -691,13 +696,13 @@ const PreviewFrame = (() => {
     return (
       <div
         className="relative rounded-xl border border-border/60 bg-background shadow-2xl shadow-primary/5 ring-1 ring-border/40 overflow-hidden transition-all"
-        style={{ width: w, height: device === "desktop" ? 760 : device === "tablet" ? 1024 : 720 }}
+          style={{ width: "100%", maxWidth: w, height: device === "desktop" ? 760 : device === "tablet" ? 1024 : 720 }}
       >
         <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-muted/80 to-muted/40 border-b border-border/60 flex items-center px-2 gap-1.5 z-10">
           <span className="h-2 w-2 rounded-full bg-rose-400/80" />
           <span className="h-2 w-2 rounded-full bg-amber-400/80" />
           <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-          <span className="ml-2 text-[10px] text-muted-foreground font-mono truncate">{src}</span>
+          <span className="ml-2 text-[10px] text-muted-foreground font-mono truncate">{src.replace(/[?&]site-preview=1$/, "")}</span>
         </div>
         <iframe
           ref={ref}

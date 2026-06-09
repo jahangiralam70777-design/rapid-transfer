@@ -5,7 +5,6 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useAppStore, hasLocalAuthSession } from "@/stores/app-store";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/auth-client";
-import { verifyAdminAccess } from "@/lib/admin-verify.functions";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -31,6 +30,7 @@ function AdminGate({ children }: { children: React.ReactNode }) {
   const user = useAppStore((s) => s.user);
   const sessionReady = useAppStore((s) => s.sessionReady);
   const authLoading = useAppStore((s) => s.authLoading);
+  const refreshAuth = useAppStore((s) => s.refreshAuth);
   const navigate = useNavigate();
   const [hasSupabaseSession, setHasSupabaseSession] = useState<boolean | null>(null);
   // H-1: server-verified admin flag. Client-side role can be spoofed, so we
@@ -54,8 +54,14 @@ function AdminGate({ children }: { children: React.ReactNode }) {
         return;
       }
       try {
-        const res = await verifyAdminAccess();
-        if (!cancelled) setServerAdmin(res.isAdmin);
+        const { data: roleRow, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.session!.user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (error) throw error;
+        if (!cancelled) setServerAdmin(!!roleRow);
       } catch {
         if (!cancelled) setServerAdmin(false);
       }
@@ -65,8 +71,12 @@ function AdminGate({ children }: { children: React.ReactNode }) {
     };
   }, [sessionReady, user?.id]);
 
+  useEffect(() => {
+    if (!user && hasLocalAuthSession()) void refreshAuth({ force: true });
+  }, [refreshAuth, user]);
+
   const status = useMemo(() => {
-    if (!sessionReady || authLoading || hasSupabaseSession === null) return "loading" as const;
+    if (!sessionReady || (authLoading && !user) || hasSupabaseSession === null) return "loading" as const;
     if (!user) { if (hasLocalAuthSession()) return "loading" as const; return "no-user" as const; }
     if (user.role !== "admin") return "forbidden" as const;
     if (!hasSupabaseSession && !user.id?.startsWith("demo-")) return "demo" as const;

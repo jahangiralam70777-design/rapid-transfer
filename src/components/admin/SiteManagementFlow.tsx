@@ -553,7 +553,7 @@ function LivePreviewFrame({ path, title }: { path: string; title: string }) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const src = `${path}${path.includes("?") ? "&" : "?"}__preview=1&__theme=${theme}&__nonce=${nonce}`;
+  const src = `${path}${path.includes("?") ? "&" : "?"}site-preview=1&__preview=1&__theme=${theme}&__nonce=${nonce}`;
 
 
   const widths: Record<typeof device, string> = {
