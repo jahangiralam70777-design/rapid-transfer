@@ -241,15 +241,15 @@ export const adminUserTrends = createServerFn({ method: "POST" })
       sb.from("profiles").select("id", { count: "exact", head: true }).gte("last_login_at", curStart),
       sb.from("profiles").select("id", { count: "exact", head: true }).gte("last_login_at", prevStart).lt("last_login_at", prevEnd),
       sb.from("admin_action_log").select("id", { count: "exact", head: true })
-        .eq("action_type", "user_status_change").eq("target_kind", "user")
+        .eq("action", "user_status_change")
         .gte("created_at", curStart),
       sb.from("admin_action_log").select("id", { count: "exact", head: true })
-        .eq("action_type", "user_status_change").eq("target_kind", "user")
+        .eq("action", "user_status_change")
         .gte("created_at", prevStart).lt("created_at", prevEnd),
       sb.from("admin_action_log").select("id", { count: "exact", head: true })
-        .eq("action_type", "user_verify").gte("created_at", curStart),
+        .eq("action", "user_verify").gte("created_at", curStart),
       sb.from("admin_action_log").select("id", { count: "exact", head: true })
-        .eq("action_type", "user_verify").gte("created_at", prevStart).lt("created_at", prevEnd),
+        .eq("action", "user_verify").gte("created_at", prevStart).lt("created_at", prevEnd),
     ]);
 
     return {
