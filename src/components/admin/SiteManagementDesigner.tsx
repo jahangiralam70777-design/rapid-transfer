@@ -206,6 +206,11 @@ export default function SiteManagementDesigner() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const activePage = pages.find((p) => p.id === activePageId) ?? pages[0];
+  const previewSrc = useMemo(() => {
+    const path = activePage?.path ?? "/";
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}site-preview=1`;
+  }, [activePage?.path]);
   const filteredPages = useMemo(
     () =>
       pages.filter((p) => p.name.toLowerCase().includes(pageSearch.toLowerCase())),
@@ -364,7 +369,7 @@ export default function SiteManagementDesigner() {
                   key={iframeKey}
                   ref={iframeRef}
                   device={device}
-                  src={activePage?.path ?? "/"}
+                  src={previewSrc}
                 />
               </div>
               {selectedSection ? (
@@ -697,7 +702,7 @@ const PreviewFrame = (() => {
           <span className="h-2 w-2 rounded-full bg-rose-400/80" />
           <span className="h-2 w-2 rounded-full bg-amber-400/80" />
           <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-          <span className="ml-2 text-[10px] text-muted-foreground font-mono truncate">{src}</span>
+          <span className="ml-2 text-[10px] text-muted-foreground font-mono truncate">{src.replace(/[?&]site-preview=1$/, "")}</span>
         </div>
         <iframe
           ref={ref}
