@@ -533,7 +533,7 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
       sb.from("activity_events").select("device").gte("created_at", thirtyDayAgo).not("device", "is", null),
       sb.from("activity_events").select("user_agent").gte("created_at", thirtyDayAgo).not("user_agent", "is", null).limit(5000),
       sb.from("exam_attempts").select("subject_id, correct_count, total_count").eq("status", "completed").not("subject_id", "is", null).gte("created_at", thirtyDayAgo).limit(5000),
-      sb.from("subjects").select("id, name, level_id"),
+      sb.from("subjects").select("id, name, level"),
       data.participation_scope === "month"
         ? sb.from("exam_attempts").select("user_id", { count: "exact", head: true }).eq("kind", "mock").gte("created_at", monthStartIso)
         : sb.from("exam_attempts").select("user_id", { count: "exact", head: true }).eq("kind", "mock"),
