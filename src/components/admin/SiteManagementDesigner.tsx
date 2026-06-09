@@ -253,7 +253,7 @@ export default function SiteManagementDesigner() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="flex h-[calc(100vh-0px)] flex-col bg-gradient-to-br from-background via-background to-muted/30 text-foreground">
+      <div className="flex h-[calc(100vh-2rem)] min-w-0 overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background via-background to-muted/30 text-foreground shadow-card-soft">
         <TopBar
           pageName={activePage?.name ?? "Home"}
           version={activePage?.version ?? 1}
@@ -266,7 +266,7 @@ export default function SiteManagementDesigner() {
 
         <div className="flex flex-1 min-h-0">
           {/* LEFT: Pages */}
-          <aside className="w-72 shrink-0 border-r border-border/60 bg-card/40 backdrop-blur-md flex flex-col">
+          <aside className="w-56 shrink-0 border-r border-border/60 bg-card/40 backdrop-blur-md flex flex-col 2xl:w-72">
             <div className="p-4 border-b border-border/60 space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold tracking-tight">Pages</h2>
@@ -318,7 +318,7 @@ export default function SiteManagementDesigner() {
           </aside>
 
           {/* MIDDLE: Structure tree */}
-          <aside className="w-72 shrink-0 border-r border-border/60 bg-card/30 backdrop-blur-md flex flex-col">
+          <aside className="w-56 shrink-0 border-r border-border/60 bg-card/30 backdrop-blur-md flex flex-col 2xl:w-72">
             <div className="p-4 border-b border-border/60 flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold tracking-tight">Structure</h2>
@@ -414,7 +414,7 @@ export default function SiteManagementDesigner() {
           </main>
 
           {/* RIGHT: Inspector */}
-          <aside className="w-80 shrink-0 border-l border-border/60 bg-card/40 backdrop-blur-md flex flex-col">
+          <aside className="w-72 shrink-0 border-l border-border/60 bg-card/40 backdrop-blur-md flex flex-col 2xl:w-80">
             <Inspector section={selectedSection} />
           </aside>
         </div>
