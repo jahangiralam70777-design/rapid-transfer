@@ -358,8 +358,8 @@ export default function SiteManagementDesigner() {
               onRefresh={() => setIframeKey((k) => k + 1)}
               path={activePage?.path ?? "/"}
             />
-            <div className="flex-1 min-h-0 overflow-auto p-6">
-              <div className="mx-auto flex justify-center">
+        <div className="flex-1 min-h-0 overflow-auto p-4 2xl:p-6">
+          <div className="mx-auto flex w-full justify-center">
                 <PreviewFrame
                   key={iframeKey}
                   ref={iframeRef}
@@ -691,7 +691,7 @@ const PreviewFrame = (() => {
     return (
       <div
         className="relative rounded-xl border border-border/60 bg-background shadow-2xl shadow-primary/5 ring-1 ring-border/40 overflow-hidden transition-all"
-        style={{ width: w, height: device === "desktop" ? 760 : device === "tablet" ? 1024 : 720 }}
+          style={{ width: "100%", maxWidth: w, height: device === "desktop" ? 760 : device === "tablet" ? 1024 : 720 }}
       >
         <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-muted/80 to-muted/40 border-b border-border/60 flex items-center px-2 gap-1.5 z-10">
           <span className="h-2 w-2 rounded-full bg-rose-400/80" />
