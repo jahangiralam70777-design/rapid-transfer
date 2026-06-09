@@ -253,7 +253,7 @@ export default function SiteManagementDesigner() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="flex h-[calc(100vh-2rem)] min-w-0 overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background via-background to-muted/30 text-foreground shadow-card-soft">
+      <div className="flex h-[calc(100vh-2rem)] min-w-0 flex-col overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background via-background to-muted/30 text-foreground shadow-card-soft">
         <TopBar
           pageName={activePage?.name ?? "Home"}
           version={activePage?.version ?? 1}
