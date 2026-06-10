@@ -7,7 +7,11 @@ services:
     plan: starter
     # --include=dev is required: Render sets NODE_ENV=production, which makes
     # plain `npm install` skip devDependencies (vite, nitro) → "vite: not found".
-    buildCommand: npm install --include=dev && npm run build:node
+    # NODE_OPTIONS=--max-old-space-size=4096 is scoped to the BUILD only: the
+    # Vite/Rollup build of this app peaks well above Node's default heap cap,
+    # which causes "FATAL ERROR: JavaScript heap out of memory" on Render.
+    # It is NOT set as a service env var so the runtime keeps Node defaults.
+    buildCommand: export NODE_OPTIONS=--max-old-space-size=4096 && npm install --include=dev && npm run build:node
     startCommand: npm run start
     healthCheckPath: /
     autoDeploy: true
