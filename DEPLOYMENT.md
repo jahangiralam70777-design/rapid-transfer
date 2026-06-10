@@ -9,9 +9,9 @@ return 200; unknown URLs return a proper 404 page).
 
 ## Commands
 
-| Setting        | Value                                              |
-| -------------- | -------------------------------------------------- |
-| Build command  | `npm install --include=dev && npm run build:node`  |
+| Setting        | Value                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| Build command  | `export NODE_OPTIONS=--max-old-space-size=4096 && npm install --include=dev && npm run build:node`     |
 | Start command  | `npm run start` (`node dist/server/index.mjs`) |
 | Health check   | `/`                                   |
 | Node version   | 22.x                                  |
@@ -22,6 +22,15 @@ return 200; unknown URLs return a proper 404 page).
 > `devDependencies`, so without this flag the build fails with
 > `sh: 1: vite: not found`. Runtime needs none of these — `npm run start` only
 > runs `node dist/server/index.mjs`.
+
+> **Why `NODE_OPTIONS=--max-old-space-size=4096`?** The Vite/Rollup production
+> build of this app (200+ route chunks, charts, PDF/XLSX libraries) peaks above
+> Node's default V8 heap cap, which aborts the Render build with
+> `FATAL ERROR: JavaScript heap out of memory`. The flag raises the heap cap
+> for the **build step only** — it is deliberately not a service env var, so
+> the runtime server keeps Node's defaults. The Vite config also disables
+> build sourcemaps and the gzip-size report pass to lower peak build memory.
+
 
 `npm run build:node` sets `NITRO_PRESET=node-server`, which makes the build
 target a standalone Node server (`dist/server/index.mjs` + static assets in

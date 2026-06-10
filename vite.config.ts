@@ -16,6 +16,14 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    build: {
+      // Keep build memory low on CI (Render): no sourcemaps to hold in memory,
+      // and skip the gzip-size report pass (it re-reads every chunk into RAM).
+      sourcemap: false,
+      reportCompressedSize: false,
+    },
+  },
   ...(nitroPreset
     ? {
         nitro: {
