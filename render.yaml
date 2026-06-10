@@ -5,7 +5,9 @@ services:
     name: edumaster
     runtime: node
     plan: starter
-    buildCommand: npm install && npm run build:node
+    # --include=dev is required: Render sets NODE_ENV=production, which makes
+    # plain `npm install` skip devDependencies (vite, nitro) → "vite: not found".
+    buildCommand: npm install --include=dev && npm run build:node
     startCommand: npm run start
     healthCheckPath: /
     autoDeploy: true

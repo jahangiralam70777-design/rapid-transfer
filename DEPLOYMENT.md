@@ -9,9 +9,9 @@ return 200; unknown URLs return a proper 404 page).
 
 ## Commands
 
-| Setting        | Value                                 |
-| -------------- | ------------------------------------- |
-| Build command  | `npm install && npm run build:node`   |
+| Setting        | Value                                              |
+| -------------- | -------------------------------------------------- |
+| Build command  | `npm install --include=dev && npm run build:node`  |
 | Start command  | `npm run start` (`node dist/server/index.mjs`) |
 | Health check   | `/`                                   |
 | Node version   | 22.x                                  |
