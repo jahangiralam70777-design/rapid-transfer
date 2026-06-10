@@ -82,7 +82,12 @@ function timeAgo(iso: string | null) {
   return `${Math.floor(h / 24)}d ago`;
 }
 function fmtTime(d: Date) {
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  return d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 }
 function fmtDate(d: Date) {
   return d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
@@ -98,14 +103,27 @@ export function AdminFlow() {
   const [periodDays, setPeriodDays] = useState<7 | 30 | 90>(30);
   const [participationScope, setParticipationScope] = useState<"all" | "month">("month");
 
-  const cc = useQuery({ queryKey: ["admin-control-center"], queryFn: () => ccFn(), refetchInterval: 15_000 });
-  const po = useQuery({
-    queryKey: ["admin-premium-overview", periodDays, participationScope],
-    queryFn: () => poFn({ data: { period_days: periodDays, participation_scope: participationScope } }),
+  const cc = useQuery({
+    queryKey: ["admin-control-center"],
+    queryFn: () => ccFn(),
     refetchInterval: 15_000,
   });
-  const snap = useQuery({ queryKey: ["admin-dashboard-snapshot"], queryFn: () => snapFn(), refetchInterval: 20_000 });
-  const badge = useQuery({ queryKey: ["admin-notifications-badge"], queryFn: () => badgeFn(), refetchInterval: 20_000 });
+  const po = useQuery({
+    queryKey: ["admin-premium-overview", periodDays, participationScope],
+    queryFn: () =>
+      poFn({ data: { period_days: periodDays, participation_scope: participationScope } }),
+    refetchInterval: 15_000,
+  });
+  const snap = useQuery({
+    queryKey: ["admin-dashboard-snapshot"],
+    queryFn: () => snapFn(),
+    refetchInterval: 20_000,
+  });
+  const badge = useQuery({
+    queryKey: ["admin-notifications-badge"],
+    queryFn: () => badgeFn(),
+    refetchInterval: 20_000,
+  });
 
   return (
     <div className="space-y-4">
@@ -119,13 +137,21 @@ export function AdminFlow() {
       <KPIStrip overview={po.data} loading={po.isLoading} />
 
       <div className="grid gap-4 lg:grid-cols-[1.55fr_1fr]">
-        <PlatformOverviewCard overview={po.data} periodDays={periodDays} onChangePeriod={setPeriodDays} />
+        <PlatformOverviewCard
+          overview={po.data}
+          periodDays={periodDays}
+          onChangePeriod={setPeriodDays}
+        />
         <DeviceBrowserCard overview={po.data} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <TopSubjectsCard overview={po.data} />
-        <ExamParticipationCard overview={po.data} scope={participationScope} onChangeScope={setParticipationScope} />
+        <ExamParticipationCard
+          overview={po.data}
+          scope={participationScope}
+          onChangeScope={setParticipationScope}
+        />
         <StudentEngagementCard overview={po.data} />
       </div>
 
@@ -159,7 +185,11 @@ function AdminTopbar({ badge }: { badge?: AdminNotificationsBadge }) {
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setSearchOpen((v) => !v);
-      } else if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+      } else if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
         e.preventDefault();
         setSearchOpen(true);
       }
@@ -171,13 +201,14 @@ function AdminTopbar({ badge }: { badge?: AdminNotificationsBadge }) {
     "relative flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/40 text-foreground/80 transition-all hover:scale-105 hover:bg-muted hover:text-foreground";
 
   const unread = badge?.unread ?? 0;
-  const initials = (user?.name ?? "Admin")
-    .split(/\s+/)
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "AD";
+  const initials =
+    (user?.name ?? "Admin")
+      .split(/\s+/)
+      .map((p) => p[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "AD";
 
   return (
     <div className="glass shadow-card-soft flex items-center gap-3 rounded-2xl p-2.5">
@@ -204,10 +235,18 @@ function AdminTopbar({ badge }: { badge?: AdminNotificationsBadge }) {
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <NotificationsPopover badge={badge} unread={unread} iconBtn={iconBtn} />
-        <Link to="/admin/notifications" search={{ tab: "inbox" } as never} aria-label="Inbox" className={iconBtn}>
+        <Link
+          to="/admin/notifications"
+          search={{ tab: "inbox" } as never}
+          aria-label="Inbox"
+          className={iconBtn}
+        >
           <Mail className="h-4 w-4" />
         </Link>
-        <Link to="/admin/settings" className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 p-1.5 pr-3">
+        <Link
+          to="/admin/settings"
+          className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 p-1.5 pr-3"
+        >
           <div className="bg-cta-gradient flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold text-white shadow-glow">
             {initials}
           </div>
@@ -217,7 +256,14 @@ function AdminTopbar({ badge }: { badge?: AdminNotificationsBadge }) {
           </div>
         </Link>
       </div>
-      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} onSelect={(to) => { setSearchOpen(false); navigate({ to: to as never }); }} />
+      <GlobalSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSelect={(to) => {
+          setSearchOpen(false);
+          navigate({ to: to as never });
+        }}
+      />
     </div>
   );
 }
@@ -225,7 +271,15 @@ function AdminTopbar({ badge }: { badge?: AdminNotificationsBadge }) {
 /* ============================================================== */
 /* Notifications popover                                           */
 /* ============================================================== */
-function NotificationsPopover({ badge, unread, iconBtn }: { badge?: AdminNotificationsBadge; unread: number; iconBtn: string }) {
+function NotificationsPopover({
+  badge,
+  unread,
+  iconBtn,
+}: {
+  badge?: AdminNotificationsBadge;
+  unread: number;
+  iconBtn: string;
+}) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -247,7 +301,9 @@ function NotificationsPopover({ badge, unread, iconBtn }: { badge?: AdminNotific
         </div>
         <ul className="max-h-72 overflow-y-auto">
           {(badge?.recent ?? []).length === 0 ? (
-            <li className="px-3 py-6 text-center text-xs text-muted-foreground">No notifications yet.</li>
+            <li className="px-3 py-6 text-center text-xs text-muted-foreground">
+              No notifications yet.
+            </li>
           ) : (
             (badge?.recent ?? []).map((n) => (
               <li key={n.id} className="border-b border-border/40 px-3 py-2 last:border-0">
@@ -305,12 +361,24 @@ function GlobalSearchDialog({
     return Array.from(by.entries());
   }, [results.data]);
   const labelFor = (k: SearchHit["kind"]) =>
-    ({ user: "Users", subject: "Subjects", chapter: "Chapters", mcq: "MCQs", quiz: "Quizzes", mock: "Mock Tests", note: "Short Notes" }[k]);
+    ({
+      user: "Users",
+      subject: "Subjects",
+      chapter: "Chapters",
+      mcq: "MCQs",
+      quiz: "Quizzes",
+      mock: "Mock Tests",
+      note: "Short Notes",
+    })[k];
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <Command shouldFilter={false}>
-        <CommandInput placeholder="Search users, subjects, chapters, MCQs, quizzes, mocks, notes…" value={q} onValueChange={setQ} />
+        <CommandInput
+          placeholder="Search users, subjects, chapters, MCQs, quizzes, mocks, notes…"
+          value={q}
+          onValueChange={setQ}
+        />
         <CommandList>
           {q.trim().length < 2 ? (
             <CommandEmpty>Type at least 2 characters to search.</CommandEmpty>
@@ -322,9 +390,17 @@ function GlobalSearchDialog({
             groups.map(([kind, hits]) => (
               <CommandGroup key={kind} heading={labelFor(kind)}>
                 {hits.map((h) => (
-                  <CommandItem key={`${h.kind}-${h.id}`} value={`${h.kind}-${h.id}`} onSelect={() => onSelect(h.to)}>
+                  <CommandItem
+                    key={`${h.kind}-${h.id}`}
+                    value={`${h.kind}-${h.id}`}
+                    onSelect={() => onSelect(h.to)}
+                  >
                     <span className="truncate">{h.label}</span>
-                    {h.sub && <span className="ml-auto text-[10px] capitalize text-muted-foreground">{h.sub}</span>}
+                    {h.sub && (
+                      <span className="ml-auto text-[10px] capitalize text-muted-foreground">
+                        {h.sub}
+                      </span>
+                    )}
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -365,7 +441,6 @@ function WelcomeHero({ overview }: { overview?: AdminPremiumOverview }) {
     const base = new Date(overview.system.server_time_iso).getTime();
     // refresh per-tick using local interval; rebase whenever overview changes
     return new Date(base + (Date.now() - +new Date(overview.system.server_time_iso)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overview?.system.server_time_iso, now]);
 
   return (
@@ -389,14 +464,24 @@ function WelcomeHero({ overview }: { overview?: AdminPremiumOverview }) {
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">{statusMeta.label}</p>
             <Sparkline data={sparkData.length ? sparkData : []} className="mt-2 h-6 w-full" />
-            {sparkData.length === 0 && <p className="mt-1 text-[10px] text-muted-foreground">No activity yet</p>}
+            {sparkData.length === 0 && (
+              <p className="mt-1 text-[10px] text-muted-foreground">No activity yet</p>
+            )}
           </div>
           {/* Uptime */}
           <div className="rounded-2xl border border-border/60 bg-background/40 p-3.5">
             <p className="text-[11px] font-semibold text-muted-foreground">Uptime</p>
-            <p className={`font-display mt-1 text-2xl font-bold tabular-nums ${
-              overview ? (uptime >= 99 ? "text-emerald-400" : uptime >= 95 ? "text-amber-400" : "text-rose-400") : "text-muted-foreground"
-            }`}>
+            <p
+              className={`font-display mt-1 text-2xl font-bold tabular-nums ${
+                overview
+                  ? uptime >= 99
+                    ? "text-emerald-400"
+                    : uptime >= 95
+                      ? "text-amber-400"
+                      : "text-rose-400"
+                  : "text-muted-foreground"
+              }`}
+            >
               {overview ? `${uptime.toFixed(2)}%` : "—"}
             </p>
             <p className="text-[10px] text-muted-foreground">
@@ -419,7 +504,8 @@ function WelcomeHero({ overview }: { overview?: AdminPremiumOverview }) {
 
 function Sparkline({ data, className }: { data: number[]; className?: string }) {
   if (data.length === 0) return null;
-  const w = 100, h = 24;
+  const w = 100,
+    h = 24;
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
   const step = data.length > 1 ? w / (data.length - 1) : w;
@@ -433,7 +519,14 @@ function Sparkline({ data, className }: { data: number[]; className?: string }) 
           <stop offset="100%" stopColor="var(--neon-blue)" />
         </linearGradient>
       </defs>
-      <polyline fill="none" stroke={`url(#${id})`} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" points={pts} />
+      <polyline
+        fill="none"
+        stroke={`url(#${id})`}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={pts}
+      />
     </svg>
   );
 }
@@ -447,9 +540,24 @@ function QuickActionsPanel() {
     { t: "Create MCQ", i: ListChecks, to: "/admin/mcq", search: { action: "create" } },
     { t: "Create Quiz", i: Timer, to: "/admin/quiz", search: { action: "create" } },
     { t: "Create Mock Test", i: Trophy, to: "/admin/mock-test", search: { action: "create" } },
-    { t: "Add Chapter", i: BookOpen, to: "/admin/academic-manager", search: { action: "create-chapter" } },
-    { t: "Add Subject", i: Layers, to: "/admin/academic-manager", search: { action: "create-subject" } },
-    { t: "Broadcast Notice", i: Megaphone, to: "/admin/notifications", search: { action: "broadcast" } },
+    {
+      t: "Add Chapter",
+      i: BookOpen,
+      to: "/admin/academic-manager",
+      search: { action: "create-chapter" },
+    },
+    {
+      t: "Add Subject",
+      i: Layers,
+      to: "/admin/academic-manager",
+      search: { action: "create-subject" },
+    },
+    {
+      t: "Broadcast Notice",
+      i: Megaphone,
+      to: "/admin/notifications",
+      search: { action: "broadcast" },
+    },
     { t: "Add User", i: UserPlus, to: "/admin/users", search: { action: "create" } },
     { t: "View All", i: LayoutGrid, to: "/admin/analytics" },
   ];
@@ -481,16 +589,72 @@ function QuickActionsPanel() {
 /* ============================================================== */
 /* KPI Strip                                                       */
 /* ============================================================== */
-type KpiTile = { l: string; v: string; sub: string; delta: number; i: typeof Users; tint: string; to: string };
+type KpiTile = {
+  l: string;
+  v: string;
+  sub: string;
+  delta: number;
+  i: typeof Users;
+  tint: string;
+  to: string;
+};
 function KPIStrip({ overview, loading }: { overview?: AdminPremiumOverview; loading: boolean }) {
   const k = overview?.kpi;
   const tiles: KpiTile[] = [
-    { l: "Active Students", v: fmtNum(k?.active_students), sub: "Students", delta: k?.active_students_delta_pct ?? 0, i: Users, tint: "text-sky-400 bg-sky-500/15", to: "/admin/users" },
-    { l: "Live Exams", v: fmtNum(k?.live_exams), sub: fmtNum(k?.live_exams), delta: k?.live_exams_delta_pct ?? 0, i: Trophy, tint: "text-amber-400 bg-amber-500/15", to: "/admin/mock-test" },
-    { l: "Tests Completed", v: fmtNum(k?.tests_completed), sub: fmtNum(k?.tests_completed), delta: k?.tests_completed_delta_pct ?? 0, i: ClipboardList, tint: "text-emerald-400 bg-emerald-500/15", to: "/admin/analytics" },
-    { l: "Questions in Bank", v: fmtNum(k?.questions_in_bank), sub: "Questions", delta: k?.questions_in_bank_delta_pct ?? 0, i: HelpCircle, tint: "text-violet-400 bg-violet-500/15", to: "/admin/question-bank" },
-    { l: "Active Sessions", v: fmtNum(k?.active_sessions), sub: fmtNum(k?.active_sessions), delta: k?.active_sessions_delta_pct ?? 0, i: Activity, tint: "text-fuchsia-400 bg-fuchsia-500/15", to: "/admin/analytics" },
-    { l: "New Registrations", v: fmtNum(k?.new_registrations), sub: fmtNum(k?.new_registrations), delta: k?.new_registrations_delta_pct ?? 0, i: UserPlus, tint: "text-pink-400 bg-pink-500/15", to: "/admin/users" },
+    {
+      l: "Active Students",
+      v: fmtNum(k?.active_students),
+      sub: "Students",
+      delta: k?.active_students_delta_pct ?? 0,
+      i: Users,
+      tint: "text-sky-400 bg-sky-500/15",
+      to: "/admin/users",
+    },
+    {
+      l: "Live Exams",
+      v: fmtNum(k?.live_exams),
+      sub: fmtNum(k?.live_exams),
+      delta: k?.live_exams_delta_pct ?? 0,
+      i: Trophy,
+      tint: "text-amber-400 bg-amber-500/15",
+      to: "/admin/mock-test",
+    },
+    {
+      l: "Tests Completed",
+      v: fmtNum(k?.tests_completed),
+      sub: fmtNum(k?.tests_completed),
+      delta: k?.tests_completed_delta_pct ?? 0,
+      i: ClipboardList,
+      tint: "text-emerald-400 bg-emerald-500/15",
+      to: "/admin/analytics",
+    },
+    {
+      l: "Questions in Bank",
+      v: fmtNum(k?.questions_in_bank),
+      sub: "Questions",
+      delta: k?.questions_in_bank_delta_pct ?? 0,
+      i: HelpCircle,
+      tint: "text-violet-400 bg-violet-500/15",
+      to: "/admin/question-bank",
+    },
+    {
+      l: "Active Sessions",
+      v: fmtNum(k?.active_sessions),
+      sub: fmtNum(k?.active_sessions),
+      delta: k?.active_sessions_delta_pct ?? 0,
+      i: Activity,
+      tint: "text-fuchsia-400 bg-fuchsia-500/15",
+      to: "/admin/analytics",
+    },
+    {
+      l: "New Registrations",
+      v: fmtNum(k?.new_registrations),
+      sub: fmtNum(k?.new_registrations),
+      delta: k?.new_registrations_delta_pct ?? 0,
+      i: UserPlus,
+      tint: "text-pink-400 bg-pink-500/15",
+      to: "/admin/users",
+    },
   ];
   return (
     <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
@@ -506,14 +670,18 @@ function KPIStrip({ overview, loading }: { overview?: AdminPremiumOverview; load
               <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${t.tint}`}>
                 <t.i className="h-3.5 w-3.5" />
               </span>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t.l}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                {t.l}
+              </p>
             </div>
             <p className="font-display mt-3 text-[26px] font-bold leading-none tabular-nums">
               {loading ? "—" : t.v}
             </p>
             <div className="mt-2 flex items-center justify-between">
               <span className="truncate text-[10px] text-muted-foreground">{t.sub}</span>
-              <span className={`flex items-center gap-0.5 text-[10px] font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}>
+              <span
+                className={`flex items-center gap-0.5 text-[10px] font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}
+              >
                 {up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
                 {Math.abs(t.delta).toFixed(1)}%
               </span>
@@ -553,9 +721,15 @@ function PlatformOverviewCard({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-display text-base font-bold">Platform Overview</h3>
-          <p className="text-[11px] text-muted-foreground">Students Activity Overview (Last {periodDays} Days)</p>
+          <p className="text-[11px] text-muted-foreground">
+            Students Activity Overview (Last {periodDays} Days)
+          </p>
         </div>
-        <div role="tablist" aria-label="Period" className="flex items-center gap-1 rounded-xl border border-border/60 bg-background/40 p-0.5 text-[11px]">
+        <div
+          role="tablist"
+          aria-label="Period"
+          className="flex items-center gap-1 rounded-xl border border-border/60 bg-background/40 p-0.5 text-[11px]"
+        >
           {options.map((o) => (
             <button
               key={o.v}
@@ -575,7 +749,9 @@ function PlatformOverviewCard({
       </div>
       <div className="mt-4 flex items-baseline gap-3">
         <p className="font-display text-3xl font-bold tabular-nums">{fmtNum(total)}</p>
-        <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}>
+        <span
+          className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}
+        >
           {up ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
           {Math.abs(delta).toFixed(1)}%
         </span>
@@ -587,9 +763,14 @@ function PlatformOverviewCard({
 }
 
 function AreaChart({ points }: { points: { date: string; value: number }[] }) {
-  const w = 600, h = 200;
+  const w = 600,
+    h = 200;
   if (points.length === 0) {
-    return <div className="mt-4 flex h-[200px] items-center justify-center text-xs text-muted-foreground">No activity data yet.</div>;
+    return (
+      <div className="mt-4 flex h-[200px] items-center justify-center text-xs text-muted-foreground">
+        No activity data yet.
+      </div>
+    );
   }
   const max = Math.max(1, ...points.map((p) => p.value));
   const step = points.length > 1 ? w / (points.length - 1) : w;
@@ -599,7 +780,9 @@ function AreaChart({ points }: { points: { date: string; value: number }[] }) {
     <div className="mt-4">
       <div className="flex gap-3">
         <div className="flex flex-col justify-between py-1 text-[9px] text-muted-foreground">
-          {[...yTicks].reverse().map((t, i) => (<span key={i}>{fmtNum(Math.round(t))}</span>))}
+          {[...yTicks].reverse().map((t, i) => (
+            <span key={i}>{fmtNum(Math.round(t))}</span>
+          ))}
         </div>
         <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-[200px] w-full">
           <defs>
@@ -613,14 +796,28 @@ function AreaChart({ points }: { points: { date: string; value: number }[] }) {
             </linearGradient>
           </defs>
           {yTicks.map((_, i) => (
-            <line key={i} x1="0" x2={w} y1={(h / 4) * i} y2={(h / 4) * i} stroke="currentColor" strokeOpacity="0.06" />
+            <line
+              key={i}
+              x1="0"
+              x2={w}
+              y1={(h / 4) * i}
+              y2={(h / 4) * i}
+              stroke="currentColor"
+              strokeOpacity="0.06"
+            />
           ))}
           <polygon fill="url(#po-area)" points={`0,${h} ${pts} ${w},${h}`} />
           <polyline fill="none" stroke="url(#po-stroke)" strokeWidth="2.2" points={pts} />
         </svg>
       </div>
       <div className="ml-7 mt-1 flex justify-between text-[9px] text-muted-foreground">
-        {[0, Math.floor(points.length / 4), Math.floor(points.length / 2), Math.floor((points.length * 3) / 4), points.length - 1].map((i) => (
+        {[
+          0,
+          Math.floor(points.length / 4),
+          Math.floor(points.length / 2),
+          Math.floor((points.length * 3) / 4),
+          points.length - 1,
+        ].map((i) => (
           <span key={i}>{points[i]?.date.slice(5)}</span>
         ))}
       </div>
@@ -635,53 +832,74 @@ function DeviceBrowserCard({ overview }: { overview?: AdminPremiumOverview }) {
   const devices = overview?.devices ?? [];
   const browsers = overview?.browsers ?? [];
 
-  const devIcon = (n: string) => n === "Mobile" ? Smartphone : n === "Desktop" ? Monitor : n === "Tablet" ? Tablet : Globe;
-  const brIcon = (n: string) => n === "Chrome" || n === "Edge" ? Chrome : Globe;
+  const devIcon = (n: string) =>
+    n === "Mobile" ? Smartphone : n === "Desktop" ? Monitor : n === "Tablet" ? Tablet : Globe;
+  const brIcon = (n: string) => (n === "Chrome" || n === "Edge" ? Chrome : Globe);
 
   return (
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <h3 className="font-display text-base font-bold">Device &amp; Browser Analytics</h3>
       <div className="mt-4 grid grid-cols-2 gap-5">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Most Used Devices</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Most Used Devices
+          </p>
           <ul className="mt-3 space-y-3">
             {devices.length === 0 ? (
               <li className="text-xs text-muted-foreground">No data yet.</li>
-            ) : devices.map((d) => {
-              const Icon = devIcon(d.name);
-              return (
-                <li key={d.name}>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1.5 font-medium"><Icon className="h-3.5 w-3.5 text-muted-foreground" />{d.name}</span>
-                    <span className="font-semibold tabular-nums">{d.pct.toFixed(1)}%</span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted/50">
-                    <div className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)]" style={{ width: `${Math.min(100, d.pct)}%` }} />
-                  </div>
-                </li>
-              );
-            })}
+            ) : (
+              devices.map((d) => {
+                const Icon = devIcon(d.name);
+                return (
+                  <li key={d.name}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                        {d.name}
+                      </span>
+                      <span className="font-semibold tabular-nums">{d.pct.toFixed(1)}%</span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted/50">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)]"
+                        style={{ width: `${Math.min(100, d.pct)}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })
+            )}
           </ul>
         </div>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Top Browsers</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Top Browsers
+          </p>
           <ul className="mt-3 space-y-3">
             {browsers.length === 0 ? (
               <li className="text-xs text-muted-foreground">No data yet.</li>
-            ) : browsers.map((b) => {
-              const Icon = brIcon(b.name);
-              return (
-                <li key={b.name}>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1.5 font-medium"><Icon className="h-3.5 w-3.5 text-muted-foreground" />{b.name}</span>
-                    <span className="font-semibold tabular-nums">{b.pct.toFixed(1)}%</span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted/50">
-                    <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-fuchsia-500" style={{ width: `${Math.min(100, b.pct)}%` }} />
-                  </div>
-                </li>
-              );
-            })}
+            ) : (
+              browsers.map((b) => {
+                const Icon = brIcon(b.name);
+                return (
+                  <li key={b.name}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                        {b.name}
+                      </span>
+                      <span className="font-semibold tabular-nums">{b.pct.toFixed(1)}%</span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted/50">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-400 to-fuchsia-500"
+                        style={{ width: `${Math.min(100, b.pct)}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })
+            )}
           </ul>
         </div>
       </div>
@@ -698,7 +916,12 @@ function TopSubjectsCard({ overview }: { overview?: AdminPremiumOverview }) {
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-sm font-bold">Top Performing Subjects</h3>
-        <Link to="/admin/analytics" className="text-[10px] text-muted-foreground hover:text-foreground">View All</Link>
+        <Link
+          to="/admin/analytics"
+          className="text-[10px] text-muted-foreground hover:text-foreground"
+        >
+          View All
+        </Link>
       </div>
       {rows.length === 0 ? (
         <p className="mt-6 text-xs text-muted-foreground">No completed attempts yet.</p>
@@ -711,7 +934,10 @@ function TopSubjectsCard({ overview }: { overview?: AdminPremiumOverview }) {
                 <span className="font-semibold tabular-nums">{r.accuracy}%</span>
               </div>
               <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted/50">
-                <div className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-pink)]" style={{ width: `${Math.min(100, r.accuracy)}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-pink)]"
+                  style={{ width: `${Math.min(100, r.accuracy)}%` }}
+                />
               </div>
             </li>
           ))}
@@ -744,7 +970,10 @@ function ExamParticipationCard({
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-sm font-bold">Exam Participation</h3>
-        <div role="tablist" className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/40 p-0.5 text-[10px]">
+        <div
+          role="tablist"
+          className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/40 p-0.5 text-[10px]"
+        >
           <button
             role="tab"
             aria-selected={scope === "month"}
@@ -766,10 +995,23 @@ function ExamParticipationCard({
       <div className="mt-3 grid grid-cols-[120px_1fr] items-center gap-3">
         <div className="relative h-[120px] w-[120px]">
           <svg viewBox="0 0 100 100" className="-rotate-90">
-            <circle cx="50" cy="50" r="42" stroke="currentColor" strokeOpacity="0.1" strokeWidth="10" fill="none" />
             <circle
-              cx="50" cy="50" r="42"
-              stroke="url(#donut-g)" strokeWidth="10" fill="none" strokeLinecap="round"
+              cx="50"
+              cy="50"
+              r="42"
+              stroke="currentColor"
+              strokeOpacity="0.1"
+              strokeWidth="10"
+              fill="none"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="42"
+              stroke="url(#donut-g)"
+              strokeWidth="10"
+              fill="none"
+              strokeLinecap="round"
               strokeDasharray={`${dash} ${c - dash}`}
             />
             <defs>
@@ -788,12 +1030,16 @@ function ExamParticipationCard({
           <li className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-sm bg-[var(--neon-purple)]" />
             <span className="font-medium">Joined</span>
-            <span className="ml-auto text-muted-foreground tabular-nums">{fmtNum(joined)} ({rate}%)</span>
+            <span className="ml-auto text-muted-foreground tabular-nums">
+              {fmtNum(joined)} ({rate}%)
+            </span>
           </li>
           <li className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-sm bg-muted-foreground/40" />
             <span className="font-medium">Not Joined</span>
-            <span className="ml-auto text-muted-foreground tabular-nums">{fmtNum(notJoined)} ({100 - rate}%)</span>
+            <span className="ml-auto text-muted-foreground tabular-nums">
+              {fmtNum(notJoined)} ({100 - rate}%)
+            </span>
           </li>
         </ul>
       </div>
@@ -812,10 +1058,14 @@ function StudentEngagementCard({ overview }: { overview?: AdminPremiumOverview }
   return (
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <h3 className="font-display text-sm font-bold">Student Engagement</h3>
-      <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Daily Active Users</p>
+      <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        Daily Active Users
+      </p>
       <div className="flex items-baseline gap-2">
         <p className="font-display text-3xl font-bold tabular-nums">{fmtNum(e?.dau_today)}</p>
-        <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}>
+        <span
+          className={`flex items-center gap-0.5 text-xs font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}
+        >
           {up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
           {Math.abs(e?.delta_pct ?? 0).toFixed(1)}%
         </span>
@@ -823,15 +1073,17 @@ function StudentEngagementCard({ overview }: { overview?: AdminPremiumOverview }
       <div className="mt-4 flex h-[110px] items-end gap-1.5">
         {series.length === 0 ? (
           <p className="text-xs text-muted-foreground">No engagement data yet.</p>
-        ) : series.map((s) => (
-          <div key={s.date} className="flex flex-1 flex-col items-center gap-1">
-            <div
-              className="w-full rounded-t bg-gradient-to-t from-[var(--neon-purple)] to-[var(--neon-pink)]"
-              style={{ height: `${(s.dau / max) * 100}%`, minHeight: 2 }}
-              title={`${s.date} · ${s.dau} DAU`}
-            />
-          </div>
-        ))}
+        ) : (
+          series.map((s) => (
+            <div key={s.date} className="flex flex-1 flex-col items-center gap-1">
+              <div
+                className="w-full rounded-t bg-gradient-to-t from-[var(--neon-purple)] to-[var(--neon-pink)]"
+                style={{ height: `${(s.dau / max) * 100}%`, minHeight: 2 }}
+                title={`${s.date} · ${s.dau} DAU`}
+              />
+            </div>
+          ))
+        )}
       </div>
     </section>
   );
@@ -843,36 +1095,56 @@ function StudentEngagementCard({ overview }: { overview?: AdminPremiumOverview }
 type RecentRow = AdminControlCenter["recent_activity"][number];
 function RecentActivityCard({ cc }: { cc?: AdminControlCenter }) {
   const [items, setItems] = useState<RecentRow[]>([]);
-  useEffect(() => { if (cc?.recent_activity) setItems(cc.recent_activity); }, [cc?.recent_activity]);
+  useEffect(() => {
+    if (cc?.recent_activity) setItems(cc.recent_activity);
+  }, [cc?.recent_activity]);
   useEffect(() => {
     const ch = supabase
       .channel(`admin-live-activity-${Math.random().toString(36).slice(2, 8)}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_events" }, (payload) => {
-        const row = payload.new as Record<string, unknown>;
-        setItems((prev) => [{
-          id: String(row.id),
-          event_type: String(row.event_type ?? ""),
-          element_label: (row.element_label as string) ?? null,
-          page_path: (row.page_path as string) ?? null,
-          module: (row.module as string) ?? null,
-          user_id: (row.user_id as string) ?? null,
-          user_name: null,
-          created_at: String(row.created_at ?? new Date().toISOString()),
-        }, ...prev].slice(0, 20));
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "activity_events" },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>;
+          setItems((prev) =>
+            [
+              {
+                id: String(row.id),
+                event_type: String(row.event_type ?? ""),
+                element_label: (row.element_label as string) ?? null,
+                page_path: (row.page_path as string) ?? null,
+                module: (row.module as string) ?? null,
+                user_id: (row.user_id as string) ?? null,
+                user_name: null,
+                created_at: String(row.created_at ?? new Date().toISOString()),
+              },
+              ...prev,
+            ].slice(0, 20),
+          );
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, []);
 
   const iconFor = (t: string) => {
     switch (t) {
-      case "login": return Users;
-      case "logout": return Users;
-      case "submit": return ClipboardList;
-      case "crud": return PlusCircle;
-      case "admin_action": return Crown;
-      case "page_view": return Activity;
-      default: return Activity;
+      case "login":
+        return Users;
+      case "logout":
+        return Users;
+      case "submit":
+        return ClipboardList;
+      case "crud":
+        return PlusCircle;
+      case "admin_action":
+        return Crown;
+      case "page_view":
+        return Activity;
+      default:
+        return Activity;
     }
   };
 
@@ -880,7 +1152,12 @@ function RecentActivityCard({ cc }: { cc?: AdminControlCenter }) {
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-sm font-bold">Recent Activity</h3>
-        <Link to="/admin/analytics" className="text-[10px] text-muted-foreground hover:text-foreground">View All</Link>
+        <Link
+          to="/admin/analytics"
+          className="text-[10px] text-muted-foreground hover:text-foreground"
+        >
+          View All
+        </Link>
       </div>
       {items.length === 0 ? (
         <p className="mt-4 text-xs text-muted-foreground">No activity yet.</p>
@@ -889,8 +1166,13 @@ function RecentActivityCard({ cc }: { cc?: AdminControlCenter }) {
           {items.slice(0, 6).map((a) => {
             const Icon = iconFor(a.event_type);
             return (
-              <li key={a.id} className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-background/40 p-2.5">
-                <span className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">{timeAgo(a.created_at)}</span>
+              <li
+                key={a.id}
+                className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-background/40 p-2.5"
+              >
+                <span className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">
+                  {timeAgo(a.created_at)}
+                </span>
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-purple)]/15 text-[var(--neon-purple)]">
                   <Icon className="h-3.5 w-3.5" />
                 </span>
@@ -915,19 +1197,27 @@ function RecentActivityCard({ cc }: { cc?: AdminControlCenter }) {
 function SystemHealthCard({ overview }: { overview?: AdminPremiumOverview }) {
   const items = overview?.system.health ?? [];
   const badge = (s: string) =>
-    s === "healthy" ? "bg-emerald-500/15 text-emerald-400" :
-    s === "warning" ? "bg-amber-500/15 text-amber-400" :
-    "bg-rose-500/15 text-rose-400";
+    s === "healthy"
+      ? "bg-emerald-500/15 text-emerald-400"
+      : s === "warning"
+        ? "bg-amber-500/15 text-amber-400"
+        : "bg-rose-500/15 text-rose-400";
   const Icon = (key: string) => {
     switch (key) {
-      case "server": return Server;
-      case "db": return DatabaseIcon;
-      case "storage": return Layers;
-      case "api": return Activity;
-      default: return CircleDot;
+      case "server":
+        return Server;
+      case "db":
+        return DatabaseIcon;
+      case "storage":
+        return Layers;
+      case "api":
+        return Activity;
+      default:
+        return CircleDot;
     }
   };
-  const sIcon = (s: string) => s === "healthy" ? CheckCircle2 : s === "warning" ? AlertTriangle : XCircle;
+  const sIcon = (s: string) =>
+    s === "healthy" ? CheckCircle2 : s === "warning" ? AlertTriangle : XCircle;
   return (
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <h3 className="font-display text-sm font-bold">System Health</h3>
@@ -936,7 +1226,10 @@ function SystemHealthCard({ overview }: { overview?: AdminPremiumOverview }) {
           const I = Icon(h.key);
           const S = sIcon(h.status);
           return (
-            <li key={h.key} className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-2.5">
+            <li
+              key={h.key}
+              className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-2.5"
+            >
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/40 text-muted-foreground">
                 <I className="h-4 w-4" />
               </span>
@@ -944,7 +1237,9 @@ function SystemHealthCard({ overview }: { overview?: AdminPremiumOverview }) {
                 <p className="truncate text-xs font-medium">{h.label}</p>
                 <p className="truncate text-[10px] text-muted-foreground">{h.detail}</p>
               </div>
-              <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badge(h.status)}`}>
+              <span
+                className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badge(h.status)}`}
+              >
                 <S className="h-3 w-3" />
                 {h.status === "healthy" ? "Healthy" : h.status === "warning" ? "Warning" : "Down"}
               </span>
@@ -959,22 +1254,70 @@ function SystemHealthCard({ overview }: { overview?: AdminPremiumOverview }) {
 /* ============================================================== */
 /* Recent Uploads                                                  */
 /* ============================================================== */
-type Snap = { recentUploads: { id: string; title: string; kind: string; created_at: string; status: string }[] } | undefined;
+type Snap =
+  | {
+      recentUploads: {
+        id: string;
+        title: string;
+        kind: string;
+        created_at: string;
+        status: string;
+      }[];
+    }
+  | undefined;
 function RecentUploadsCard({ snap }: { snap: Snap }) {
-  const KIND_META: Record<string, { i: typeof ListChecks; tint: string; label: string; to: string }> = {
-    mcq: { i: ListChecks, tint: "text-fuchsia-300 bg-fuchsia-500/15", label: "MCQ", to: "/admin/mcq" },
-    note: { i: FileText, tint: "text-cyan-300 bg-cyan-500/15", label: "Note", to: "/admin/short-notes" },
-    flash: { i: Layers, tint: "text-violet-300 bg-violet-500/15", label: "Card", to: "/admin/flash-cards" },
-    video: { i: PlayCircle, tint: "text-sky-300 bg-sky-500/15", label: "Class", to: "/admin/classes" },
-    qbank: { i: DatabaseIcon, tint: "text-amber-300 bg-amber-500/15", label: "QBank", to: "/admin/question-bank" },
-    quiz: { i: Timer, tint: "text-emerald-300 bg-emerald-500/15", label: "Quiz", to: "/admin/quiz" },
+  const KIND_META: Record<
+    string,
+    { i: typeof ListChecks; tint: string; label: string; to: string }
+  > = {
+    mcq: {
+      i: ListChecks,
+      tint: "text-fuchsia-300 bg-fuchsia-500/15",
+      label: "MCQ",
+      to: "/admin/mcq",
+    },
+    note: {
+      i: FileText,
+      tint: "text-cyan-300 bg-cyan-500/15",
+      label: "Note",
+      to: "/admin/short-notes",
+    },
+    flash: {
+      i: Layers,
+      tint: "text-violet-300 bg-violet-500/15",
+      label: "Card",
+      to: "/admin/flash-cards",
+    },
+    video: {
+      i: PlayCircle,
+      tint: "text-sky-300 bg-sky-500/15",
+      label: "Class",
+      to: "/admin/classes",
+    },
+    qbank: {
+      i: DatabaseIcon,
+      tint: "text-amber-300 bg-amber-500/15",
+      label: "QBank",
+      to: "/admin/question-bank",
+    },
+    quiz: {
+      i: Timer,
+      tint: "text-emerald-300 bg-emerald-500/15",
+      label: "Quiz",
+      to: "/admin/quiz",
+    },
   };
   const data = snap?.recentUploads ?? [];
   return (
     <section className="glass shadow-card-soft rounded-3xl p-5">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-sm font-bold">Recent Uploads</h3>
-        <Link to="/admin/analytics" className="text-[10px] text-muted-foreground hover:text-foreground">View All</Link>
+        <Link
+          to="/admin/analytics"
+          className="text-[10px] text-muted-foreground hover:text-foreground"
+        >
+          View All
+        </Link>
       </div>
       {data.length === 0 ? (
         <p className="mt-4 text-xs text-muted-foreground">No uploads yet.</p>
@@ -989,12 +1332,16 @@ function RecentUploadsCard({ snap }: { snap: Snap }) {
                   search={{ focus: u.id } as never}
                   className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-2.5 transition-colors hover:bg-muted/40"
                 >
-                  <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${meta.tint}`}>
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg ${meta.tint}`}
+                  >
                     <meta.i className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium">{u.title || "Untitled"}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">{meta.label} · {timeAgo(u.created_at)}</p>
+                    <p className="truncate text-[10px] text-muted-foreground">
+                      {meta.label} · {timeAgo(u.created_at)}
+                    </p>
                   </div>
                   <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
                 </Link>
@@ -1012,9 +1359,15 @@ function FooterRow() {
     <footer className="glass shadow-card-soft mt-2 flex flex-wrap items-center justify-between gap-2 rounded-2xl px-4 py-2 text-[11px] text-muted-foreground">
       <span>© {new Date().getFullYear()} CA Aspire BD. All rights reserved.</span>
       <div className="flex items-center gap-4">
-        <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
-        <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
-        <Link to="/security" className="hover:text-foreground">Support</Link>
+        <Link to="/privacy" className="hover:text-foreground">
+          Privacy Policy
+        </Link>
+        <Link to="/terms" className="hover:text-foreground">
+          Terms of Service
+        </Link>
+        <Link to="/security" className="hover:text-foreground">
+          Support
+        </Link>
       </div>
     </footer>
   );

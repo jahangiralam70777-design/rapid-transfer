@@ -6,7 +6,6 @@ import { assertPermission } from "@/lib/admin-permissions";
 const statusEnum = z.enum(["draft", "published", "archived"]);
 const difficultyEnum = z.enum(["easy", "medium", "hard"]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // ---------- List quizzes ----------
 const listInput = z.object({
   search: z.string().trim().max(200).optional(),
@@ -61,28 +60,134 @@ export const adminQuizStats = createServerFn({ method: "GET" })
     const twoMonthsAgo = new Date(now.getTime() - 60 * 86400_000).toISOString();
     const nowIso = now.toISOString();
 
-    const [total, pub, draft, archived, scheduled, attempts, attemptsThis, attemptsPrev, totalThisMonth, totalPrev, pubThisMonth, pubPrev, draftThisMonth, draftPrev, recentAttemptsRows, avgRows, completedThis, startedThis, activeUsersRows, aiGen, aiGenPrev] = await Promise.all([
+    const [
+      total,
+      pub,
+      draft,
+      archived,
+      scheduled,
+      attempts,
+      attemptsThis,
+      attemptsPrev,
+      totalThisMonth,
+      totalPrev,
+      pubThisMonth,
+      pubPrev,
+      draftThisMonth,
+      draftPrev,
+      recentAttemptsRows,
+      avgRows,
+      completedThis,
+      startedThis,
+      activeUsersRows,
+      aiGen,
+      aiGenPrev,
+    ] = await Promise.all([
       sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz"),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "published"),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "draft"),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "archived"),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "published").gt("starts_at", nowIso),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "published"),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "draft"),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "archived"),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "published")
+        .gt("starts_at", nowIso),
       sb.from("exam_attempts").select("id", { count: "exact", head: true }),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).gte("created_at", monthAgo),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).gte("created_at", twoMonthsAgo).lt("created_at", monthAgo),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").gte("created_at", monthAgo),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").gte("created_at", twoMonthsAgo).lt("created_at", monthAgo),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "published").gte("updated_at", monthAgo),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "published").gte("updated_at", twoMonthsAgo).lt("updated_at", monthAgo),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "draft").gte("created_at", monthAgo),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").eq("status", "draft").gte("created_at", twoMonthsAgo).lt("created_at", monthAgo),
-      sb.from("exam_attempts").select("created_at").gte("created_at", new Date(now.getTime() - 7 * 86400_000).toISOString()).limit(5000),
-      sb.from("exam_attempts").select("score,total_count,created_at").gte("created_at", monthAgo).limit(5000),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).gte("created_at", monthAgo).not("completed_at", "is", null),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).gte("created_at", monthAgo),
-      sb.from("exam_attempts").select("user_id").gte("created_at", new Date(now.getTime() - 86400_000).toISOString()).limit(5000),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").ilike("title", "[Auto]%"),
-      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz").ilike("title", "[Auto]%").gte("created_at", twoMonthsAgo).lt("created_at", monthAgo),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", monthAgo),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", twoMonthsAgo)
+        .lt("created_at", monthAgo),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .gte("created_at", monthAgo),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .gte("created_at", twoMonthsAgo)
+        .lt("created_at", monthAgo),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "published")
+        .gte("updated_at", monthAgo),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "published")
+        .gte("updated_at", twoMonthsAgo)
+        .lt("updated_at", monthAgo),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "draft")
+        .gte("created_at", monthAgo),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .eq("status", "draft")
+        .gte("created_at", twoMonthsAgo)
+        .lt("created_at", monthAgo),
+      sb
+        .from("exam_attempts")
+        .select("created_at")
+        .gte("created_at", new Date(now.getTime() - 7 * 86400_000).toISOString())
+        .limit(5000),
+      sb
+        .from("exam_attempts")
+        .select("score,total_count,created_at")
+        .gte("created_at", monthAgo)
+        .limit(5000),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", monthAgo)
+        .not("completed_at", "is", null),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", monthAgo),
+      sb
+        .from("exam_attempts")
+        .select("user_id")
+        .gte("created_at", new Date(now.getTime() - 86400_000).toISOString())
+        .limit(5000),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .ilike("title", "[Auto]%"),
+      sb
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "quiz")
+        .ilike("title", "[Auto]%")
+        .gte("created_at", twoMonthsAgo)
+        .lt("created_at", monthAgo),
     ]);
 
     const pct = (cur: number, prev: number) => {
@@ -108,7 +213,11 @@ export const adminQuizStats = createServerFn({ method: "GET" })
     }
     let scoreSum = 0;
     let scoreDen = 0;
-    for (const r of (avgRows.data ?? []) as Array<{ created_at: string; score: number; total_count: number }>) {
+    for (const r of (avgRows.data ?? []) as Array<{
+      created_at: string;
+      score: number;
+      total_count: number;
+    }>) {
       const k = (r.created_at || "").slice(0, 10);
       if (k in dayBuckets30) dayBuckets30[k]++;
       if (r.total_count > 0) {
@@ -121,9 +230,13 @@ export const adminQuizStats = createServerFn({ method: "GET" })
 
     const startedCount = startedThis.count ?? 0;
     const completedCount = completedThis.count ?? 0;
-    const completionRate = startedCount ? Math.round((completedCount / startedCount) * 1000) / 10 : 0;
-    const activeUsers = new Set(((activeUsersRows.data ?? []) as Array<{ user_id: string }>).map((r) => r.user_id)).size;
-    const performanceScore = Math.round(((avgScore * 0.6) + (completionRate * 0.4)) * 10) / 10;
+    const completionRate = startedCount
+      ? Math.round((completedCount / startedCount) * 1000) / 10
+      : 0;
+    const activeUsers = new Set(
+      ((activeUsersRows.data ?? []) as Array<{ user_id: string }>).map((r) => r.user_id),
+    ).size;
+    const performanceScore = Math.round((avgScore * 0.6 + completionRate * 0.4) * 10) / 10;
 
     return {
       total: total.count ?? 0,
@@ -149,7 +262,6 @@ export const adminQuizStats = createServerFn({ method: "GET" })
     };
   });
 
-
 // ---------- Create / Update / Delete ----------
 const quizInput = z.object({
   title: z.string().trim().min(1).max(180),
@@ -161,7 +273,12 @@ const quizInput = z.object({
   status: statusEnum.default("draft"),
   difficulty: difficultyEnum.default("medium"),
   total_questions: z.number().int().min(1).max(200).default(10),
-  duration_seconds: z.number().int().min(30).max(60 * 60 * 6).default(900),
+  duration_seconds: z
+    .number()
+    .int()
+    .min(30)
+    .max(60 * 60 * 6)
+    .default(900),
   starts_at: z.string().datetime().nullable().optional(),
   ends_at: z.string().datetime().nullable().optional(),
   is_public: z.boolean().default(true),
@@ -214,7 +331,10 @@ export const adminSetQuizStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
-    const { error } = await context.supabase.from("quizzes").update({ status: data.status }).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("quizzes")
+      .update({ status: data.status })
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -228,17 +348,29 @@ export const adminDuplicateQuiz = createServerFn({ method: "POST" })
     const { data: src, error } = await sb.from("quizzes").select("*").eq("id", data.id).single();
     if (error) throw error;
     const { id: _id, created_at: _c, updated_at: _u, ...rest } = src;
-    void _id; void _c; void _u;
+    void _id;
+    void _c;
+    void _u;
     const { data: row, error: ie } = await sb
       .from("quizzes")
-      .insert({ ...rest, title: `${rest.title} (Copy)`, status: "draft", created_by: context.userId })
+      .insert({
+        ...rest,
+        title: `${rest.title} (Copy)`,
+        status: "draft",
+        created_by: context.userId,
+      })
       .select("id")
       .single();
     if (ie) throw ie;
     // copy quiz_questions
-    const { data: qqs } = await sb.from("quiz_questions").select("mcq_id,position").eq("quiz_id", data.id);
+    const { data: qqs } = await sb
+      .from("quiz_questions")
+      .select("mcq_id,position")
+      .eq("quiz_id", data.id);
     if (qqs?.length) {
-      await sb.from("quiz_questions").insert(qqs.map((q: { mcq_id: string; position: number }) => ({ ...q, quiz_id: row.id })));
+      await sb
+        .from("quiz_questions")
+        .insert(qqs.map((q: { mcq_id: string; position: number }) => ({ ...q, quiz_id: row.id })));
     }
     return row;
   });
@@ -261,10 +393,12 @@ export const adminGetQuizQuestions = createServerFn({ method: "POST" })
 export const adminSetQuizQuestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { quizId: string; mcqIds: string[] }) =>
-    z.object({
-      quizId: z.string().uuid(),
-      mcqIds: z.array(z.string().uuid()).max(500),
-    }).parse(i),
+    z
+      .object({
+        quizId: z.string().uuid(),
+        mcqIds: z.array(z.string().uuid()).max(500),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -314,11 +448,17 @@ export const adminAutoGenerateQuizzes = createServerFn({ method: "POST" })
     if (data.chapterId) {
       chapterIds = [data.chapterId];
     } else if (data.subjectId) {
-      const { data: ch, error } = await sb.from("chapters").select("id").eq("subject_id", data.subjectId);
+      const { data: ch, error } = await sb
+        .from("chapters")
+        .select("id")
+        .eq("subject_id", data.subjectId);
       if (error) throw error;
       chapterIds = (ch ?? []).map((c: { id: string }) => c.id);
     } else if (data.level) {
-      const { data: subs, error: se } = await sb.from("subjects").select("id").eq("level", data.level);
+      const { data: subs, error: se } = await sb
+        .from("subjects")
+        .select("id")
+        .eq("level", data.level);
       if (se) throw se;
       const sIds = (subs ?? []).map((s: { id: string }) => s.id);
       if (sIds.length === 0) return { created: 0, updated: 0, skipped: 0, results: [] };
@@ -333,18 +473,30 @@ export const adminAutoGenerateQuizzes = createServerFn({ method: "POST" })
       .select("id,name,subject_id")
       .in("id", chapterIds);
     if (cErr) throw cErr;
-    const subjectIds = Array.from(new Set((chRows ?? []).map((c: { subject_id: string }) => c.subject_id)));
+    const subjectIds = Array.from(
+      new Set((chRows ?? []).map((c: { subject_id: string }) => c.subject_id)),
+    );
     const subjResp = subjectIds.length
       ? await sb.from("subjects").select("id,level,name").in("id", subjectIds)
       : { data: [] as Array<{ id: string; level: string; name: string }> };
     const subjMap = new Map(
-      ((subjResp.data ?? []) as Array<{ id: string; level: string; name: string }>).map((s) => [s.id, s]),
+      ((subjResp.data ?? []) as Array<{ id: string; level: string; name: string }>).map((s) => [
+        s.id,
+        s,
+      ]),
     );
 
     let created = 0;
     let updated = 0;
     let skipped = 0;
-    const results: Array<{ chapterId: string; chapter: string; status: "created" | "updated" | "skipped"; reason?: string; quizId?: string; picked?: number }> = [];
+    const results: Array<{
+      chapterId: string;
+      chapter: string;
+      status: "created" | "updated" | "skipped";
+      reason?: string;
+      quizId?: string;
+      picked?: number;
+    }> = [];
 
     for (const ch of (chRows ?? []) as Array<{ id: string; name: string; subject_id: string }>) {
       const subj = subjMap.get(ch.subject_id);
@@ -398,10 +550,22 @@ export const adminAutoGenerateQuizzes = createServerFn({ method: "POST" })
         const { error: uErr } = await sb.from("quizzes").update(quizPayload).eq("id", quizId);
         if (uErr) throw uErr;
         updated++;
-        results.push({ chapterId: ch.id, chapter: ch.name, status: "updated", quizId, picked: target });
+        results.push({
+          chapterId: ch.id,
+          chapter: ch.name,
+          status: "updated",
+          quizId,
+          picked: target,
+        });
       } else if (existing && existing.length > 0 && !data.overwrite) {
         skipped++;
-        results.push({ chapterId: ch.id, chapter: ch.name, status: "skipped", reason: "auto quiz exists", quizId: (existing[0] as { id: string }).id });
+        results.push({
+          chapterId: ch.id,
+          chapter: ch.name,
+          status: "skipped",
+          reason: "auto quiz exists",
+          quizId: (existing[0] as { id: string }).id,
+        });
         continue;
       } else {
         const { data: ins, error: iErr } = await sb
@@ -412,7 +576,13 @@ export const adminAutoGenerateQuizzes = createServerFn({ method: "POST" })
         if (iErr) throw iErr;
         quizId = (ins as { id: string }).id;
         created++;
-        results.push({ chapterId: ch.id, chapter: ch.name, status: "created", quizId, picked: target });
+        results.push({
+          chapterId: ch.id,
+          chapter: ch.name,
+          status: "created",
+          quizId,
+          picked: target,
+        });
       }
 
       await sb.from("quiz_questions").delete().eq("quiz_id", quizId);
@@ -481,7 +651,12 @@ export const adminBulkQuizAction = createServerFn({ method: "POST" })
       return { ok: true, count: data.ids.length };
     }
     if (data.action === "publish" || data.action === "unpublish" || data.action === "archive") {
-      const status = data.action === "publish" ? "published" : data.action === "unpublish" ? "draft" : "archived";
+      const status =
+        data.action === "publish"
+          ? "published"
+          : data.action === "unpublish"
+            ? "draft"
+            : "archived";
       const { error } = await sb.from("quizzes").update({ status }).in("id", data.ids);
       if (error) throw error;
       return { ok: true, count: data.ids.length };
@@ -492,16 +667,30 @@ export const adminBulkQuizAction = createServerFn({ method: "POST" })
       const { data: src, error } = await sb.from("quizzes").select("*").eq("id", id).single();
       if (error) continue;
       const { id: _id, created_at: _c, updated_at: _u, ...rest } = src;
-      void _id; void _c; void _u;
+      void _id;
+      void _c;
+      void _u;
       const { data: row } = await sb
         .from("quizzes")
-        .insert({ ...rest, title: `${rest.title} (Copy)`, status: "draft", created_by: context.userId })
+        .insert({
+          ...rest,
+          title: `${rest.title} (Copy)`,
+          status: "draft",
+          created_by: context.userId,
+        })
         .select("id")
         .single();
       if (!row) continue;
-      const { data: qqs } = await sb.from("quiz_questions").select("mcq_id,position").eq("quiz_id", id);
+      const { data: qqs } = await sb
+        .from("quiz_questions")
+        .select("mcq_id,position")
+        .eq("quiz_id", id);
       if (qqs?.length) {
-        await sb.from("quiz_questions").insert(qqs.map((q: { mcq_id: string; position: number }) => ({ ...q, quiz_id: row.id })));
+        await sb
+          .from("quiz_questions")
+          .insert(
+            qqs.map((q: { mcq_id: string; position: number }) => ({ ...q, quiz_id: row.id })),
+          );
       }
       count++;
     }
@@ -520,7 +709,9 @@ export const adminExportQuizzes = createServerFn({ method: "POST" })
     await assertPermission(context.supabase, context.userId, "manage_content");
     let q = context.supabase
       .from("quizzes")
-      .select("id,title,description,level,status,difficulty,total_questions,duration_seconds,starts_at,ends_at,created_at,updated_at")
+      .select(
+        "id,title,description,level,status,difficulty,total_questions,duration_seconds,starts_at,ends_at,created_at,updated_at",
+      )
       .eq("kind", "quiz")
       .order("updated_at", { ascending: false })
       .limit(2000);
@@ -528,14 +719,35 @@ export const adminExportQuizzes = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw error;
     const list = (rows ?? []) as Array<Record<string, unknown>>;
-    if (data.format === "json") return { content: JSON.stringify(list, null, 2), filename: `quizzes-${Date.now()}.json`, mime: "application/json" };
-    const headers = ["id","title","description","level","status","difficulty","total_questions","duration_seconds","starts_at","ends_at","created_at","updated_at"];
+    if (data.format === "json")
+      return {
+        content: JSON.stringify(list, null, 2),
+        filename: `quizzes-${Date.now()}.json`,
+        mime: "application/json",
+      };
+    const headers = [
+      "id",
+      "title",
+      "description",
+      "level",
+      "status",
+      "difficulty",
+      "total_questions",
+      "duration_seconds",
+      "starts_at",
+      "ends_at",
+      "created_at",
+      "updated_at",
+    ];
     const esc = (v: unknown) => {
       if (v === null || v === undefined) return "";
       const s = String(v).replace(/"/g, '""');
       return /[",\n]/.test(s) ? `"${s}"` : s;
     };
-    const csv = [headers.join(","), ...list.map((r) => headers.map((h) => esc(r[h])).join(","))].join("\n");
+    const csv = [
+      headers.join(","),
+      ...list.map((r) => headers.map((h) => esc(r[h])).join(",")),
+    ].join("\n");
     return { content: csv, filename: `quizzes-${Date.now()}.csv`, mime: "text/csv" };
   });
 
@@ -543,32 +755,56 @@ export const adminExportQuizzes = createServerFn({ method: "POST" })
 // KPI CARD DETAILS — drives the click-through dialogs
 // ============================================================
 const cardMetric = z.enum([
-  "total", "published", "draft", "scheduled", "archived",
-  "attempts", "completion_rate", "avg_score",
-  "active_users", "performance_score", "ai_generated",
+  "total",
+  "published",
+  "draft",
+  "scheduled",
+  "archived",
+  "attempts",
+  "completion_rate",
+  "avg_score",
+  "active_users",
+  "performance_score",
+  "ai_generated",
 ]);
 
 type QuizLite = {
-  id: string; title: string; status: string; level: string | null;
-  subject_id: string | null; total_questions: number;
-  starts_at: string | null; ends_at: string | null;
-  created_at: string; updated_at: string;
+  id: string;
+  title: string;
+  status: string;
+  level: string | null;
+  subject_id: string | null;
+  total_questions: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 type AttemptRow = {
-  id: string; user_id: string; quiz_id: string | null; title: string | null;
-  score: number; total_count: number; correct_count: number;
-  duration_seconds: number; status: string;
-  started_at: string; completed_at: string | null; created_at: string;
+  id: string;
+  user_id: string;
+  quiz_id: string | null;
+  title: string | null;
+  score: number;
+  total_count: number;
+  correct_count: number;
+  duration_seconds: number;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  created_at: string;
 };
 
 export const adminQuizCardDetails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { metric: z.infer<typeof cardMetric>; search?: string; limit?: number }) =>
-    z.object({
-      metric: cardMetric,
-      search: z.string().trim().max(200).optional(),
-      limit: z.number().int().min(1).max(500).optional(),
-    }).parse(i),
+    z
+      .object({
+        metric: cardMetric,
+        search: z.string().trim().max(200).optional(),
+        limit: z.number().int().min(1).max(500).optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -579,51 +815,94 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
     const dayAgo = new Date(Date.now() - 86400_000).toISOString();
     const monthAgo = new Date(Date.now() - 30 * 86400_000).toISOString();
 
-    const baseQuizSelect = "id,title,status,level,subject_id,total_questions,starts_at,ends_at,created_at,updated_at";
+    const baseQuizSelect =
+      "id,title,status,level,subject_id,total_questions,starts_at,ends_at,created_at,updated_at";
     const buildQuizQuery = () => {
-      let q = sb.from("quizzes").select(baseQuizSelect).eq("kind", "quiz").order("updated_at", { ascending: false }).limit(limit);
+      let q = sb
+        .from("quizzes")
+        .select(baseQuizSelect)
+        .eq("kind", "quiz")
+        .order("updated_at", { ascending: false })
+        .limit(limit);
       if (search) q = q.ilike("title", `%${search}%`);
       return q;
     };
 
     // ---------- Quiz list metrics ----------
-    if (["total","published","draft","scheduled","archived","ai_generated"].includes(data.metric)) {
+    if (
+      ["total", "published", "draft", "scheduled", "archived", "ai_generated"].includes(data.metric)
+    ) {
       let q = buildQuizQuery();
-      if (data.metric === "published") q = q.eq("status","published");
-      else if (data.metric === "draft") q = q.eq("status","draft");
-      else if (data.metric === "archived") q = q.eq("status","archived");
-      else if (data.metric === "scheduled") q = q.eq("status","published").gt("starts_at", nowIso);
+      if (data.metric === "published") q = q.eq("status", "published");
+      else if (data.metric === "draft") q = q.eq("status", "draft");
+      else if (data.metric === "archived") q = q.eq("status", "archived");
+      else if (data.metric === "scheduled") q = q.eq("status", "published").gt("starts_at", nowIso);
       else if (data.metric === "ai_generated") q = q.ilike("title", "[Auto]%");
       const { data: rows, error } = await q;
       if (error) throw error;
       const quizzes = (rows ?? []) as QuizLite[];
       const ids = quizzes.map((r) => r.id);
       // attempts/avg per quiz
-      const attemptsAgg: Record<string, { attempts: number; scoreSum: number; scoreDen: number }> = {};
+      const attemptsAgg: Record<string, { attempts: number; scoreSum: number; scoreDen: number }> =
+        {};
       if (ids.length) {
-        const { data: at } = await sb.from("exam_attempts")
-          .select("quiz_id,score,total_count").in("quiz_id", ids).limit(5000);
-        for (const a of (at ?? []) as Array<{ quiz_id: string; score: number; total_count: number }>) {
+        const { data: at } = await sb
+          .from("exam_attempts")
+          .select("quiz_id,score,total_count")
+          .in("quiz_id", ids)
+          .limit(5000);
+        for (const a of (at ?? []) as Array<{
+          quiz_id: string;
+          score: number;
+          total_count: number;
+        }>) {
           const b = attemptsAgg[a.quiz_id] ?? { attempts: 0, scoreSum: 0, scoreDen: 0 };
           b.attempts += 1;
-          if (a.total_count > 0) { b.scoreSum += (a.score / a.total_count) * 100; b.scoreDen += 1; }
+          if (a.total_count > 0) {
+            b.scoreSum += (a.score / a.total_count) * 100;
+            b.scoreDen += 1;
+          }
           attemptsAgg[a.quiz_id] = b;
         }
       }
-      const subjectIds = Array.from(new Set(quizzes.map((q) => q.subject_id).filter(Boolean) as string[]));
+      const subjectIds = Array.from(
+        new Set(quizzes.map((q) => q.subject_id).filter(Boolean) as string[]),
+      );
       const subjectMap: Record<string, string> = {};
       if (subjectIds.length) {
         const { data: subs } = await sb.from("subjects").select("id,name").in("id", subjectIds);
-        for (const s of (subs ?? []) as Array<{ id: string; name: string }>) subjectMap[s.id] = s.name;
+        for (const s of (subs ?? []) as Array<{ id: string; name: string }>)
+          subjectMap[s.id] = s.name;
       }
       // status breakdown across the entire dataset (not just current page)
       const [tot, pub, drf, arc, sch, ai] = await Promise.all([
-        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind","quiz"),
-        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind","quiz").eq("status","published"),
-        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind","quiz").eq("status","draft"),
-        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind","quiz").eq("status","archived"),
-        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind","quiz").eq("status","published").gt("starts_at", nowIso),
-        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind","quiz").ilike("title","[Auto]%"),
+        sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "quiz"),
+        sb
+          .from("quizzes")
+          .select("id", { count: "exact", head: true })
+          .eq("kind", "quiz")
+          .eq("status", "published"),
+        sb
+          .from("quizzes")
+          .select("id", { count: "exact", head: true })
+          .eq("kind", "quiz")
+          .eq("status", "draft"),
+        sb
+          .from("quizzes")
+          .select("id", { count: "exact", head: true })
+          .eq("kind", "quiz")
+          .eq("status", "archived"),
+        sb
+          .from("quizzes")
+          .select("id", { count: "exact", head: true })
+          .eq("kind", "quiz")
+          .eq("status", "published")
+          .gt("starts_at", nowIso),
+        sb
+          .from("quizzes")
+          .select("id", { count: "exact", head: true })
+          .eq("kind", "quiz")
+          .ilike("title", "[Auto]%"),
       ]);
       return {
         kind: "quiz_list" as const,
@@ -632,7 +911,7 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
           const a = attemptsAgg[q.id];
           return {
             ...q,
-            subject_name: q.subject_id ? subjectMap[q.subject_id] ?? null : null,
+            subject_name: q.subject_id ? (subjectMap[q.subject_id] ?? null) : null,
             attempts: a?.attempts ?? 0,
             avg_score: a && a.scoreDen ? Math.round((a.scoreSum / a.scoreDen) * 10) / 10 : 0,
           };
@@ -650,8 +929,11 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
 
     // ---------- Attempts ----------
     if (data.metric === "attempts") {
-      const { data: at, error } = await sb.from("exam_attempts")
-        .select("id,user_id,quiz_id,title,score,total_count,correct_count,duration_seconds,status,started_at,completed_at,created_at")
+      const { data: at, error } = await sb
+        .from("exam_attempts")
+        .select(
+          "id,user_id,quiz_id,title,score,total_count,correct_count,duration_seconds,status,started_at,completed_at,created_at",
+        )
         .order("created_at", { ascending: false })
         .limit(limit);
       if (error) throw error;
@@ -670,17 +952,25 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
         rows: rows.map((r) => ({
           ...r,
           student: profMap[r.user_id] ?? r.user_id.slice(0, 8),
-          accuracy: r.total_count > 0 ? Math.round((r.correct_count / r.total_count) * 1000) / 10 : 0,
+          accuracy:
+            r.total_count > 0 ? Math.round((r.correct_count / r.total_count) * 1000) / 10 : 0,
         })),
       };
     }
 
     // ---------- Completion rate ----------
     if (data.metric === "completion_rate") {
-      const { data: at } = await sb.from("exam_attempts")
+      const { data: at } = await sb
+        .from("exam_attempts")
         .select("subject_id,status,created_at,completed_at")
-        .gte("created_at", monthAgo).limit(5000);
-      const all = (at ?? []) as Array<{ subject_id: string | null; status: string; created_at: string; completed_at: string | null }>;
+        .gte("created_at", monthAgo)
+        .limit(5000);
+      const all = (at ?? []) as Array<{
+        subject_id: string | null;
+        status: string;
+        created_at: string;
+        completed_at: string | null;
+      }>;
       const byDay: Record<string, { started: number; completed: number }> = {};
       for (let i = 29; i >= 0; i--) {
         const k = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
@@ -712,14 +1002,21 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
         kind: "completion" as const,
         metric: data.metric,
         series: Object.entries(byDay).map(([d, v]) => ({
-          d, started: v.started, completed: v.completed,
+          d,
+          started: v.started,
+          completed: v.completed,
           rate: v.started ? Math.round((v.completed / v.started) * 1000) / 10 : 0,
         })),
-        bySubject: Object.entries(bySubject).map(([id, v]) => ({
-          subject_id: id, subject_name: sMap[id] ?? "Unknown",
-          started: v.started, completed: v.completed,
-          rate: v.started ? Math.round((v.completed / v.started) * 1000) / 10 : 0,
-        })).sort((a, b) => b.started - a.started).slice(0, 12),
+        bySubject: Object.entries(bySubject)
+          .map(([id, v]) => ({
+            subject_id: id,
+            subject_name: sMap[id] ?? "Unknown",
+            started: v.started,
+            completed: v.completed,
+            rate: v.started ? Math.round((v.completed / v.started) * 1000) / 10 : 0,
+          }))
+          .sort((a, b) => b.started - a.started)
+          .slice(0, 12),
         totals: {
           started: totalStarted,
           completed: totalCompleted,
@@ -731,12 +1028,23 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
 
     // ---------- Avg score ----------
     if (data.metric === "avg_score") {
-      const { data: at } = await sb.from("exam_attempts")
+      const { data: at } = await sb
+        .from("exam_attempts")
         .select("quiz_id,subject_id,score,total_count,created_at,title")
-        .gte("created_at", monthAgo).limit(5000);
-      const rows = (at ?? []) as Array<{ quiz_id: string | null; subject_id: string | null; score: number; total_count: number; title: string | null }>;
+        .gte("created_at", monthAgo)
+        .limit(5000);
+      const rows = (at ?? []) as Array<{
+        quiz_id: string | null;
+        subject_id: string | null;
+        score: number;
+        total_count: number;
+        title: string | null;
+      }>;
       const buckets = [0, 0, 0, 0, 0]; // 0-20, 20-40, 40-60, 60-80, 80-100
-      let high = 0, low = 100, sum = 0, den = 0;
+      let high = 0,
+        low = 100,
+        sum = 0,
+        den = 0;
       const perQuiz: Record<string, { sum: number; den: number; title: string }> = {};
       const perSub: Record<string, { sum: number; den: number }> = {};
       for (const r of rows) {
@@ -746,14 +1054,19 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
         buckets[idx] += 1;
         if (pct > high) high = pct;
         if (pct < low) low = pct;
-        sum += pct; den += 1;
+        sum += pct;
+        den += 1;
         if (r.quiz_id) {
           const b = perQuiz[r.quiz_id] ?? { sum: 0, den: 0, title: r.title ?? "Quiz" };
-          b.sum += pct; b.den += 1; perQuiz[r.quiz_id] = b;
+          b.sum += pct;
+          b.den += 1;
+          perQuiz[r.quiz_id] = b;
         }
         if (r.subject_id) {
           const b = perSub[r.subject_id] ?? { sum: 0, den: 0 };
-          b.sum += pct; b.den += 1; perSub[r.subject_id] = b;
+          b.sum += pct;
+          b.den += 1;
+          perSub[r.subject_id] = b;
         }
       }
       const sids = Object.keys(perSub);
@@ -775,27 +1088,50 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
         highest: Math.round(high * 10) / 10,
         lowest: den ? Math.round(low * 10) / 10 : 0,
         average: den ? Math.round((sum / den) * 10) / 10 : 0,
-        byQuiz: Object.entries(perQuiz).map(([id, v]) => ({
-          quiz_id: id, title: v.title, avg: Math.round((v.sum / v.den) * 10) / 10, attempts: v.den,
-        })).sort((a, b) => b.avg - a.avg).slice(0, 12),
-        bySubject: Object.entries(perSub).map(([id, v]) => ({
-          subject_id: id, subject_name: sMap[id] ?? "Unknown",
-          avg: Math.round((v.sum / v.den) * 10) / 10, attempts: v.den,
-        })).sort((a, b) => b.avg - a.avg).slice(0, 12),
+        byQuiz: Object.entries(perQuiz)
+          .map(([id, v]) => ({
+            quiz_id: id,
+            title: v.title,
+            avg: Math.round((v.sum / v.den) * 10) / 10,
+            attempts: v.den,
+          }))
+          .sort((a, b) => b.avg - a.avg)
+          .slice(0, 12),
+        bySubject: Object.entries(perSub)
+          .map(([id, v]) => ({
+            subject_id: id,
+            subject_name: sMap[id] ?? "Unknown",
+            avg: Math.round((v.sum / v.den) * 10) / 10,
+            attempts: v.den,
+          }))
+          .sort((a, b) => b.avg - a.avg)
+          .slice(0, 12),
       };
     }
 
     // ---------- Active users (24h) ----------
     if (data.metric === "active_users") {
-      const { data: at } = await sb.from("exam_attempts")
+      const { data: at } = await sb
+        .from("exam_attempts")
         .select("user_id,created_at,title,score,total_count")
-        .gte("created_at", dayAgo).order("created_at", { ascending: false }).limit(5000);
-      const events = (at ?? []) as Array<{ user_id: string; created_at: string; title: string | null; score: number; total_count: number }>;
+        .gte("created_at", dayAgo)
+        .order("created_at", { ascending: false })
+        .limit(5000);
+      const events = (at ?? []) as Array<{
+        user_id: string;
+        created_at: string;
+        title: string | null;
+        score: number;
+        total_count: number;
+      }>;
       const map: Record<string, { last: string; activity: number; lastQuiz: string | null }> = {};
       for (const e of events) {
         const b = map[e.user_id] ?? { last: e.created_at, activity: 0, lastQuiz: e.title };
         b.activity += 1;
-        if (e.created_at > b.last) { b.last = e.created_at; b.lastQuiz = e.title; }
+        if (e.created_at > b.last) {
+          b.last = e.created_at;
+          b.lastQuiz = e.title;
+        }
         map[e.user_id] = b;
       }
       const uids = Object.keys(map);
@@ -809,53 +1145,80 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
       // device from latest login event
       const dMap: Record<string, { device: string | null; browser: string | null }> = {};
       if (uids.length) {
-        const { data: le } = await sb.from("user_login_events")
+        const { data: le } = await sb
+          .from("user_login_events")
           .select("user_id,device,browser,login_at")
-          .in("user_id", uids).order("login_at", { ascending: false }).limit(2000);
-        for (const e of (le ?? []) as Array<{ user_id: string; device: string | null; browser: string | null }>) {
+          .in("user_id", uids)
+          .order("login_at", { ascending: false })
+          .limit(2000);
+        for (const e of (le ?? []) as Array<{
+          user_id: string;
+          device: string | null;
+          browser: string | null;
+        }>) {
           if (!dMap[e.user_id]) dMap[e.user_id] = { device: e.device, browser: e.browser };
         }
       }
       return {
         kind: "active_users" as const,
         metric: data.metric,
-        rows: uids.map((id) => ({
-          user_id: id,
-          name: pMap[id]?.name ?? id.slice(0, 8),
-          email: pMap[id]?.email ?? null,
-          last_seen: map[id].last,
-          activity_count: map[id].activity,
-          last_quiz: map[id].lastQuiz,
-          device: dMap[id]?.device ?? null,
-          browser: dMap[id]?.browser ?? null,
-        })).sort((a, b) => b.last_seen.localeCompare(a.last_seen)),
+        rows: uids
+          .map((id) => ({
+            user_id: id,
+            name: pMap[id]?.name ?? id.slice(0, 8),
+            email: pMap[id]?.email ?? null,
+            last_seen: map[id].last,
+            activity_count: map[id].activity,
+            last_quiz: map[id].lastQuiz,
+            device: dMap[id]?.device ?? null,
+            browser: dMap[id]?.browser ?? null,
+          }))
+          .sort((a, b) => b.last_seen.localeCompare(a.last_seen)),
         total: uids.length,
       };
     }
 
     // ---------- Performance score ----------
     if (data.metric === "performance_score") {
-      const { data: at } = await sb.from("exam_attempts")
+      const { data: at } = await sb
+        .from("exam_attempts")
         .select("user_id,subject_id,chapter_id,score,total_count,completed_at,created_at")
-        .gte("created_at", monthAgo).limit(5000);
-      const rows = (at ?? []) as Array<{ user_id: string; subject_id: string | null; chapter_id: string | null; score: number; total_count: number; completed_at: string | null }>;
-      const perUser: Record<string, { sum: number; den: number; attempts: number; completed: number }> = {};
+        .gte("created_at", monthAgo)
+        .limit(5000);
+      const rows = (at ?? []) as Array<{
+        user_id: string;
+        subject_id: string | null;
+        chapter_id: string | null;
+        score: number;
+        total_count: number;
+        completed_at: string | null;
+      }>;
+      const perUser: Record<
+        string,
+        { sum: number; den: number; attempts: number; completed: number }
+      > = {};
       const perSub: Record<string, { sum: number; den: number }> = {};
       const perChap: Record<string, { sum: number; den: number }> = {};
       for (const r of rows) {
         if (r.total_count <= 0) continue;
         const pct = (r.score / r.total_count) * 100;
         const u = perUser[r.user_id] ?? { sum: 0, den: 0, attempts: 0, completed: 0 };
-        u.sum += pct; u.den += 1; u.attempts += 1;
+        u.sum += pct;
+        u.den += 1;
+        u.attempts += 1;
         if (r.completed_at) u.completed += 1;
         perUser[r.user_id] = u;
         if (r.subject_id) {
           const b = perSub[r.subject_id] ?? { sum: 0, den: 0 };
-          b.sum += pct; b.den += 1; perSub[r.subject_id] = b;
+          b.sum += pct;
+          b.den += 1;
+          perSub[r.subject_id] = b;
         }
         if (r.chapter_id) {
           const b = perChap[r.chapter_id] ?? { sum: 0, den: 0 };
-          b.sum += pct; b.den += 1; perChap[r.chapter_id] = b;
+          b.sum += pct;
+          b.den += 1;
+          perChap[r.chapter_id] = b;
         }
       }
       const uids = Object.keys(perUser);
@@ -878,24 +1241,39 @@ export const adminQuizCardDetails = createServerFn({ method: "POST" })
         const { data: chs } = await sb.from("chapters").select("id,name").in("id", cids);
         for (const c of (chs ?? []) as Array<{ id: string; name: string }>) cMap[c.id] = c.name;
       }
-      const users = uids.map((id) => ({
-        user_id: id, name: pMap[id] ?? id.slice(0, 8),
-        avg: Math.round((perUser[id].sum / perUser[id].den) * 10) / 10,
-        attempts: perUser[id].attempts,
-      })).sort((a, b) => b.avg - a.avg);
+      const users = uids
+        .map((id) => ({
+          user_id: id,
+          name: pMap[id] ?? id.slice(0, 8),
+          avg: Math.round((perUser[id].sum / perUser[id].den) * 10) / 10,
+          attempts: perUser[id].attempts,
+        }))
+        .sort((a, b) => b.avg - a.avg);
       return {
         kind: "performance" as const,
         metric: data.metric,
         top: users.slice(0, 10),
-        weak: users.filter((u) => u.attempts >= 2).slice(-10).reverse(),
-        bySubject: sids.map((id) => ({
-          subject_id: id, subject_name: sMap[id] ?? "Unknown",
-          avg: Math.round((perSub[id].sum / perSub[id].den) * 10) / 10, attempts: perSub[id].den,
-        })).sort((a, b) => b.avg - a.avg),
-        byChapter: cids.map((id) => ({
-          chapter_id: id, chapter_name: cMap[id] ?? "Unknown",
-          avg: Math.round((perChap[id].sum / perChap[id].den) * 10) / 10, attempts: perChap[id].den,
-        })).sort((a, b) => b.avg - a.avg).slice(0, 12),
+        weak: users
+          .filter((u) => u.attempts >= 2)
+          .slice(-10)
+          .reverse(),
+        bySubject: sids
+          .map((id) => ({
+            subject_id: id,
+            subject_name: sMap[id] ?? "Unknown",
+            avg: Math.round((perSub[id].sum / perSub[id].den) * 10) / 10,
+            attempts: perSub[id].den,
+          }))
+          .sort((a, b) => b.avg - a.avg),
+        byChapter: cids
+          .map((id) => ({
+            chapter_id: id,
+            chapter_name: cMap[id] ?? "Unknown",
+            avg: Math.round((perChap[id].sum / perChap[id].den) * 10) / 10,
+            attempts: perChap[id].den,
+          }))
+          .sort((a, b) => b.avg - a.avg)
+          .slice(0, 12),
       };
     }
 

@@ -95,9 +95,7 @@ export function PagesPanel({ activePageId, onActivate }: Props) {
     if (!q.trim()) return list;
     const needle = q.toLowerCase();
     return list.filter(
-      (p) =>
-        p.title.toLowerCase().includes(needle) ||
-        p.slug.toLowerCase().includes(needle),
+      (p) => p.title.toLowerCase().includes(needle) || p.slug.toLowerCase().includes(needle),
     );
   }, [data, q]);
 
@@ -202,11 +200,7 @@ export function PagesPanel({ activePageId, onActivate }: Props) {
         Drag pages to reorder. Pages you create appear in the site navigation.
       </div>
 
-      <CreatePageDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreated={invalidate}
-      />
+      <CreatePageDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={invalidate} />
       <EditPageDialog
         page={editPage}
         onOpenChange={(o) => !o && setEditPage(null)}
@@ -238,8 +232,9 @@ function PageRow({
   onDuplicate: () => void;
   onSetHome: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: page.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: page.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -252,9 +247,7 @@ function PageRow({
       ref={setNodeRef}
       style={style}
       className={`group flex items-center gap-1 rounded-xl px-1 py-1 text-sm transition ${
-        active
-          ? "bg-cta-gradient text-white shadow-glow"
-          : "hover:bg-muted/60"
+        active ? "bg-cta-gradient text-white shadow-glow" : "hover:bg-muted/60"
       }`}
     >
       <button
@@ -277,7 +270,9 @@ function PageRow({
         {page.is_home ? (
           <Home className="h-3.5 w-3.5 shrink-0" />
         ) : (
-          <Globe className={`h-3.5 w-3.5 shrink-0 ${active ? "text-white/80" : "text-muted-foreground"}`} />
+          <Globe
+            className={`h-3.5 w-3.5 shrink-0 ${active ? "text-white/80" : "text-muted-foreground"}`}
+          />
         )}
         <span className="truncate font-medium">{page.title}</span>
         {page.status === "draft" && (
@@ -484,9 +479,7 @@ function EditPageDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit page</DialogTitle>
-          <DialogDescription>
-            Update title, URL slug, SEO and publish status.
-          </DialogDescription>
+          <DialogDescription>Update title, URL slug, SEO and publish status.</DialogDescription>
         </DialogHeader>
         {page && (
           <div className="space-y-3">
@@ -502,9 +495,7 @@ function EditPageDialog({
                 disabled={page.is_home}
               />
               {page.is_home && (
-                <p className="text-[11px] text-muted-foreground">
-                  The homepage slug is locked.
-                </p>
+                <p className="text-[11px] text-muted-foreground">The homepage slug is locked.</p>
               )}
             </div>
             <div className="space-y-1.5">
@@ -513,11 +504,7 @@ function EditPageDialog({
             </div>
             <div className="space-y-1.5">
               <Label>SEO description</Label>
-              <Textarea
-                value={seoDesc}
-                onChange={(e) => setSeoDesc(e.target.value)}
-                rows={2}
-              />
+              <Textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)} rows={2} />
             </div>
             <div className="space-y-1.5">
               <Label>Status</Label>
@@ -581,8 +568,8 @@ function DeletePageDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete page?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete <strong>{page?.title}</strong> and all
-            its sections. This action cannot be undone.
+            This will permanently delete <strong>{page?.title}</strong> and all its sections. This
+            action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

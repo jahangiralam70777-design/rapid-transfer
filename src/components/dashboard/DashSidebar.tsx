@@ -5,22 +5,21 @@ import { useAppStore } from "@/stores/app-store";
 import { useModuleVisibility } from "@/hooks/use-module-visibility";
 import { DashSidebarFooter } from "./DashSidebarFooter";
 
-
 export function DashSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   const { isPathHidden } = useModuleVisibility();
   const visibleItems = studentNavItems.filter((item) => !isPathHidden(item.to));
-  const learningItems = visibleItems.filter(
-    (i) => !["Notifications", "Profile"].includes(i.title),
-  );
-  const accountItems = visibleItems.filter((i) =>
-    ["Notifications", "Profile"].includes(i.title),
-  );
+  const learningItems = visibleItems.filter((i) => !["Notifications", "Profile"].includes(i.title));
+  const accountItems = visibleItems.filter((i) => ["Notifications", "Profile"].includes(i.title));
   const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
     <>
-      <Link to="/" onClick={() => mobile && setSidebarOpen(false)} className="flex items-center gap-2 px-2 py-2">
+      <Link
+        to="/"
+        onClick={() => mobile && setSidebarOpen(false)}
+        className="flex items-center gap-2 px-2 py-2"
+      >
         <div className="bg-cta-gradient flex h-9 w-9 items-center justify-center rounded-xl shadow-glow">
           <GraduationCap className="h-5 w-5 text-white" />
         </div>
@@ -74,7 +73,9 @@ export function DashSidebar() {
                   onClick={() => mobile && setSidebarOpen(false)}
                   aria-current={isActive ? "page" : undefined}
                   className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-                    isActive ? "bg-cta-gradient text-white shadow-glow" : "text-foreground/80 hover:bg-muted hover:text-foreground"
+                    isActive
+                      ? "bg-cta-gradient text-white shadow-glow"
+                      : "text-foreground/80 hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   <s.icon className="h-4 w-4" />
@@ -92,9 +93,17 @@ export function DashSidebar() {
     <>
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <button aria-label="Close menu" className="absolute inset-0 bg-background/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <button
+            aria-label="Close menu"
+            className="absolute inset-0 bg-background/70 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
           <aside className="glass shadow-card-soft pointer-events-auto relative z-10 flex h-full w-72 max-w-[85vw] flex-col p-4">
-            <button aria-label="Close menu" onClick={() => setSidebarOpen(false)} className="absolute right-3 top-3 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <button
+              aria-label="Close menu"
+              onClick={() => setSidebarOpen(false)}
+              className="absolute right-3 top-3 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
             <SidebarContent mobile />

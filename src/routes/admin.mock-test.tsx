@@ -14,8 +14,7 @@ export const Route = createFileRoute("/admin/mock-test")({
       { property: "og:title", content: "Mock Test Manager · CA Aspire BD Admin" },
       {
         property: "og:description",
-        content:
-          "Mock builder, scheduling, leaderboards and analytics for administrators.",
+        content: "Mock builder, scheduling, leaderboards and analytics for administrators.",
       },
     ],
   }),

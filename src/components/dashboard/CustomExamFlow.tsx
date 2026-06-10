@@ -3,22 +3,56 @@ import { sanitizeOptionText } from "@/lib/sanitize-option";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Sparkles, Award, Crown,
-  Atom, ChevronRight, ChevronDown, Check, ArrowLeft, ArrowRight,
-  Clock, Bookmark, LogOut, Trophy, RotateCw, Download,
-  Settings2, ListChecks, Timer as TimerIcon, Shuffle, Sparkle,
-  Loader2, BookOpen,
+  Sparkles,
+  Award,
+  Crown,
+  Atom,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  Bookmark,
+  LogOut,
+  Trophy,
+  RotateCw,
+  Download,
+  Settings2,
+  ListChecks,
+  Timer as TimerIcon,
+  Shuffle,
+  Sparkle,
+  Loader2,
+  BookOpen,
 } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
-type LevelRow = { code: string; name: string; description: string | null; color: string | null; icon: string | null };
-type SubjectRow = { id: string; name: string; level: string; description: string | null; color: string | null; icon: string | null };
+type LevelRow = {
+  code: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  icon: string | null;
+};
+type SubjectRow = {
+  id: string;
+  name: string;
+  level: string;
+  description: string | null;
+  color: string | null;
+  icon: string | null;
+};
 type ChapterRow = { id: string; name: string; subject_id: string; description: string | null };
 type McqRow = {
-  id: string; chapter_id: string;
+  id: string;
+  chapter_id: string;
   question: string;
-  option_a: string; option_b: string; option_c: string; option_d: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
   correct_option: string;
   difficulty: "easy" | "medium" | "hard";
 };
@@ -33,8 +67,12 @@ const levelTone = (i: number) =>
   ["var(--neon-purple)", "var(--neon-blue)", "oklch(0.82 0.16 85)"][i % 3];
 const subjectTone = (i: number) =>
   [
-    "var(--neon-purple)", "var(--neon-blue)", "var(--neon-pink)",
-    "oklch(0.78 0.15 200)", "oklch(0.75 0.18 150)", "oklch(0.78 0.18 60)",
+    "var(--neon-purple)",
+    "var(--neon-blue)",
+    "var(--neon-pink)",
+    "oklch(0.78 0.15 200)",
+    "oklch(0.75 0.18 150)",
+    "oklch(0.78 0.18 60)",
   ][i % 6];
 
 const diffColor: Record<string, string> = {
@@ -78,12 +116,21 @@ export function CustomExamFlow() {
     queryKey: ["custom-exam-tree"],
     queryFn: async () => {
       const [lvl, subj, chap] = await Promise.all([
-        supabase.from("levels").select("code,name,description,color,icon")
-          .eq("status", "published").order("sort_order"),
-        supabase.from("subjects").select("id,name,level,description,color,icon")
-          .eq("status", "published").order("sort_order"),
-        supabase.from("chapters").select("id,name,subject_id,description")
-          .eq("status", "published").order("sort_order"),
+        supabase
+          .from("levels")
+          .select("code,name,description,color,icon")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("subjects")
+          .select("id,name,level,description,color,icon")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("chapters")
+          .select("id,name,subject_id,description")
+          .eq("status", "published")
+          .order("sort_order"),
       ]);
       return {
         levels: (lvl.data ?? []) as LevelRow[],
@@ -137,7 +184,9 @@ export function CustomExamFlow() {
         qc.invalidateQueries({ queryKey: ["custom-exam-tree"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [qc]);
 
   // ---------- Timer ----------
@@ -179,7 +228,9 @@ export function CustomExamFlow() {
     try {
       const { data, error } = await supabase
         .from("mcqs")
-        .select("id,chapter_id,question,option_a,option_b,option_c,option_d,correct_option,difficulty")
+        .select(
+          "id,chapter_id,question,option_a,option_b,option_c,option_d,correct_option,difficulty",
+        )
         .eq("status", "published")
         .in("chapter_id", Array.from(selectedChaps));
       if (error) throw error;
@@ -204,8 +255,10 @@ export function CustomExamFlow() {
 
   const correctCount = examQs.filter((q, i) => answers[i] === q.correct_option).length;
   const wrong = Object.keys(answers).length - correctCount;
-  const accuracy = Object.keys(answers).length === 0 ? 0
-    : Math.round((correctCount / Object.keys(answers).length) * 100);
+  const accuracy =
+    Object.keys(answers).length === 0
+      ? 0
+      : Math.round((correctCount / Object.keys(answers).length) * 100);
   const progress = examQs.length === 0 ? 0 : (Object.keys(answers).length / examQs.length) * 100;
 
   // ---------- UI ----------
@@ -234,19 +287,29 @@ export function CustomExamFlow() {
                     <button
                       onClick={() => i <= step && setStep(i as Step)}
                       className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-                        active ? "bg-cta-gradient text-white shadow-glow"
-                          : done ? "bg-muted text-foreground"
-                          : "text-muted-foreground"
+                        active
+                          ? "bg-cta-gradient text-white shadow-glow"
+                          : done
+                            ? "bg-muted text-foreground"
+                            : "text-muted-foreground"
                       }`}
                     >
-                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
-                        active ? "bg-white/20" : done ? "bg-foreground/10" : "border border-border"
-                      }`}>
+                      <span
+                        className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+                          active
+                            ? "bg-white/20"
+                            : done
+                              ? "bg-foreground/10"
+                              : "border border-border"
+                        }`}
+                      >
                         {done ? <Check className="h-3 w-3" /> : i + 1}
                       </span>
                       {l}
                     </button>
-                    {i < stepLabels.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                    {i < stepLabels.length - 1 && (
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
                   </div>
                 );
               })}
@@ -269,20 +332,34 @@ export function CustomExamFlow() {
               const Icon = levelIcon(l.code);
               const tone = l.color || levelTone(i);
               return (
-                <button key={l.code}
-                  onClick={() => { setLevel(l.code); setSubject(null); setSelectedChaps(new Set()); setStep(1); }}
+                <button
+                  key={l.code}
+                  onClick={() => {
+                    setLevel(l.code);
+                    setSubject(null);
+                    setSelectedChaps(new Set());
+                    setStep(1);
+                  }}
                   className="group relative rounded-3xl p-px text-left transition-transform hover:-translate-y-1"
                   style={{ background: `linear-gradient(135deg, ${tone}, transparent 65%)` }}
                 >
                   <div className="glass relative h-full overflow-hidden rounded-[calc(theme(borderRadius.3xl)-1px)] p-6">
-                    <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-40 blur-3xl transition-opacity group-hover:opacity-80"
-                      style={{ background: tone }} />
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-glow"
-                      style={{ background: `linear-gradient(135deg, ${tone}, oklch(0.55 0.2 270))` }}>
+                    <div
+                      className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-40 blur-3xl transition-opacity group-hover:opacity-80"
+                      style={{ background: tone }}
+                    />
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-glow"
+                      style={{
+                        background: `linear-gradient(135deg, ${tone}, oklch(0.55 0.2 270))`,
+                      }}
+                    >
                       <Icon className="h-6 w-6" />
                     </div>
                     <h3 className="font-display mt-5 text-xl font-bold">{l.name}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{l.description ?? "Curated content set"}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {l.description ?? "Curated content set"}
+                    </p>
                     <div className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gradient">
                       Continue <ArrowRight className="h-3.5 w-3.5" />
                     </div>
@@ -300,23 +377,39 @@ export function CustomExamFlow() {
               <EmptyState text="No subjects published for this level yet." />
             )}
             {subjects.map((sub, i) => {
-              const chapCount = (tree.data?.chapters ?? []).filter((c) => c.subject_id === sub.id).length;
+              const chapCount = (tree.data?.chapters ?? []).filter(
+                (c) => c.subject_id === sub.id,
+              ).length;
               const tone = sub.color || subjectTone(i);
               return (
-                <button key={sub.id}
-                  onClick={() => { setSubject({ id: sub.id, name: sub.name }); setSelectedChaps(new Set()); setOpenChap(null); setStep(2); }}
+                <button
+                  key={sub.id}
+                  onClick={() => {
+                    setSubject({ id: sub.id, name: sub.name });
+                    setSelectedChaps(new Set());
+                    setOpenChap(null);
+                    setStep(2);
+                  }}
                   className="group relative rounded-3xl p-px text-left transition-transform hover:-translate-y-1"
                   style={{ background: `linear-gradient(135deg, ${tone}, transparent 65%)` }}
                 >
                   <div className="glass relative h-full overflow-hidden rounded-[calc(theme(borderRadius.3xl)-1px)] p-5">
-                    <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30 blur-2xl transition-opacity group-hover:opacity-70"
-                      style={{ background: tone }} />
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-                      style={{ background: `linear-gradient(135deg, ${tone}, oklch(0.55 0.2 270))` }}>
+                    <div
+                      className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30 blur-2xl transition-opacity group-hover:opacity-70"
+                      style={{ background: tone }}
+                    />
+                    <div
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+                      style={{
+                        background: `linear-gradient(135deg, ${tone}, oklch(0.55 0.2 270))`,
+                      }}
+                    >
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <h3 className="font-display mt-4 text-lg font-bold">{sub.name}</h3>
-                    <p className="text-xs text-muted-foreground">{chapCount} chapter{chapCount === 1 ? "" : "s"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {chapCount} chapter{chapCount === 1 ? "" : "s"}
+                    </p>
                   </div>
                 </button>
               );
@@ -329,7 +422,9 @@ export function CustomExamFlow() {
           <section className="animate-fade-up space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                <span className="text-foreground font-semibold">{selectedChaps.size}</span> chapter(s) selected · <span className="text-foreground font-semibold">{totalAvail}</span> MCQs available
+                <span className="text-foreground font-semibold">{selectedChaps.size}</span>{" "}
+                chapter(s) selected ·{" "}
+                <span className="text-foreground font-semibold">{totalAvail}</span> MCQs available
               </p>
               <button
                 onClick={() => selectedChaps.size > 0 && totalAvail > 0 && setStep(3)}
@@ -360,9 +455,11 @@ export function CustomExamFlow() {
                             } ${empty ? "opacity-40 cursor-not-allowed" : ""}`}
                             aria-label="Select chapter"
                           >
-                            <span className={`flex h-5 w-5 items-center justify-center rounded-md border ${
-                              checked ? "border-white bg-white/20" : "border-border"
-                            }`}>
+                            <span
+                              className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                                checked ? "border-white bg-white/20" : "border-border"
+                              }`}
+                            >
                               {checked && <Check className="h-3 w-3" />}
                             </span>
                           </button>
@@ -378,10 +475,14 @@ export function CustomExamFlow() {
                                 <p className="font-display font-bold">{c.name}</p>
                               </div>
                               <p className="mt-0.5 text-xs text-muted-foreground">
-                                {empty ? "No MCQs available for this chapter yet." : `${q} MCQs available`}
+                                {empty
+                                  ? "No MCQs available for this chapter yet."
+                                  : `${q} MCQs available`}
                               </p>
                             </div>
-                            <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+                            <ChevronDown
+                              className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+                            />
                           </button>
                         </div>
                         {open && (
@@ -393,7 +494,9 @@ export function CustomExamFlow() {
                               { l: "Status", v: empty ? "Empty" : "Ready" },
                             ].map((x) => (
                               <div key={x.l} className="rounded-xl bg-card/40 p-3">
-                                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{x.l}</p>
+                                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  {x.l}
+                                </p>
                                 <p className="font-display mt-1 text-sm font-bold">{String(x.v)}</p>
                               </div>
                             ))}
@@ -427,25 +530,45 @@ export function CustomExamFlow() {
                     const active = !customMcq && mcqCount === n;
                     const disabled = n > totalAvail;
                     return (
-                      <button key={n}
-                        onClick={() => { if (disabled) return; setCustomMcq(false); setMcqCount(n); }}
+                      <button
+                        key={n}
+                        onClick={() => {
+                          if (disabled) return;
+                          setCustomMcq(false);
+                          setMcqCount(n);
+                        }}
                         disabled={disabled}
                         className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-                          active ? "bg-cta-gradient text-white shadow-glow" : "glass hover:scale-[1.02]"
-                        } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}>
+                          active
+                            ? "bg-cta-gradient text-white shadow-glow"
+                            : "glass hover:scale-[1.02]"
+                        } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+                      >
                         {n}
                       </button>
                     );
                   })}
-                  <button onClick={() => setCustomMcq(true)}
+                  <button
+                    onClick={() => setCustomMcq(true)}
                     className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-                      customMcq ? "bg-cta-gradient text-white shadow-glow" : "glass hover:scale-[1.02]"
-                    }`}>Custom</button>
+                      customMcq
+                        ? "bg-cta-gradient text-white shadow-glow"
+                        : "glass hover:scale-[1.02]"
+                    }`}
+                  >
+                    Custom
+                  </button>
                   {customMcq && (
                     <input
-                      type="number" min={1} max={totalAvail || 200}
+                      type="number"
+                      min={1}
+                      max={totalAvail || 200}
                       value={mcqCount}
-                      onChange={(e) => setMcqCount(Math.max(1, Math.min(totalAvail || 200, Number(e.target.value) || 1)))}
+                      onChange={(e) =>
+                        setMcqCount(
+                          Math.max(1, Math.min(totalAvail || 200, Number(e.target.value) || 1)),
+                        )
+                      }
                       className="h-10 w-24 rounded-xl border border-border bg-background/60 px-3 text-sm outline-none focus:border-primary"
                     />
                   )}
@@ -461,20 +584,37 @@ export function CustomExamFlow() {
                   {timePresets.map((n) => {
                     const active = !customDur && duration === n;
                     return (
-                      <button key={n}
-                        onClick={() => { setCustomDur(false); setDuration(n); }}
+                      <button
+                        key={n}
+                        onClick={() => {
+                          setCustomDur(false);
+                          setDuration(n);
+                        }}
                         className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-                          active ? "bg-cta-gradient text-white shadow-glow" : "glass hover:scale-[1.02]"
-                        }`}>{n} min</button>
+                          active
+                            ? "bg-cta-gradient text-white shadow-glow"
+                            : "glass hover:scale-[1.02]"
+                        }`}
+                      >
+                        {n} min
+                      </button>
                     );
                   })}
-                  <button onClick={() => setCustomDur(true)}
+                  <button
+                    onClick={() => setCustomDur(true)}
                     className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-                      customDur ? "bg-cta-gradient text-white shadow-glow" : "glass hover:scale-[1.02]"
-                    }`}>Custom</button>
+                      customDur
+                        ? "bg-cta-gradient text-white shadow-glow"
+                        : "glass hover:scale-[1.02]"
+                    }`}
+                  >
+                    Custom
+                  </button>
                   {customDur && (
                     <input
-                      type="number" min={1} max={300}
+                      type="number"
+                      min={1}
+                      max={300}
                       value={duration}
                       onChange={(e) => setDuration(Math.max(1, Number(e.target.value) || 1))}
                       className="h-10 w-24 rounded-xl border border-border bg-background/60 px-3 text-sm outline-none focus:border-primary"
@@ -484,10 +624,20 @@ export function CustomExamFlow() {
               </div>
 
               <div className="mt-6 space-y-3">
-                <Toggle icon={Sparkle} label="Include previously attempted questions"
-                  desc="Mix older MCQs back into this exam" value={includePrev} onChange={setIncludePrev} />
-                <Toggle icon={Shuffle} label="Randomize question order"
-                  desc="Shuffle question sequence on start" value={randomize} onChange={setRandomize} />
+                <Toggle
+                  icon={Sparkle}
+                  label="Include previously attempted questions"
+                  desc="Mix older MCQs back into this exam"
+                  value={includePrev}
+                  onChange={setIncludePrev}
+                />
+                <Toggle
+                  icon={Shuffle}
+                  label="Randomize question order"
+                  desc="Shuffle question sequence on start"
+                  value={randomize}
+                  onChange={setRandomize}
+                />
               </div>
             </div>
 
@@ -497,7 +647,11 @@ export function CustomExamFlow() {
                 <h3 className="font-display text-lg font-bold">Live Summary</h3>
                 <p className="text-xs text-muted-foreground">Real-time exam blueprint</p>
                 <ul className="mt-5 space-y-3 text-sm">
-                  <Row icon={ListChecks} l="Total Questions" v={String(Math.min(mcqCount, totalAvail))} />
+                  <Row
+                    icon={ListChecks}
+                    l="Total Questions"
+                    v={String(Math.min(mcqCount, totalAvail))}
+                  />
                   <Row icon={Sparkle} l="Total Marks" v={String(Math.min(mcqCount, totalAvail))} />
                   <Row icon={TimerIcon} l="Estimated Time" v={`${duration} min`} />
                   <Row icon={Atom} l="Selected Chapters" v={String(selectedChaps.size || "—")} />
@@ -507,7 +661,13 @@ export function CustomExamFlow() {
                   disabled={selectedChaps.size === 0 || totalAvail === 0 || generating}
                   className="bg-cta-gradient mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02] disabled:opacity-40"
                 >
-                  {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Generate Custom Exam <ArrowRight className="h-4 w-4" /></>}
+                  {generating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      Generate Custom Exam <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -520,27 +680,40 @@ export function CustomExamFlow() {
             <div className="glass shadow-card-soft rounded-2xl p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{subject?.name} · {level}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {subject?.name} · {level}
+                  </p>
                   <h3 className="font-display text-lg font-bold">Custom Exam</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`glass flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-bold ${
-                    timeLeft < 60 ? "text-red-400" : "text-gradient"
-                  }`}>
+                  <div
+                    className={`glass flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-bold ${
+                      timeLeft < 60 ? "text-red-400" : "text-gradient"
+                    }`}
+                  >
                     <Clock className="h-4 w-4" /> {m}:{s}
                   </div>
-                  <button onClick={() => { setStarted(false); setStep(3); }}
-                    className="glass inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-destructive/10">
+                  <button
+                    onClick={() => {
+                      setStarted(false);
+                      setStep(3);
+                    }}
+                    className="glass inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-destructive/10"
+                  >
                     <LogOut className="h-3.5 w-3.5" /> Exit
                   </button>
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-3">
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] transition-all"
-                    style={{ width: `${progress}%`, boxShadow: "0 0 12px var(--neon-purple)" }} />
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] transition-all"
+                    style={{ width: `${progress}%`, boxShadow: "0 0 12px var(--neon-purple)" }}
+                  />
                 </div>
-                <span className="text-xs text-muted-foreground">{Object.keys(answers).length}/{examQs.length}</span>
+                <span className="text-xs text-muted-foreground">
+                  {Object.keys(answers).length}/{examQs.length}
+                </span>
               </div>
             </div>
 
@@ -553,20 +726,29 @@ export function CustomExamFlow() {
                   <span className="glass rounded-xl px-3 py-1.5 text-xs font-semibold">
                     Q {String(current + 1).padStart(2, "0")} / {examQs.length}
                   </span>
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
-                    style={{ background: diffColor[examQs[current].difficulty] ?? "var(--neon-blue)" }}>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
+                    style={{
+                      background: diffColor[examQs[current].difficulty] ?? "var(--neon-blue)",
+                    }}
+                  >
                     {diffLabel(examQs[current].difficulty)}
                   </span>
                 </div>
-                <button onClick={() => {
-                  const b = new Set(bookmarks);
-                  b.has(current) ? b.delete(current) : b.add(current);
-                  setBookmarks(b);
-                }}
+                <button
+                  onClick={() => {
+                    const b = new Set(bookmarks);
+                    b.has(current) ? b.delete(current) : b.add(current);
+                    setBookmarks(b);
+                  }}
                   className={`glass flex h-9 w-9 items-center justify-center rounded-xl transition-transform hover:scale-105 ${
                     bookmarks.has(current) ? "text-[var(--neon-pink)]" : ""
-                  }`}>
-                  <Bookmark className="h-4 w-4" fill={bookmarks.has(current) ? "currentColor" : "none"} />
+                  }`}
+                >
+                  <Bookmark
+                    className="h-4 w-4"
+                    fill={bookmarks.has(current) ? "currentColor" : "none"}
+                  />
                 </button>
               </div>
 
@@ -576,19 +758,27 @@ export function CustomExamFlow() {
 
               <div className="relative mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {(["A", "B", "C", "D"] as const).map((k) => {
-                  const text = sanitizeOptionText((examQs[current] as any)[`option_${k.toLowerCase()}`] as string);
+                  const text = sanitizeOptionText(
+                    (examQs[current] as any)[`option_${k.toLowerCase()}`] as string,
+                  );
                   const isPicked = answers[current] === k;
                   return (
-                    <button key={k}
+                    <button
+                      key={k}
                       onClick={() => setAnswers({ ...answers, [current]: k })}
                       className={`group relative flex items-center gap-4 rounded-2xl border p-4 text-left transition-all ${
-                        isPicked ? "border-primary bg-primary/10 shadow-glow"
+                        isPicked
+                          ? "border-primary bg-primary/10 shadow-glow"
                           : "border-border hover:border-primary/50 hover:bg-muted/40"
-                      }`}>
-                      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display text-base font-bold transition-all ${
-                        isPicked ? "bg-cta-gradient text-white shadow-glow"
-                          : "bg-muted text-foreground group-hover:bg-cta-gradient group-hover:text-white"
-                      }`}>
+                      }`}
+                    >
+                      <span
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display text-base font-bold transition-all ${
+                          isPicked
+                            ? "bg-cta-gradient text-white shadow-glow"
+                            : "bg-muted text-foreground group-hover:bg-cta-gradient group-hover:text-white"
+                        }`}
+                      >
                         {k}
                       </span>
                       <span className="text-sm font-medium">{text}</span>
@@ -598,18 +788,30 @@ export function CustomExamFlow() {
               </div>
 
               <div className="relative mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button onClick={() => setCurrent((c) => Math.max(0, c - 1))} disabled={current === 0}
-                  className="glass inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.02] disabled:opacity-40">
+                <button
+                  onClick={() => setCurrent((c) => Math.max(0, c - 1))}
+                  disabled={current === 0}
+                  className="glass inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.02] disabled:opacity-40"
+                >
                   <ArrowLeft className="h-4 w-4" /> Previous
                 </button>
                 <div className="flex gap-3">
-                  <button onClick={() => setSubmitted(true)}
-                    className="rounded-xl border border-border bg-background/40 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted">
+                  <button
+                    onClick={() => setSubmitted(true)}
+                    className="rounded-xl border border-border bg-background/40 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
+                  >
                     Submit Exam
                   </button>
-                  <button onClick={() => current === examQs.length - 1 ? setSubmitted(true) : setCurrent((c) => Math.min(examQs.length - 1, c + 1))}
-                    className="bg-cta-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]">
-                    {current === examQs.length - 1 ? "Finish" : "Next"} <ArrowRight className="h-4 w-4" />
+                  <button
+                    onClick={() =>
+                      current === examQs.length - 1
+                        ? setSubmitted(true)
+                        : setCurrent((c) => Math.min(examQs.length - 1, c + 1))
+                    }
+                    className="bg-cta-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]"
+                  >
+                    {current === examQs.length - 1 ? "Finish" : "Next"}{" "}
+                    <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -630,14 +832,21 @@ export function CustomExamFlow() {
                 const isDone = answers[i] !== undefined;
                 const isBookmarked = bookmarks.has(i);
                 return (
-                  <button key={i} onClick={() => setCurrent(i)}
+                  <button
+                    key={i}
+                    onClick={() => setCurrent(i)}
                     className={`relative flex h-9 items-center justify-center rounded-lg text-xs font-semibold transition-transform hover:scale-110 ${
-                      isCurrent ? "bg-cta-gradient text-white shadow-glow"
-                        : isDone ? "border border-emerald-400/40 bg-emerald-500/15 text-emerald-400"
-                        : "border border-border bg-card/40 text-muted-foreground"
-                    }`}>
+                      isCurrent
+                        ? "bg-cta-gradient text-white shadow-glow"
+                        : isDone
+                          ? "border border-emerald-400/40 bg-emerald-500/15 text-emerald-400"
+                          : "border border-border bg-card/40 text-muted-foreground"
+                    }`}
+                  >
                     {i + 1}
-                    {isBookmarked && <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_var(--neon-pink)]" />}
+                    {isBookmarked && (
+                      <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_var(--neon-pink)]" />
+                    )}
                   </button>
                 );
               })}
@@ -680,14 +889,33 @@ export function CustomExamFlow() {
                         <stop offset="100%" stopColor="oklch(0.72 0.2 235)" />
                       </linearGradient>
                     </defs>
-                    <circle cx="60" cy="60" r="54" stroke="currentColor" strokeWidth="10" fill="none" className="text-muted/40" />
-                    <circle cx="60" cy="60" r="54" stroke="url(#cres)" strokeWidth="10" fill="none" strokeLinecap="round"
-                      strokeDasharray="339" strokeDashoffset={339 - (339 * accuracy) / 100}
-                      style={{ transition: "stroke-dashoffset 1.2s ease-out" }} />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="54"
+                      stroke="currentColor"
+                      strokeWidth="10"
+                      fill="none"
+                      className="text-muted/40"
+                    />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="54"
+                      stroke="url(#cres)"
+                      strokeWidth="10"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeDasharray="339"
+                      strokeDashoffset={339 - (339 * accuracy) / 100}
+                      style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
+                    />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <p className="font-display text-3xl font-bold text-gradient">{accuracy}%</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Accuracy</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Accuracy
+                    </p>
                   </div>
                 </div>
 
@@ -695,12 +923,22 @@ export function CustomExamFlow() {
                   {[
                     { l: "Correct", v: correctCount, c: "text-emerald-400" },
                     { l: "Wrong", v: wrong, c: "text-red-400" },
-                    { l: "Skipped", v: examQs.length - Object.keys(answers).length, c: "text-muted-foreground" },
-                    { l: "Time", v: `${duration - Math.floor(timeLeft / 60)}m`, c: "text-gradient" },
+                    {
+                      l: "Skipped",
+                      v: examQs.length - Object.keys(answers).length,
+                      c: "text-muted-foreground",
+                    },
+                    {
+                      l: "Time",
+                      v: `${duration - Math.floor(timeLeft / 60)}m`,
+                      c: "text-gradient",
+                    },
                   ].map((x) => (
                     <div key={x.l} className="rounded-2xl border border-border bg-card/40 p-3">
                       <p className={`font-display text-lg font-bold ${x.c}`}>{x.v}</p>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{x.l}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {x.l}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -709,11 +947,16 @@ export function CustomExamFlow() {
                   <button className="glass inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-transform hover:scale-[1.02]">
                     <Download className="h-4 w-4" /> Download Result
                   </button>
-                  <button onClick={() => {
-                    setAnswers({}); setBookmarks(new Set()); setCurrent(0);
-                    setSubmitted(false); setTimeLeft(duration * 60);
-                  }}
-                    className="bg-cta-gradient inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]">
+                  <button
+                    onClick={() => {
+                      setAnswers({});
+                      setBookmarks(new Set());
+                      setCurrent(0);
+                      setSubmitted(false);
+                      setTimeLeft(duration * 60);
+                    }}
+                    className="bg-cta-gradient inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]"
+                  >
                     <RotateCw className="h-4 w-4" /> Retry Exam
                   </button>
                 </div>
@@ -735,8 +978,18 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
-function Toggle({ icon: Icon, label, desc, value, onChange }: {
-  icon: any; label: string; desc: string; value: boolean; onChange: (v: boolean) => void;
+function Toggle({
+  icon: Icon,
+  label,
+  desc,
+  value,
+  onChange,
+}: {
+  icon: any;
+  label: string;
+  desc: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
 }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-border bg-background/40 p-4">
@@ -749,9 +1002,13 @@ function Toggle({ icon: Icon, label, desc, value, onChange }: {
           <p className="text-[10px] text-muted-foreground">{desc}</p>
         </div>
       </div>
-      <button onClick={() => onChange(!value)}
-        className={`relative h-6 w-11 rounded-full transition-colors ${value ? "bg-cta-gradient shadow-glow" : "bg-muted"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${value ? "translate-x-5" : "translate-x-0.5"}`} />
+      <button
+        onClick={() => onChange(!value)}
+        className={`relative h-6 w-11 rounded-full transition-colors ${value ? "bg-cta-gradient shadow-glow" : "bg-muted"}`}
+      >
+        <span
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${value ? "translate-x-5" : "translate-x-0.5"}`}
+        />
       </button>
     </div>
   );
@@ -772,7 +1029,9 @@ function Stat({ l, v, gradient }: { l: string; v: string; gradient?: boolean }) 
   return (
     <div className="rounded-2xl border border-border bg-card/40 p-3">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{l}</p>
-      <p className={`font-display mt-1 text-xl font-bold ${gradient ? "text-gradient" : ""}`}>{v}</p>
+      <p className={`font-display mt-1 text-xl font-bold ${gradient ? "text-gradient" : ""}`}>
+        {v}
+      </p>
     </div>
   );
 }

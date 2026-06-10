@@ -27,7 +27,6 @@ export function DashboardPreview() {
           <div>
             <p className="font-display text-base font-bold">1K+</p>
             <p className="text-[10px] text-muted-foreground">Mock Attempts</p>
-
           </div>
         </div>
       </div>
@@ -40,7 +39,6 @@ export function DashboardPreview() {
           <div>
             <p className="font-display text-base font-bold">2K+</p>
             <p className="text-[10px] text-muted-foreground">Students</p>
-
           </div>
         </div>
       </div>
@@ -57,9 +55,11 @@ export function DashboardPreview() {
             <p className="font-display text-lg font-bold">Rahim Ahmed</p>
           </div>
           <div className="flex -space-x-2">
-            {["bg-[var(--neon-purple)]", "bg-[var(--neon-blue)]", "bg-[var(--neon-pink)]"].map((c, i) => (
-              <div key={i} className={`h-8 w-8 rounded-full ring-2 ring-background ${c}`} />
-            ))}
+            {["bg-[var(--neon-purple)]", "bg-[var(--neon-blue)]", "bg-[var(--neon-pink)]"].map(
+              (c, i) => (
+                <div key={i} className={`h-8 w-8 rounded-full ring-2 ring-background ${c}`} />
+              ),
+            )}
           </div>
         </div>
 
@@ -71,7 +71,12 @@ export function DashboardPreview() {
             { i: Brain, l: "XP", v: "8.4k", c: "var(--neon-pink)" },
           ].map(({ i: Icon, l, v, c }) => (
             <div key={l} className="rounded-2xl border border-border bg-card/40 p-3">
-              <Icon className="h-4 w-4" style={{ color: `var(--${c.includes("purple") ? "neon-purple" : c.includes("blue") ? "neon-blue" : "neon-pink"})` }} />
+              <Icon
+                className="h-4 w-4"
+                style={{
+                  color: `var(--${c.includes("purple") ? "neon-purple" : c.includes("blue") ? "neon-blue" : "neon-pink"})`,
+                }}
+              />
               <p className="font-display mt-2 text-lg font-bold">{v}</p>
               <p className="text-[10px] text-muted-foreground">{l}</p>
             </div>
@@ -110,9 +115,19 @@ export function DashboardPreview() {
                     <stop offset="100%" stopColor="oklch(0.72 0.2 235)" />
                   </linearGradient>
                 </defs>
-                <circle cx="60" cy="60" r="54" stroke="currentColor" strokeWidth="10" fill="none" className="text-muted/40" />
                 <circle
-                  cx="60" cy="60" r="54"
+                  cx="60"
+                  cy="60"
+                  r="54"
+                  stroke="currentColor"
+                  strokeWidth="10"
+                  fill="none"
+                  className="text-muted/40"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="54"
                   stroke="url(#ringGrad)"
                   strokeWidth="10"
                   fill="none"
@@ -141,7 +156,10 @@ export function DashboardPreview() {
               { t: "Audit Mock Test", s: "Score 94/100", c: "var(--neon-purple)" },
               { t: "Taxation Flash Cards", s: "32 cards reviewed", c: "var(--neon-blue)" },
             ].map((a) => (
-              <div key={a.t} className="flex items-center justify-between rounded-xl bg-background/40 px-3 py-2">
+              <div
+                key={a.t}
+                className="flex items-center justify-between rounded-xl bg-background/40 px-3 py-2"
+              >
                 <div className="flex items-center gap-3">
                   <span className="h-2 w-2 rounded-full" style={{ background: a.c }} />
                   <div>

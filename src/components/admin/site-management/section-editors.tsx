@@ -2,10 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  adminUpdateSectionDraft,
-  adminPublishSection,
-} from "@/lib/site-management.functions";
+import { adminUpdateSectionDraft, adminPublishSection } from "@/lib/site-management.functions";
 import {
   EditorShell,
   Field,
@@ -81,7 +78,9 @@ export function HeroEditor({ section }: { section: Section }) {
   const initial: HeroDraft = { ...HERO_DEFAULT, ...(section.draft_content as Partial<HeroDraft>) };
   const { value, setField, setValue } = useDraft<HeroDraft>(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
 
   return (
     <EditorShell
@@ -102,11 +101,18 @@ export function HeroEditor({ section }: { section: Section }) {
           <Input value={value.heading} onChange={(e) => setField("heading", e.target.value)} />
         </Field>
         <Field label="Sub-heading">
-          <Input value={value.subheading} onChange={(e) => setField("subheading", e.target.value)} />
+          <Input
+            value={value.subheading}
+            onChange={(e) => setField("subheading", e.target.value)}
+          />
         </Field>
       </TwoCol>
       <Field label="Description" hint="One or two sentences shown under the heading.">
-        <Textarea value={value.description} rows={3} onChange={(e) => setField("description", e.target.value)} />
+        <Textarea
+          value={value.description}
+          rows={3}
+          onChange={(e) => setField("description", e.target.value)}
+        />
       </Field>
       <MediaPickerButton
         label="Hero image"
@@ -119,13 +125,17 @@ export function HeroEditor({ section }: { section: Section }) {
           <Field label="Button text">
             <Input
               value={value.primary_cta.label}
-              onChange={(e) => setField("primary_cta", { ...value.primary_cta, label: e.target.value })}
+              onChange={(e) =>
+                setField("primary_cta", { ...value.primary_cta, label: e.target.value })
+              }
             />
           </Field>
           <Field label="Button link" hint="Internal path like /signup or full URL">
             <Input
               value={value.primary_cta.href}
-              onChange={(e) => setField("primary_cta", { ...value.primary_cta, href: e.target.value })}
+              onChange={(e) =>
+                setField("primary_cta", { ...value.primary_cta, href: e.target.value })
+              }
             />
           </Field>
         </TwoCol>
@@ -136,13 +146,17 @@ export function HeroEditor({ section }: { section: Section }) {
           <Field label="Button text">
             <Input
               value={value.secondary_cta.label}
-              onChange={(e) => setField("secondary_cta", { ...value.secondary_cta, label: e.target.value })}
+              onChange={(e) =>
+                setField("secondary_cta", { ...value.secondary_cta, label: e.target.value })
+              }
             />
           </Field>
           <Field label="Button link">
             <Input
               value={value.secondary_cta.href}
-              onChange={(e) => setField("secondary_cta", { ...value.secondary_cta, href: e.target.value })}
+              onChange={(e) =>
+                setField("secondary_cta", { ...value.secondary_cta, href: e.target.value })
+              }
             />
           </Field>
         </TwoCol>
@@ -162,7 +176,10 @@ export function HeroEditor({ section }: { section: Section }) {
                   <Input value={item.title} onChange={(e) => update({ title: e.target.value })} />
                 </Field>
                 <Field label="Subtitle">
-                  <Input value={item.subtitle} onChange={(e) => update({ subtitle: e.target.value })} />
+                  <Input
+                    value={item.subtitle}
+                    onChange={(e) => update({ subtitle: e.target.value })}
+                  />
                 </Field>
               </TwoCol>
               <Field label="Icon">
@@ -184,7 +201,9 @@ export function StatsEditor({ section }: { section: Section }) {
   const initial: StatsDraft = { items: [], ...(section.draft_content as Partial<StatsDraft>) };
   const { value, setValue } = useDraft<StatsDraft>(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
 
   return (
     <EditorShell
@@ -223,10 +242,15 @@ export function StatsEditor({ section }: { section: Section }) {
 type FeaturesDraft = { items: Array<{ icon: string; title: string; description: string }> };
 
 export function FeaturesEditor({ section }: { section: Section }) {
-  const initial: FeaturesDraft = { items: [], ...(section.draft_content as Partial<FeaturesDraft>) };
+  const initial: FeaturesDraft = {
+    items: [],
+    ...(section.draft_content as Partial<FeaturesDraft>),
+  };
   const { value, setValue } = useDraft<FeaturesDraft>(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
 
   return (
     <EditorShell
@@ -256,7 +280,11 @@ export function FeaturesEditor({ section }: { section: Section }) {
               </Field>
             </TwoCol>
             <Field label="Description">
-              <Textarea rows={2} value={item.description} onChange={(e) => update({ description: e.target.value })} />
+              <Textarea
+                rows={2}
+                value={item.description}
+                onChange={(e) => update({ description: e.target.value })}
+              />
             </Field>
           </>
         )}
@@ -272,10 +300,15 @@ type TestimonialsDraft = {
 };
 
 export function TestimonialsEditor({ section }: { section: Section }) {
-  const initial: TestimonialsDraft = { items: [], ...(section.draft_content as Partial<TestimonialsDraft>) };
+  const initial: TestimonialsDraft = {
+    items: [],
+    ...(section.draft_content as Partial<TestimonialsDraft>),
+  };
   const { value, setValue } = useDraft<TestimonialsDraft>(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
 
   return (
     <EditorShell
@@ -305,7 +338,11 @@ export function TestimonialsEditor({ section }: { section: Section }) {
               </Field>
             </TwoCol>
             <Field label="Quote">
-              <Textarea rows={3} value={item.quote} onChange={(e) => update({ quote: e.target.value })} />
+              <Textarea
+                rows={3}
+                value={item.quote}
+                onChange={(e) => update({ quote: e.target.value })}
+              />
             </Field>
             <MediaPickerButton
               label="Avatar"
@@ -327,7 +364,9 @@ export function FaqEditor({ section }: { section: Section }) {
   const initial: FaqDraft = { items: [], ...(section.draft_content as Partial<FaqDraft>) };
   const { value, setValue } = useDraft<FaqDraft>(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
 
   return (
     <EditorShell
@@ -352,7 +391,11 @@ export function FaqEditor({ section }: { section: Section }) {
               <Input value={item.question} onChange={(e) => update({ question: e.target.value })} />
             </Field>
             <Field label="Answer">
-              <Textarea rows={3} value={item.answer} onChange={(e) => update({ answer: e.target.value })} />
+              <Textarea
+                rows={3}
+                value={item.answer}
+                onChange={(e) => update({ answer: e.target.value })}
+              />
             </Field>
           </>
         )}
@@ -380,7 +423,9 @@ export function CtaEditor({ section }: { section: Section }) {
   };
   const { value, setField } = useDraft<CtaDraft>(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
 
   return (
     <EditorShell
@@ -397,20 +442,52 @@ export function CtaEditor({ section }: { section: Section }) {
         <Input value={value.heading} onChange={(e) => setField("heading", e.target.value)} />
       </Field>
       <Field label="Sub-heading">
-        <Textarea rows={2} value={value.subheading} onChange={(e) => setField("subheading", e.target.value)} />
+        <Textarea
+          rows={2}
+          value={value.subheading}
+          onChange={(e) => setField("subheading", e.target.value)}
+        />
       </Field>
       <div className="rounded-xl border border-border p-3">
         <p className="mb-2 text-xs font-semibold">Primary button</p>
         <TwoCol>
-          <Field label="Text"><Input value={value.primary_cta.label} onChange={(e) => setField("primary_cta", { ...value.primary_cta, label: e.target.value })} /></Field>
-          <Field label="Link"><Input value={value.primary_cta.href} onChange={(e) => setField("primary_cta", { ...value.primary_cta, href: e.target.value })} /></Field>
+          <Field label="Text">
+            <Input
+              value={value.primary_cta.label}
+              onChange={(e) =>
+                setField("primary_cta", { ...value.primary_cta, label: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="Link">
+            <Input
+              value={value.primary_cta.href}
+              onChange={(e) =>
+                setField("primary_cta", { ...value.primary_cta, href: e.target.value })
+              }
+            />
+          </Field>
         </TwoCol>
       </div>
       <div className="rounded-xl border border-border p-3">
         <p className="mb-2 text-xs font-semibold">Secondary button</p>
         <TwoCol>
-          <Field label="Text"><Input value={value.secondary_cta.label} onChange={(e) => setField("secondary_cta", { ...value.secondary_cta, label: e.target.value })} /></Field>
-          <Field label="Link"><Input value={value.secondary_cta.href} onChange={(e) => setField("secondary_cta", { ...value.secondary_cta, href: e.target.value })} /></Field>
+          <Field label="Text">
+            <Input
+              value={value.secondary_cta.label}
+              onChange={(e) =>
+                setField("secondary_cta", { ...value.secondary_cta, label: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="Link">
+            <Input
+              value={value.secondary_cta.href}
+              onChange={(e) =>
+                setField("secondary_cta", { ...value.secondary_cta, href: e.target.value })
+              }
+            />
+          </Field>
         </TwoCol>
       </div>
     </EditorShell>
@@ -423,7 +500,9 @@ export function GenericKeyValueEditor({ section }: { section: Section }) {
   const initial = section.draft_content as Record<string, unknown>;
   const { value, setValue } = useDraft(initial, section.section_key);
   const { save, publish } = useSectionMutations(section.section_key);
-  const dirty = !deepEqual(value, section.draft_content) || !deepEqual(section.draft_content, section.published_content);
+  const dirty =
+    !deepEqual(value, section.draft_content) ||
+    !deepEqual(section.draft_content, section.published_content);
   const entries = Object.entries(value);
 
   return (

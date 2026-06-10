@@ -2,16 +2,37 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Search, Plus, Bell, Send, Trash2, Edit3, Copy, Calendar,
-  Mail, Smartphone, MessageSquare, Megaphone, CircleDot,
-  Sparkles, Loader2, X, Save, Filter, Pause, Play,
+  Search,
+  Plus,
+  Bell,
+  Send,
+  Trash2,
+  Edit3,
+  Copy,
+  Calendar,
+  Mail,
+  Smartphone,
+  MessageSquare,
+  Megaphone,
+  CircleDot,
+  Sparkles,
+  Loader2,
+  X,
+  Save,
+  Filter,
+  Pause,
+  Play,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  adminListNotifications, adminNotificationStats,
-  adminCreateNotification, adminUpdateNotification,
-  adminDeleteNotification, adminSendNotification, adminSetNotificationStatus,
+  adminListNotifications,
+  adminNotificationStats,
+  adminCreateNotification,
+  adminUpdateNotification,
+  adminDeleteNotification,
+  adminSendNotification,
+  adminSetNotificationStatus,
 } from "@/lib/admin-notifications.functions";
 import { adminListLevels, adminListSubjects } from "@/lib/admin-mcq.functions";
 import { Button } from "@/components/ui/button";
@@ -20,14 +41,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 type Notification = {
-  id: string; title: string; body: string; link: string | null;
+  id: string;
+  title: string;
+  body: string;
+  link: string | null;
   type: "announcement" | "push" | "email" | "in_app";
   priority: "low" | "medium" | "high" | "critical";
   status: "draft" | "scheduled" | "sent" | "failed" | "paused";
@@ -82,20 +115,24 @@ export function NotificationManagerFlow() {
         qc.invalidateQueries({ queryKey: ["admin-notif-stats"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const stats = useQuery({ queryKey: ["admin-notif-stats"], queryFn: () => statsFn() });
   const list = useQuery({
     queryKey: ["admin-notifications", { search, status, type, page }],
-    queryFn: () => listFn({
-      data: {
-        search: search || undefined,
-        status: status === "all" ? undefined : (status as Notification["status"]),
-        type: type === "all" ? undefined : (type as Notification["type"]),
-        page, pageSize: 25,
-      },
-    }),
+    queryFn: () =>
+      listFn({
+        data: {
+          search: search || undefined,
+          status: status === "all" ? undefined : (status as Notification["status"]),
+          type: type === "all" ? undefined : (type as Notification["type"]),
+          page,
+          pageSize: 25,
+        },
+      }),
   });
 
   const invalidate = () => {
@@ -105,17 +142,26 @@ export function NotificationManagerFlow() {
 
   const delM = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { toast.success("Notification deleted"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Notification deleted");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const sendM = useMutation({
     mutationFn: (id: string) => sendFn({ data: { id } }),
-    onSuccess: (d) => { toast.success(`Sent to ${d.delivered} users`); invalidate(); },
+    onSuccess: (d) => {
+      toast.success(`Sent to ${d.delivered} users`);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const statusM = useMutation({
     mutationFn: (v: { id: string; status: Notification["status"] }) => statusFn({ data: v }),
-    onSuccess: (_d, v) => { toast.success(`Marked ${v.status}`); invalidate(); },
+    onSuccess: (_d, v) => {
+      toast.success(`Marked ${v.status}`);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -137,10 +183,14 @@ export function NotificationManagerFlow() {
               Notification <span className="text-gradient">Manager</span>
             </h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Create, schedule and broadcast announcements. Delivered to students instantly via realtime.
+              Create, schedule and broadcast announcements. Delivered to students instantly via
+              realtime.
             </p>
           </div>
-          <Button className="bg-cta-gradient text-white shadow-glow" onClick={() => setCreating(true)}>
+          <Button
+            className="bg-cta-gradient text-white shadow-glow"
+            onClick={() => setCreating(true)}
+          >
             <Plus className="mr-2 h-4 w-4" /> Create Notification
           </Button>
         </div>
@@ -157,11 +207,16 @@ export function NotificationManagerFlow() {
         ].map(({ l, v, i: Icon, c }) => (
           <div key={l} className="glass shadow-card-soft rounded-2xl p-4">
             <div className="flex items-center justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: `${c}22`, color: c }}>
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-xl"
+                style={{ background: `${c}22`, color: c }}
+              >
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-3 font-display text-2xl font-bold tracking-tight">{v.toLocaleString()}</p>
+            <p className="mt-3 font-display text-2xl font-bold tracking-tight">
+              {v.toLocaleString()}
+            </p>
             <p className="text-xs text-muted-foreground">{l}</p>
           </div>
         ))}
@@ -174,13 +229,24 @@ export function NotificationManagerFlow() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="Search notifications…"
               className="h-9 rounded-xl pl-9"
             />
           </div>
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-32"><SelectValue placeholder="Status" /></SelectTrigger>
+          <Select
+            value={status}
+            onValueChange={(v) => {
+              setStatus(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-32">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any Status</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
@@ -190,8 +256,16 @@ export function NotificationManagerFlow() {
               <SelectItem value="failed">Failed</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={type} onValueChange={(v) => { setType(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-36"><SelectValue placeholder="Type" /></SelectTrigger>
+          <Select
+            value={type}
+            onValueChange={(v) => {
+              setType(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-36">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="announcement">Announcement</SelectItem>
@@ -200,7 +274,10 @@ export function NotificationManagerFlow() {
               <SelectItem value="in_app">In-app</SelectItem>
             </SelectContent>
           </Select>
-          <Badge variant="outline" className="ml-auto text-[10px]"><Filter className="mr-1 h-3 w-3" />{total} total</Badge>
+          <Badge variant="outline" className="ml-auto text-[10px]">
+            <Filter className="mr-1 h-3 w-3" />
+            {total} total
+          </Badge>
         </div>
       </section>
 
@@ -209,10 +286,13 @@ export function NotificationManagerFlow() {
         <div className="flex items-center justify-between border-b border-border/40 px-4 py-3">
           <div>
             <h3 className="font-display text-sm font-bold tracking-tight">All Notifications</h3>
-            <p className="text-[11px] text-muted-foreground">Page {page} of {totalPages} · live sync</p>
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages} · live sync
+            </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-glow" /> Realtime
+            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-glow" />{" "}
+            Realtime
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -228,8 +308,19 @@ export function NotificationManagerFlow() {
             <table className="w-full text-xs">
               <thead className="bg-background/30 text-muted-foreground">
                 <tr className="text-left">
-                  {["Title", "Type", "Audience", "Priority", "Status", "Delivered", "Sent / Scheduled", "Actions"].map((h) => (
-                    <th key={h} className="whitespace-nowrap px-3 py-2 font-medium">{h}</th>
+                  {[
+                    "Title",
+                    "Type",
+                    "Audience",
+                    "Priority",
+                    "Status",
+                    "Delivered",
+                    "Sent / Scheduled",
+                    "Actions",
+                  ].map((h) => (
+                    <th key={h} className="whitespace-nowrap px-3 py-2 font-medium">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -240,48 +331,85 @@ export function NotificationManagerFlow() {
                     <tr key={n.id} className="border-t border-border/30 hover:bg-background/40">
                       <td className="max-w-[260px] px-3 py-3">
                         <p className="truncate text-sm font-medium">{n.title}</p>
-                        {n.body && <p className="line-clamp-1 text-[10px] text-muted-foreground">{n.body}</p>}
+                        {n.body && (
+                          <p className="line-clamp-1 text-[10px] text-muted-foreground">{n.body}</p>
+                        )}
                       </td>
                       <td className="px-3 py-3">
-                        <Badge variant="outline" className="gap-1 text-[10px]"><TI className="h-3 w-3" />{n.type}</Badge>
+                        <Badge variant="outline" className="gap-1 text-[10px]">
+                          <TI className="h-3 w-3" />
+                          {n.type}
+                        </Badge>
                       </td>
                       <td className="px-3 py-3 text-muted-foreground capitalize">
-                        {n.audience === "all" ? "Everyone" :
-                         n.audience === "level" ? `Level: ${n.audience_level ?? "—"}` :
-                         n.audience === "role" ? `Role: ${n.audience_role ?? "—"}` :
-                         n.audience === "users" ? `${n.audience_user_ids.length} users` :
-                         "Subject"}
+                        {n.audience === "all"
+                          ? "Everyone"
+                          : n.audience === "level"
+                            ? `Level: ${n.audience_level ?? "—"}`
+                            : n.audience === "role"
+                              ? `Role: ${n.audience_role ?? "—"}`
+                              : n.audience === "users"
+                                ? `${n.audience_user_ids.length} users`
+                                : "Subject"}
                       </td>
-                      <td className="px-3 py-3 capitalize"><Badge variant="outline" className="text-[10px]">{n.priority}</Badge></td>
+                      <td className="px-3 py-3 capitalize">
+                        <Badge variant="outline" className="text-[10px]">
+                          {n.priority}
+                        </Badge>
+                      </td>
                       <td className="px-3 py-3">
-                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] capitalize ${STATUS_TONE[n.status]}`}>
-                          <CircleDot className="mr-1 h-2 w-2" />{n.status}
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] capitalize ${STATUS_TONE[n.status]}`}
+                        >
+                          <CircleDot className="mr-1 h-2 w-2" />
+                          {n.status}
                         </span>
                       </td>
                       <td className="px-3 py-3 font-mono">{n.delivered_count.toLocaleString()}</td>
                       <td className="px-3 py-3 text-muted-foreground">
-                        {n.sent_at ? new Date(n.sent_at).toLocaleString() :
-                         n.scheduled_at ? `→ ${new Date(n.scheduled_at).toLocaleString()}` : "—"}
+                        {n.sent_at
+                          ? new Date(n.sent_at).toLocaleString()
+                          : n.scheduled_at
+                            ? `→ ${new Date(n.scheduled_at).toLocaleString()}`
+                            : "—"}
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-1">
-                          <IconBtn title="Edit" onClick={() => setEditing(n)}><Edit3 className="h-3.5 w-3.5" /></IconBtn>
+                          <IconBtn title="Edit" onClick={() => setEditing(n)}>
+                            <Edit3 className="h-3.5 w-3.5" />
+                          </IconBtn>
                           {n.status !== "sent" && (
-                            <IconBtn title="Send now" onClick={() => { if (confirm("Send this notification now?")) sendM.mutate(n.id); }}>
+                            <IconBtn
+                              title="Send now"
+                              onClick={() => {
+                                if (confirm("Send this notification now?")) sendM.mutate(n.id);
+                              }}
+                            >
                               <Send className="h-3.5 w-3.5 text-emerald-400" />
                             </IconBtn>
                           )}
                           {n.status === "scheduled" && (
-                            <IconBtn title="Pause" onClick={() => statusM.mutate({ id: n.id, status: "paused" })}>
+                            <IconBtn
+                              title="Pause"
+                              onClick={() => statusM.mutate({ id: n.id, status: "paused" })}
+                            >
                               <Pause className="h-3.5 w-3.5" />
                             </IconBtn>
                           )}
                           {n.status === "paused" && (
-                            <IconBtn title="Resume" onClick={() => statusM.mutate({ id: n.id, status: "scheduled" })}>
+                            <IconBtn
+                              title="Resume"
+                              onClick={() => statusM.mutate({ id: n.id, status: "scheduled" })}
+                            >
                               <Play className="h-3.5 w-3.5" />
                             </IconBtn>
                           )}
-                          <IconBtn title="Delete" onClick={() => { if (confirm("Delete this notification?")) delM.mutate(n.id); }}>
+                          <IconBtn
+                            title="Delete"
+                            onClick={() => {
+                              if (confirm("Delete this notification?")) delM.mutate(n.id);
+                            }}
+                          >
                             <Trash2 className="h-3.5 w-3.5 text-rose-400" />
                           </IconBtn>
                         </div>
@@ -295,10 +423,26 @@ export function NotificationManagerFlow() {
         </div>
         {total > 0 && (
           <div className="flex items-center justify-between border-t border-border/40 px-4 py-3 text-xs text-muted-foreground">
-            <span>Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total}</span>
+            <span>
+              Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total}
+            </span>
             <div className="flex gap-1">
-              <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
-              <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </Button>
             </div>
           </div>
         )}
@@ -307,7 +451,10 @@ export function NotificationManagerFlow() {
       {(creating || editing) && (
         <NotificationEditor
           notif={editing}
-          onClose={() => { setCreating(false); setEditing(null); }}
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
           onSaved={invalidate}
         />
       )}
@@ -315,7 +462,15 @@ export function NotificationManagerFlow() {
   );
 }
 
-function IconBtn({ children, title, onClick }: { children: React.ReactNode; title: string; onClick: () => void }) {
+function IconBtn({
+  children,
+  title,
+  onClick,
+}: {
+  children: React.ReactNode;
+  title: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -332,8 +487,14 @@ function IconBtn({ children, title, onClick }: { children: React.ReactNode; titl
 // Editor
 // ============================================================
 function NotificationEditor({
-  notif, onClose, onSaved,
-}: { notif: Notification | null; onClose: () => void; onSaved: () => void }) {
+  notif,
+  onClose,
+  onSaved,
+}: {
+  notif: Notification | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const createFn = useServerFn(adminCreateNotification);
   const updateFn = useServerFn(adminUpdateNotification);
   const sendFn = useServerFn(adminSendNotification);
@@ -367,7 +528,8 @@ function NotificationEditor({
         audience: form.audience as Notification["audience"],
         audience_level: form.audience === "level" ? form.audience_level || null : null,
         audience_subject_id: form.audience === "subject" ? form.audience_subject_id || null : null,
-        audience_role: form.audience === "role" ? (form.audience_role as Notification["audience_role"]) : null,
+        audience_role:
+          form.audience === "role" ? (form.audience_role as Notification["audience_role"]) : null,
         audience_user_ids: [],
         scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
       };
@@ -380,7 +542,7 @@ function NotificationEditor({
       if (sendNow && id) await sendFn({ data: { id } });
     },
     onSuccess: (_d, sendNow) => {
-      toast.success(sendNow ? "Notification sent" : (notif ? "Saved" : "Created"));
+      toast.success(sendNow ? "Notification sent" : notif ? "Saved" : "Created");
       onSaved();
       onClose();
     },
@@ -397,20 +559,37 @@ function NotificationEditor({
         <div className="grid gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label>Title *</Label>
-            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Audit Mock Test 12 is live" />
+            <Input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="Audit Mock Test 12 is live"
+            />
           </div>
           <div className="md:col-span-2">
             <Label>Body</Label>
-            <Textarea rows={3} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
+            <Textarea
+              rows={3}
+              value={form.body}
+              onChange={(e) => setForm({ ...form, body: e.target.value })}
+            />
           </div>
           <div className="md:col-span-2">
             <Label>Link (optional)</Label>
-            <Input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/mock-test/abc-123" />
+            <Input
+              value={form.link}
+              onChange={(e) => setForm({ ...form, link: e.target.value })}
+              placeholder="/mock-test/abc-123"
+            />
           </div>
           <div>
             <Label>Type</Label>
-            <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.type}
+              onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="in_app">In-app</SelectItem>
                 <SelectItem value="push">Push</SelectItem>
@@ -421,8 +600,13 @@ function NotificationEditor({
           </div>
           <div>
             <Label>Priority</Label>
-            <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as typeof form.priority })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.priority}
+              onValueChange={(v) => setForm({ ...form, priority: v as typeof form.priority })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
@@ -433,8 +617,13 @@ function NotificationEditor({
           </div>
           <div>
             <Label>Audience</Label>
-            <Select value={form.audience} onValueChange={(v) => setForm({ ...form, audience: v as typeof form.audience })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.audience}
+              onValueChange={(v) => setForm({ ...form, audience: v as typeof form.audience })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All users</SelectItem>
                 <SelectItem value="level">By level</SelectItem>
@@ -446,12 +635,21 @@ function NotificationEditor({
           {form.audience === "level" && (
             <div>
               <Label>Level</Label>
-              <Select value={form.audience_level} onValueChange={(v) => setForm({ ...form, audience_level: v })}>
-                <SelectTrigger><SelectValue placeholder="Choose level" /></SelectTrigger>
+              <Select
+                value={form.audience_level}
+                onValueChange={(v) => setForm({ ...form, audience_level: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose level" />
+                </SelectTrigger>
                 <SelectContent>
-                  {((levels.data as Array<{ code: string; name: string }> | undefined) ?? []).map((l) => (
-                    <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
-                  ))}
+                  {((levels.data as Array<{ code: string; name: string }> | undefined) ?? []).map(
+                    (l) => (
+                      <SelectItem key={l.code} value={l.code}>
+                        {l.name}
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -459,12 +657,21 @@ function NotificationEditor({
           {form.audience === "subject" && (
             <div>
               <Label>Subject</Label>
-              <Select value={form.audience_subject_id} onValueChange={(v) => setForm({ ...form, audience_subject_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Choose subject" /></SelectTrigger>
+              <Select
+                value={form.audience_subject_id}
+                onValueChange={(v) => setForm({ ...form, audience_subject_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose subject" />
+                </SelectTrigger>
                 <SelectContent>
-                  {((subjects.data as Array<{ id: string; name: string }> | undefined) ?? []).map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
+                  {((subjects.data as Array<{ id: string; name: string }> | undefined) ?? []).map(
+                    (s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -472,8 +679,15 @@ function NotificationEditor({
           {form.audience === "role" && (
             <div>
               <Label>Role</Label>
-              <Select value={form.audience_role} onValueChange={(v) => setForm({ ...form, audience_role: v as typeof form.audience_role })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.audience_role}
+                onValueChange={(v) =>
+                  setForm({ ...form, audience_role: v as typeof form.audience_role })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="student">Students</SelectItem>
                   <SelectItem value="moderator">Moderators</SelectItem>
@@ -484,16 +698,35 @@ function NotificationEditor({
           )}
           <div className="md:col-span-2">
             <Label>Schedule (optional)</Label>
-            <Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} />
+            <Input
+              type="datetime-local"
+              value={form.scheduled_at}
+              onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })}
+            />
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Cancel</Button>
-          <Button variant="outline" disabled={!form.title.trim() || save.isPending} onClick={() => save.mutate(false)}>
-            {save.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Cancel
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!form.title.trim() || save.isPending}
+            onClick={() => save.mutate(false)}
+          >
+            {save.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-1 h-4 w-4" />
+            )}
             Save {form.scheduled_at ? "& schedule" : "as draft"}
           </Button>
-          <Button className="bg-cta-gradient text-white" disabled={!form.title.trim() || save.isPending} onClick={() => save.mutate(true)}>
+          <Button
+            className="bg-cta-gradient text-white"
+            disabled={!form.title.trim() || save.isPending}
+            onClick={() => save.mutate(true)}
+          >
             <Send className="mr-1 h-4 w-4" /> Send now
           </Button>
         </DialogFooter>

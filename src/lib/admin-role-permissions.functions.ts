@@ -67,7 +67,10 @@ export const toggleRolePermission = createServerFn({ method: "POST" })
     if (data.enabled) {
       const { error } = await sb
         .from("role_permissions")
-        .upsert({ role: data.role, permission: data.permission }, { onConflict: "role,permission" });
+        .upsert(
+          { role: data.role, permission: data.permission },
+          { onConflict: "role,permission" },
+        );
       if (error) throw new Error(error.message);
     } else {
       const { error } = await sb

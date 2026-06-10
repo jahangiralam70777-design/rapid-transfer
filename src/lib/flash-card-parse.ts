@@ -23,8 +23,7 @@ export function parseFlashCardText(input: string): ParsedCard[] {
 
   // ---- Format 1: labelled Q/A ----
   // Split by occurrences of a question label.
-  const labelRe =
-    /(?:^|\n)\s*(?:question|q|front|prompt)\s*[:\-.)]\s*/i;
+  const labelRe = /(?:^|\n)\s*(?:question|q|front|prompt)\s*[:\-.)]\s*/i;
   if (labelRe.test(text)) {
     const blocks = text.split(/(?=(?:^|\n)\s*(?:question|q|front|prompt)\s*[:\-.)])/i);
     for (const raw of blocks) {
@@ -41,7 +40,10 @@ export function parseFlashCardText(input: string): ParsedCard[] {
   }
 
   // ---- Format 2: "Front :: Back" on a single line ----
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.some((l) => l.includes("::"))) {
     for (const l of lines) {
       if (!l.includes("::")) continue;
@@ -55,9 +57,15 @@ export function parseFlashCardText(input: string): ParsedCard[] {
   }
 
   // ---- Format 3: blank-line separated pairs ----
-  const paras = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const paras = text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
   for (const p of paras) {
-    const pl = p.split("\n").map((l) => l.trim()).filter(Boolean);
+    const pl = p
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
     if (pl.length >= 2) {
       const front = clean(pl[0]);
       const back = clean(pl.slice(1).join(" "));
@@ -93,7 +101,6 @@ export async function extractTextFromFile(file: File): Promise<string> {
   }
 
   if (name.endsWith(".docx")) {
-    
     const mammoth = await import("mammoth/mammoth.browser");
     const buf = await file.arrayBuffer();
     const res = await mammoth.extractRawText({ arrayBuffer: buf });

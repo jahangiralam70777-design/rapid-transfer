@@ -38,20 +38,41 @@ function splitBlocks(text: string): string[] {
   if (!t) return [];
   // Split on blank lines first; if that produces only 1 block, also split on the
   // next "Q:"/numbered question marker.
-  const byBlank = t.split(/\n\s*\n+/).map((b) => b.trim()).filter(Boolean);
+  const byBlank = t
+    .split(/\n\s*\n+/)
+    .map((b) => b.trim())
+    .filter(Boolean);
   if (byBlank.length > 1) return byBlank;
   const re = /(?=^\s*(?:q\s*[:.\)\-]|question\s*[:.\)\-]|\d+\s*[.\)]))/gim;
-  return t.split(re).map((b) => b.trim()).filter(Boolean);
+  return t
+    .split(re)
+    .map((b) => b.trim())
+    .filter(Boolean);
 }
 
 function parseBlock(raw: string): { mcq: ParsedMcq | null; reason?: string } {
-  const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.length < 2) return { mcq: null, reason: "Too few lines for a question" };
 
   // True/False detection: leading marker like "TF:", "TRUE_FALSE:", "T/F:"
   const tfHead = lines[0].match(/^\s*(?:tf|true[_\s/-]?false|t\/f)\s*[:.\)\-]\s*(.+)$/i);
   if (tfHead) {
-    const tfQuestion = norm(tfHead[1] + " " + lines.slice(1).filter((l) => !/^\s*(?:answer|ans|correct|explanation|explain|solution|reason|a|b)\s*[:.\)\-]/i.test(l)).join(" "));
+    const tfQuestion = norm(
+      tfHead[1] +
+        " " +
+        lines
+          .slice(1)
+          .filter(
+            (l) =>
+              !/^\s*(?:answer|ans|correct|explanation|explain|solution|reason|a|b)\s*[:.\)\-]/i.test(
+                l,
+              ),
+          )
+          .join(" "),
+    );
     let tfAnswer: string | null = null;
     let tfExp = "";
     for (const line of lines.slice(1)) {
@@ -63,9 +84,12 @@ function parseBlock(raw: string): { mcq: ParsedMcq | null; reason?: string } {
     if (!tfAnswer) return { mcq: null, reason: "True/False missing answer" };
     const a = tfAnswer.toLowerCase().replace(/[^a-z]/g, "");
     const correct: "A" | "B" =
-      a === "true" || a === "t" || a === "a" ? "A" :
-      a === "false" || a === "f" || a === "b" ? "B" : "A";
-    if (!["true","t","a","false","f","b"].includes(a))
+      a === "true" || a === "t" || a === "a"
+        ? "A"
+        : a === "false" || a === "f" || a === "b"
+          ? "B"
+          : "A";
+    if (!["true", "t", "a", "false", "f", "b"].includes(a))
       return { mcq: null, reason: `Could not resolve True/False answer "${tfAnswer}"` };
     return {
       mcq: {
@@ -93,8 +117,8 @@ function parseBlock(raw: string): { mcq: ParsedMcq | null; reason?: string } {
     const optMatch = line.match(/^\s*[(\[]?\s*([A-Da-d])\s*[)\].:\-]\s+(.*)$/);
     const ansMatch = line.match(/^\s*(?:answer|ans|correct(?:\s+answer)?)\s*[:.\-)]\s*(.+)$/i);
     const expMatch = line.match(/^\s*(?:explanation|explain|solution|reason)\s*[:.\-)]\s*(.*)$/i);
-    const qMatch = line.match(/^\s*(?:q|question)\s*[:.)\-]\s*(.+)$/i) ||
-      line.match(/^\s*\d+\s*[.)]\s*(.+)$/);
+    const qMatch =
+      line.match(/^\s*(?:q|question)\s*[:.)\-]\s*(.+)$/i) || line.match(/^\s*\d+\s*[.)]\s*(.+)$/);
 
     if (ansMatch) {
       answer = ansMatch[1].trim();
@@ -122,8 +146,7 @@ function parseBlock(raw: string): { mcq: ParsedMcq | null; reason?: string } {
 
   const question = norm(qParts.join(" "));
   if (!question) return { mcq: null, reason: "Missing question text" };
-  if (!opts.A || !opts.B || !opts.C || !opts.D)
-    return { mcq: null, reason: "Need 4 options A–D" };
+  if (!opts.A || !opts.B || !opts.C || !opts.D) return { mcq: null, reason: "Need 4 options A–D" };
   if (!answer) return { mcq: null, reason: "Missing answer" };
 
   // Resolve answer → letter
@@ -134,7 +157,10 @@ function parseBlock(raw: string): { mcq: ParsedMcq | null; reason?: string } {
   } else {
     const a = norm(answer).toLowerCase();
     for (const k of ["A", "B", "C", "D"] as const) {
-      if (opts[k] && norm(opts[k]!).toLowerCase() === a) { correct = k; break; }
+      if (opts[k] && norm(opts[k]!).toLowerCase() === a) {
+        correct = k;
+        break;
+      }
     }
   }
   if (!correct) return { mcq: null, reason: `Could not resolve answer "${answer}"` };
@@ -167,5 +193,8 @@ export function parseMcqText(input: string): ParsedMcqResult {
 
 /** Normalize a question for duplicate detection. */
 export function fingerprintQuestion(q: string): string {
-  return q.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return q
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }

@@ -30,10 +30,7 @@ export function evaluatePublishGuard(input: PublishGuardInput): PublishGuardResu
     severity = "block";
   }
 
-  if (
-    input.remoteVersionId &&
-    input.remoteVersionId !== input.localVersionId
-  ) {
+  if (input.remoteVersionId && input.remoteVersionId !== input.localVersionId) {
     reasons.push(
       "Another admin has saved a newer draft. Reload before publishing to avoid overwriting their work.",
     );

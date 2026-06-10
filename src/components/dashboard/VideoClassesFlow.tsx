@@ -3,8 +3,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Sparkles, ChevronRight, ChevronLeft, PlayCircle, Clock, Search,
-  Loader2, EyeOff, Video, ExternalLink, Bookmark, Share2,
+  Sparkles,
+  ChevronRight,
+  ChevronLeft,
+  PlayCircle,
+  Clock,
+  Search,
+  Loader2,
+  EyeOff,
+  Video,
+  ExternalLink,
+  Bookmark,
+  Share2,
 } from "lucide-react";
 import { listPublicVideoClasses } from "@/lib/admin-video-classes.functions";
 
@@ -35,8 +45,9 @@ function fmtDuration(s: number) {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
-               : `${m}:${String(sec).padStart(2, "0")}`;
+  return h > 0
+    ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+    : `${m}:${String(sec).padStart(2, "0")}`;
 }
 
 export function VideoClassesFlow() {
@@ -56,8 +67,16 @@ export function VideoClassesFlow() {
     queryFn: async () => {
       const [lvl, subj, chap] = await Promise.all([
         supabase.from("levels").select("code,name").eq("status", "published").order("sort_order"),
-        supabase.from("subjects").select("id,name,level").eq("status", "published").order("sort_order"),
-        supabase.from("chapters").select("id,name,subject_id").eq("status", "published").order("sort_order"),
+        supabase
+          .from("subjects")
+          .select("id,name,level")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("chapters")
+          .select("id,name,subject_id")
+          .eq("status", "published")
+          .order("sort_order"),
       ]);
       return {
         levels: (lvl.data ?? []) as { code: string; name: string }[],
@@ -72,7 +91,10 @@ export function VideoClassesFlow() {
   const allSubjects = tree.data?.subjects ?? [];
   const allChapters = tree.data?.chapters ?? [];
 
-  const subjects = useMemo(() => allSubjects.filter((s) => s.level === level), [allSubjects, level]);
+  const subjects = useMemo(
+    () => allSubjects.filter((s) => s.level === level),
+    [allSubjects, level],
+  );
   const chapters = useMemo(
     () => (subject ? allChapters.filter((c) => c.subject_id === subject.id) : []),
     [allChapters, subject],
@@ -98,11 +120,17 @@ export function VideoClassesFlow() {
       .on("postgres_changes", { event: "*", schema: "public", table: "video_classes" }, () => {
         qc.invalidateQueries({ queryKey: ["public-video-classes"] });
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "video_class_visibility" }, () => {
-        qc.invalidateQueries({ queryKey: ["public-video-classes"] });
-      })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "video_class_visibility" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["public-video-classes"] });
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const classes: VideoClass[] = (classesQuery.data?.rows ?? []) as VideoClass[];
@@ -121,7 +149,11 @@ export function VideoClassesFlow() {
 
   // Set first available as active when entering watch step
   useEffect(() => {
-    if (step === 3 && filtered.length > 0 && (!active || !filtered.find((c) => c.id === active.id))) {
+    if (
+      step === 3 &&
+      filtered.length > 0 &&
+      (!active || !filtered.find((c) => c.id === active.id))
+    ) {
       setActive(filtered[0]);
     }
   }, [step, filtered, active]);
@@ -132,8 +164,12 @@ export function VideoClassesFlow() {
         <Header />
         <div className="glass rounded-3xl p-10 text-center shadow-card-soft">
           <EyeOff className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <h2 className="font-display text-xl font-bold">Video Classes are currently unavailable</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Please check back later — your admin has temporarily hidden this section.</p>
+          <h2 className="font-display text-xl font-bold">
+            Video Classes are currently unavailable
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Please check back later — your admin has temporarily hidden this section.
+          </p>
         </div>
       </div>
     );
@@ -142,15 +178,31 @@ export function VideoClassesFlow() {
   return (
     <div className="space-y-6">
       <Header />
-      <Stepper step={step} level={level} subject={subject?.name ?? ""} chapter={chapter?.name ?? ""} setStep={setStep} />
+      <Stepper
+        step={step}
+        level={level}
+        subject={subject?.name ?? ""}
+        chapter={chapter?.name ?? ""}
+        setStep={setStep}
+      />
 
       {/* Step 0 — Level */}
       {step === 0 && (
         <Grid>
           {allLevels.length === 0 && <EmptyMsg label="No levels available yet" />}
           {allLevels.map((l, i) => (
-            <SelectCard key={l.code} title={l.name} desc="Browse classes for this level" delay={i * 70}
-              onClick={() => { setLevel(l.code); setSubject(null); setChapter(null); setStep(1); }} />
+            <SelectCard
+              key={l.code}
+              title={l.name}
+              desc="Browse classes for this level"
+              delay={i * 70}
+              onClick={() => {
+                setLevel(l.code);
+                setSubject(null);
+                setChapter(null);
+                setStep(1);
+              }}
+            />
           ))}
         </Grid>
       )}
@@ -160,8 +212,17 @@ export function VideoClassesFlow() {
         <Grid cols={3}>
           {subjects.length === 0 && <EmptyMsg label="No subjects in this level yet" />}
           {subjects.map((s, i) => (
-            <SelectCard key={s.id} title={s.name} desc="Tap to view chapters" delay={i * 60}
-              onClick={() => { setSubject({ id: s.id, name: s.name }); setChapter(null); setStep(2); }} />
+            <SelectCard
+              key={s.id}
+              title={s.name}
+              desc="Tap to view chapters"
+              delay={i * 60}
+              onClick={() => {
+                setSubject({ id: s.id, name: s.name });
+                setChapter(null);
+                setStep(2);
+              }}
+            />
           ))}
         </Grid>
       )}
@@ -176,7 +237,10 @@ export function VideoClassesFlow() {
             return (
               <button
                 key={ch.id}
-                onClick={() => { setChapter({ id: ch.id, name: ch.name }); setStep(3); }}
+                onClick={() => {
+                  setChapter({ id: ch.id, name: ch.name });
+                  setStep(3);
+                }}
                 className="glass animate-fade-in flex w-full items-center justify-between gap-3 rounded-3xl p-5 text-left shadow-card-soft transition hover:-translate-y-0.5"
                 style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
               >
@@ -186,7 +250,9 @@ export function VideoClassesFlow() {
                   </div>
                   <div>
                     <p className="font-display text-base font-bold">{ch.name}</p>
-                    <p className="text-xs text-muted-foreground">{count} class{count === 1 ? "" : "es"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {count} class{count === 1 ? "" : "es"}
+                    </p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -211,18 +277,21 @@ export function VideoClassesFlow() {
             </div>
 
             {classesQuery.isLoading && <LoadingMsg />}
-            {!classesQuery.isLoading && filtered.length === 0 && <EmptyMsg label="No classes published for this chapter yet" />}
-
-            {active && (
-              <Player active={active} />
+            {!classesQuery.isLoading && filtered.length === 0 && (
+              <EmptyMsg label="No classes published for this chapter yet" />
             )}
+
+            {active && <Player active={active} />}
           </div>
 
           <aside className="space-y-4">
             <div className="glass rounded-3xl p-4 shadow-card-soft">
               <div className="mb-3 flex items-center justify-between">
                 <p className="font-display text-sm font-bold">Playlist · {chapter?.name}</p>
-                <button onClick={() => setStep(2)} className="rounded-lg p-1 text-muted-foreground hover:text-foreground">
+                <button
+                  onClick={() => setStep(2)}
+                  className="rounded-lg p-1 text-muted-foreground hover:text-foreground"
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
               </div>
@@ -240,14 +309,23 @@ export function VideoClassesFlow() {
                       <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-[var(--neon-purple)]/40 to-[var(--neon-blue)]/40">
                         {c.thumbnail_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={c.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                          <img
+                            src={c.thumbnail_url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
                         ) : null}
                         <PlayCircle className="absolute inset-0 m-auto h-4 w-4 text-white" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium">{i + 1}. {c.title}</p>
-                        <p className={`truncate text-[10px] ${isActive ? "text-white/80" : "text-muted-foreground"}`}>
-                          <Clock className="mr-1 inline h-3 w-3" />{fmtDuration(c.duration_seconds)}
+                        <p className="truncate text-xs font-medium">
+                          {i + 1}. {c.title}
+                        </p>
+                        <p
+                          className={`truncate text-[10px] ${isActive ? "text-white/80" : "text-muted-foreground"}`}
+                        >
+                          <Clock className="mr-1 inline h-3 w-3" />
+                          {fmtDuration(c.duration_seconds)}
                           {c.instructor ? ` · ${c.instructor}` : ""}
                         </p>
                       </div>
@@ -276,14 +354,28 @@ function Header() {
           <h1 className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             Smart <span className="text-gradient">Video Classes</span>
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Chapter-wise premium video lessons, live from your admin.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Chapter-wise premium video lessons, live from your admin.
+          </p>
         </div>
       </div>
     </div>
   );
 }
 
-function Stepper({ step, level, subject, chapter, setStep }: { step: Step; level: string; subject: string; chapter: string; setStep: (s: Step) => void }) {
+function Stepper({
+  step,
+  level,
+  subject,
+  chapter,
+  setStep,
+}: {
+  step: Step;
+  level: string;
+  subject: string;
+  chapter: string;
+  setStep: (s: Step) => void;
+}) {
   const items = [
     { i: 0 as Step, l: "Level", v: level || "—" },
     { i: 1 as Step, l: "Subject", v: subject || "—" },
@@ -297,17 +389,29 @@ function Stepper({ step, level, subject, chapter, setStep }: { step: Step; level
         const done = step > it.i;
         return (
           <div key={it.l} className="flex items-center gap-2">
-            <button onClick={() => (done || active) && setStep(it.i)}
+            <button
+              onClick={() => (done || active) && setStep(it.i)}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
-                active ? "bg-cta-gradient text-white shadow-glow"
-                  : done ? "bg-muted/60 text-foreground hover:bg-muted" : "text-muted-foreground"
-              }`}>
-              <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                active ? "bg-white/20" : done ? "bg-emerald-500/20 text-emerald-400" : "bg-muted"
-              }`}>{done ? "✓" : it.i + 1}</span>
-              <span>{it.l}:</span><span className="opacity-80">{it.v}</span>
+                active
+                  ? "bg-cta-gradient text-white shadow-glow"
+                  : done
+                    ? "bg-muted/60 text-foreground hover:bg-muted"
+                    : "text-muted-foreground"
+              }`}
+            >
+              <span
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  active ? "bg-white/20" : done ? "bg-emerald-500/20 text-emerald-400" : "bg-muted"
+                }`}
+              >
+                {done ? "✓" : it.i + 1}
+              </span>
+              <span>{it.l}:</span>
+              <span className="opacity-80">{it.v}</span>
             </button>
-            {idx < items.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+            {idx < items.length - 1 && (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
           </div>
         );
       })}
@@ -316,13 +420,30 @@ function Stepper({ step, level, subject, chapter, setStep }: { step: Step; level
 }
 
 function Grid({ children, cols = 3 }: { children: React.ReactNode; cols?: number }) {
-  return <div className={`grid gap-4 sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : ""}`}>{children}</div>;
+  return (
+    <div className={`grid gap-4 sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : ""}`}>
+      {children}
+    </div>
+  );
 }
 
-function SelectCard({ title, desc, onClick, delay }: { title: string; desc: string; onClick: () => void; delay: number }) {
+function SelectCard({
+  title,
+  desc,
+  onClick,
+  delay,
+}: {
+  title: string;
+  desc: string;
+  onClick: () => void;
+  delay: number;
+}) {
   return (
-    <button onClick={onClick} className="group relative animate-fade-in text-left"
-      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}>
+    <button
+      onClick={onClick}
+      className="group relative animate-fade-in text-left"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+    >
       <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] opacity-0 blur transition-opacity duration-300 group-hover:opacity-60" />
       <div className="glass relative h-full overflow-hidden rounded-3xl p-6 shadow-card-soft transition-transform duration-300 group-hover:-translate-y-1">
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-cta-gradient text-white shadow-glow">
@@ -385,11 +506,17 @@ function Player({ active }: { active: VideoClass }) {
           <p className="text-xs text-muted-foreground">
             {active.instructor || "—"} · {fmtDuration(active.duration_seconds)}
           </p>
-          {active.description && <p className="mt-3 text-sm text-muted-foreground">{active.description}</p>}
+          {active.description && (
+            <p className="mt-3 text-sm text-muted-foreground">{active.description}</p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             {active.youtube_url && (
-              <a href={active.youtube_url} target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-background/50 px-3 py-1.5 text-xs hover:bg-white/5">
+              <a
+                href={active.youtube_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-background/50 px-3 py-1.5 text-xs hover:bg-white/5"
+              >
                 <ExternalLink className="h-3 w-3" /> Open on YouTube
               </a>
             )}
@@ -398,7 +525,8 @@ function Player({ active }: { active: VideoClass }) {
             </button>
             <button
               onClick={() => {
-                if (navigator.share && active.youtube_url) navigator.share({ title: active.title, url: active.youtube_url }).catch(() => {});
+                if (navigator.share && active.youtube_url)
+                  navigator.share({ title: active.title, url: active.youtube_url }).catch(() => {});
                 else if (active.youtube_url) navigator.clipboard.writeText(active.youtube_url);
               }}
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-background/50 px-3 py-1.5 text-xs hover:bg-white/5"
@@ -406,7 +534,12 @@ function Player({ active }: { active: VideoClass }) {
               <Share2 className="h-3 w-3" /> Share
             </button>
             {(active.tags ?? []).slice(0, 4).map((t) => (
-              <span key={t} className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">#{t}</span>
+              <span
+                key={t}
+                className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground"
+              >
+                #{t}
+              </span>
             ))}
           </div>
         </div>

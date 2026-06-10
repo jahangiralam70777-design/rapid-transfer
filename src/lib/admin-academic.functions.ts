@@ -4,11 +4,22 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertPermission } from "@/lib/admin-permissions";
 
 const statusEnum = z.enum(["draft", "published", "archived"]);
-const levelCode = z.string().trim().min(1).max(40).regex(/^[a-z0-9_-]+$/);
+const levelCode = z
+  .string()
+  .trim()
+  .min(1)
+  .max(40)
+  .regex(/^[a-z0-9_-]+$/);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function slugify(s: string) {
-  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || `item-${Date.now()}`;
+  return (
+    s
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || `item-${Date.now()}`
+  );
 }
 
 async function fetchAllRows<T>(
@@ -70,13 +81,39 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
     await assertPermission(context.supabase, context.userId, "edit_academic_structure");
     const sb = context.supabase;
     type Mcq = { id: string; chapter_id: string | null; status: string };
-    type Qz = { id: string; subject_id: string | null; chapter_id: string | null; kind: string | null; status: string };
+    type Qz = {
+      id: string;
+      subject_id: string | null;
+      chapter_id: string | null;
+      kind: string | null;
+      status: string;
+    };
     type QuizQuestion = { quiz_id: string; mcq_id: string };
 
-    const [levelsRes, subjectsRes, chaptersRes, mcqs, quizzes, quizQuestions, mcqTotalRes, subjectsTotalRes, chaptersTotalRes, quizTotalRes, mockTotalRes, notesTotalRes, flashCardsTotalRes] = await Promise.all([
+    const [
+      levelsRes,
+      subjectsRes,
+      chaptersRes,
+      mcqs,
+      quizzes,
+      quizQuestions,
+      mcqTotalRes,
+      subjectsTotalRes,
+      chaptersTotalRes,
+      quizTotalRes,
+      mockTotalRes,
+      notesTotalRes,
+      flashCardsTotalRes,
+    ] = await Promise.all([
       sb.from("levels").select("*").order("sort_order", { ascending: true }),
-      sb.from("subjects").select("id,name,slug,level,color,icon,description,status,sort_order,updated_at").order("sort_order", { ascending: true }),
-      sb.from("chapters").select("id,name,slug,subject_id,description,status,sort_order,updated_at").order("sort_order", { ascending: true }),
+      sb
+        .from("subjects")
+        .select("id,name,slug,level,color,icon,description,status,sort_order,updated_at")
+        .order("sort_order", { ascending: true }),
+      sb
+        .from("chapters")
+        .select("id,name,slug,subject_id,description,status,sort_order,updated_at")
+        .order("sort_order", { ascending: true }),
       fetchAllRows<Mcq>(sb, "mcqs", "id,chapter_id,status"),
       fetchAllRows<Qz>(sb, "quizzes", "id,subject_id,chapter_id,kind,status"),
       fetchAllRows<QuizQuestion>(sb, "quiz_questions", "quiz_id,mcq_id"),
@@ -102,7 +139,9 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
 
     const subjectsData = subjectsRes.data ?? [];
     const chaptersData = chaptersRes.data ?? [];
-    const chapterToSubject = new Map(chaptersData.map((chapter) => [chapter.id, chapter.subject_id]));
+    const chapterToSubject = new Map(
+      chaptersData.map((chapter) => [chapter.id, chapter.subject_id]),
+    );
 
     const mcqByChapter = new Map<string, number>();
     const mcqChapterById = new Map<string, string>();
@@ -116,7 +155,8 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
     for (const link of quizQuestions) {
       const chapterId = mcqChapterById.get(link.mcq_id);
       if (!chapterId) continue;
-      if (!quizLinkedChapters.has(link.quiz_id)) quizLinkedChapters.set(link.quiz_id, new Set<string>());
+      if (!quizLinkedChapters.has(link.quiz_id))
+        quizLinkedChapters.set(link.quiz_id, new Set<string>());
       quizLinkedChapters.get(link.quiz_id)!.add(chapterId);
     }
 
@@ -142,7 +182,10 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
       }
     }
 
-    const derivedMcqTotal = Array.from(mcqByChapter.values()).reduce((sum, value) => sum + value, 0);
+    const derivedMcqTotal = Array.from(mcqByChapter.values()).reduce(
+      (sum, value) => sum + value,
+      0,
+    );
     const actualMcqTotal = mcqTotalRes.count ?? 0;
     const actualSubjects = subjectsTotalRes.count ?? subjectsData.length;
     const actualChapters = chaptersTotalRes.count ?? chaptersData.length;
@@ -170,7 +213,13 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
         mocks: actualMocks,
         notes: actualNotes,
         flashCards: actualFlashCards,
-        totalContent: actualMcqTotal + actualChapters + actualQuizzes + actualMocks + actualNotes + actualFlashCards,
+        totalContent:
+          actualMcqTotal +
+          actualChapters +
+          actualQuizzes +
+          actualMocks +
+          actualNotes +
+          actualFlashCards,
       },
       validation: {
         checkedAt: new Date().toISOString(),
@@ -180,7 +229,13 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
           mcqs: actualMcqTotal,
           quizzes: actualQuizzes,
           mocks: actualMocks,
-          totalContent: actualMcqTotal + actualChapters + actualQuizzes + actualMocks + actualNotes + actualFlashCards,
+          totalContent:
+            actualMcqTotal +
+            actualChapters +
+            actualQuizzes +
+            actualMocks +
+            actualNotes +
+            actualFlashCards,
         },
         derived: {
           subjects: subjectsData.length,
@@ -193,8 +248,16 @@ export const adminGetAcademicTree = createServerFn({ method: "POST" })
           mcqs: actualMcqTotal - derivedMcqTotal,
         },
         orphanLinkedContent: {
-          quizzes: quizzes.filter((quiz) => quiz.kind !== "mock" && !(quiz.chapter_id || quiz.subject_id || (quizLinkedChapters.get(quiz.id)?.size ?? 0))).length,
-          mocks: quizzes.filter((quiz) => quiz.kind === "mock" && !(quiz.chapter_id || quiz.subject_id || (quizLinkedChapters.get(quiz.id)?.size ?? 0))).length,
+          quizzes: quizzes.filter(
+            (quiz) =>
+              quiz.kind !== "mock" &&
+              !(quiz.chapter_id || quiz.subject_id || (quizLinkedChapters.get(quiz.id)?.size ?? 0)),
+          ).length,
+          mocks: quizzes.filter(
+            (quiz) =>
+              quiz.kind === "mock" &&
+              !(quiz.chapter_id || quiz.subject_id || (quizLinkedChapters.get(quiz.id)?.size ?? 0)),
+          ).length,
         },
       },
     };
@@ -246,7 +309,8 @@ export const adminDeleteLevel = createServerFn({ method: "POST" })
       .select("id", { count: "exact", head: true })
       .eq("level", data.code);
     if (ce) throw ce;
-    if ((count ?? 0) > 0) throw new Error(`Cannot delete level: ${count} subject(s) still assigned`);
+    if ((count ?? 0) > 0)
+      throw new Error(`Cannot delete level: ${count} subject(s) still assigned`);
     const { error } = await context.supabase.from("levels").delete().eq("code", data.code);
     if (error) throw error;
     return { ok: true };
@@ -419,21 +483,35 @@ export const adminAcademicAnalytics = createServerFn({ method: "POST" })
 
     const [events, recentRes, notesRes, flashRes, lastRes] = await Promise.all([
       fetchAllWithQuery<Ev>((from, to) =>
-        sb.from("activity_events")
+        sb
+          .from("activity_events")
           .select("module, target_kind, target_id, user_id, created_at")
           .gte("created_at", since)
           .range(from, to),
       ),
-      sb.from("activity_events")
-        .select("id, event_type, element_label, module, target_kind, target_id, user_id, created_at")
+      sb
+        .from("activity_events")
+        .select(
+          "id, event_type, element_label, module, target_kind, target_id, user_id, created_at",
+        )
         .in("module", ["academic", "mcq", "quiz", "mock", "flash_cards", "short_notes"])
         .order("created_at", { ascending: false })
         .limit(8),
       sb.from("short_notes").select("id", { count: "exact", head: true }),
       sb.from("flash_cards").select("id", { count: "exact", head: true }),
-      sb.from("activity_events").select("created_at").order("created_at", { ascending: false }).limit(1),
+      sb
+        .from("activity_events")
+        .select("created_at")
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
-    type Ev = { module: string | null; target_kind: string | null; target_id: string | null; user_id: string | null; created_at: string };
+    type Ev = {
+      module: string | null;
+      target_kind: string | null;
+      target_id: string | null;
+      user_id: string | null;
+      created_at: string;
+    };
 
     const subjViews = new Map<string, number>();
     const subjUsers = new Map<string, Set<string>>();
@@ -450,7 +528,10 @@ export const adminAcademicAnalytics = createServerFn({ method: "POST" })
       const day = e.created_at.slice(0, 10);
       if (!dayBuckets.has(day)) dayBuckets.set(day, { views: 0, users: new Set(), attempts: 0 });
       const bucket = dayBuckets.get(day)!;
-      if (e.user_id) { allUsers.add(e.user_id); bucket.users.add(e.user_id); }
+      if (e.user_id) {
+        allUsers.add(e.user_id);
+        bucket.users.add(e.user_id);
+      }
 
       const isAttempt = e.module === "mcq" || e.module === "quiz" || e.module === "mock";
       if (isAttempt) {
@@ -484,13 +565,28 @@ export const adminAcademicAnalytics = createServerFn({ method: "POST" })
     for (let i = rangeDays - 1; i >= 0; i--) {
       const d = new Date(now - i * 24 * 3600 * 1000).toISOString().slice(0, 10);
       const b = dayBuckets.get(d);
-      series.push({ day: d, views: b?.views ?? 0, attempts: b?.attempts ?? 0, users: b?.users.size ?? 0 });
+      series.push({
+        day: d,
+        views: b?.views ?? 0,
+        attempts: b?.attempts ?? 0,
+        users: b?.users.size ?? 0,
+      });
     }
 
     const subjects: Record<string, { views: number; uniqueUsers: number; attempts: number }> = {};
-    for (const [k, v] of subjViews) subjects[k] = { views: v, uniqueUsers: subjUsers.get(k)?.size ?? 0, attempts: subjAttempts.get(k) ?? 0 };
+    for (const [k, v] of subjViews)
+      subjects[k] = {
+        views: v,
+        uniqueUsers: subjUsers.get(k)?.size ?? 0,
+        attempts: subjAttempts.get(k) ?? 0,
+      };
     const chapters: Record<string, { views: number; uniqueUsers: number; attempts: number }> = {};
-    for (const [k, v] of chapViews) chapters[k] = { views: v, uniqueUsers: chapUsers.get(k)?.size ?? 0, attempts: chapAttempts.get(k) ?? 0 };
+    for (const [k, v] of chapViews)
+      chapters[k] = {
+        views: v,
+        uniqueUsers: chapUsers.get(k)?.size ?? 0,
+        attempts: chapAttempts.get(k) ?? 0,
+      };
 
     return {
       totals: {

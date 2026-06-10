@@ -19,7 +19,10 @@ export const Route = createFileRoute("/reset-password")({
       { title: "Create New Password · CA Aspire BD" },
       { name: "description", content: "Set a new password and secure your CA Aspire BD account." },
       { property: "og:title", content: "Create New Password · CA Aspire BD" },
-      { property: "og:description", content: "Strong password requirements with real-time strength feedback." },
+      {
+        property: "og:description",
+        content: "Strong password requirements with real-time strength feedback.",
+      },
     ],
   }),
 });
@@ -52,7 +55,9 @@ function ResetPassword() {
       <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] text-white shadow-[0_0_30px_var(--neon-purple)]">
         <KeyRound className="h-6 w-6" />
       </div>
-      <h2 className="text-center font-display text-3xl font-bold tracking-tight">Create new password</h2>
+      <h2 className="text-center font-display text-3xl font-bold tracking-tight">
+        Create new password
+      </h2>
       <p className="mt-1.5 text-center text-sm text-muted-foreground">
         Choose a strong password to re-secure your account.
       </p>

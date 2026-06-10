@@ -23,7 +23,6 @@ const HERO_DEFAULTS: HeroContent = {
   secondary_cta: { label: "See Inside", href: "/dashboard" },
 };
 
-
 export function Hero() {
   const hero = useSection<HeroContent>("hero", HERO_DEFAULTS);
   const stats = usePlatformStats();
@@ -73,11 +72,12 @@ export function Hero() {
           <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-border pt-6">
             {stats.slice(0, 3).map((s) => (
               <div key={s.key}>
-                <p className="font-display text-2xl font-bold text-gradient">{formatStatValue(s)}</p>
+                <p className="font-display text-2xl font-bold text-gradient">
+                  {formatStatValue(s)}
+                </p>
                 <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             ))}
-
           </div>
         </div>
 

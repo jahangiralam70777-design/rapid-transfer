@@ -1,4 +1,10 @@
-import { type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, forwardRef, useState } from "react";
+import {
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  forwardRef,
+  useState,
+} from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
@@ -9,26 +15,27 @@ export function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
-export const NeoInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { icon?: ReactNode }>(
-  function NeoInput({ icon, className = "", ...props }, ref) {
-    return (
-      <div className="group relative">
-        {icon && (
-          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-[var(--neon-purple)]">
-            {icon}
-          </span>
-        )}
-        <input
-          ref={ref}
-          {...props}
-          className={`h-11 w-full rounded-xl border border-border bg-background/60 px-4 ${
-            icon ? "pl-10" : ""
-          } text-sm placeholder:text-muted-foreground/70 outline-none transition focus:border-[var(--neon-purple)] focus:shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon-purple)_18%,transparent)] ${className}`}
-        />
-      </div>
-    );
-  }
-);
+export const NeoInput = forwardRef<
+  HTMLInputElement,
+  InputHTMLAttributes<HTMLInputElement> & { icon?: ReactNode }
+>(function NeoInput({ icon, className = "", ...props }, ref) {
+  return (
+    <div className="group relative">
+      {icon && (
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-[var(--neon-purple)]">
+          {icon}
+        </span>
+      )}
+      <input
+        ref={ref}
+        {...props}
+        className={`h-11 w-full rounded-xl border border-border bg-background/60 px-4 ${
+          icon ? "pl-10" : ""
+        } text-sm placeholder:text-muted-foreground/70 outline-none transition focus:border-[var(--neon-purple)] focus:shadow-[0_0_0_4px_color-mix(in_oklab,var(--neon-purple)_18%,transparent)] ${className}`}
+      />
+    </div>
+  );
+});
 
 export function PasswordInput({
   placeholder = "••••••••",
@@ -176,9 +183,7 @@ export function Requirements({ value }: { value: string }) {
         <li key={r.label} className="flex items-center gap-1.5">
           <span
             className={`grid h-4 w-4 place-items-center rounded-full ${
-              r.ok
-                ? "bg-emerald-500/15 text-emerald-400"
-                : "bg-muted text-muted-foreground"
+              r.ok ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground"
             }`}
           >
             {r.ok ? <Check className="h-2.5 w-2.5" /> : <X className="h-2.5 w-2.5" />}
@@ -189,4 +194,3 @@ export function Requirements({ value }: { value: string }) {
     </ul>
   );
 }
-

@@ -3,30 +3,83 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Search, Plus, Trash2, Edit3, Eye, EyeOff, Send, Copy, BarChart3, Loader2,
-  CalendarClock, Trophy, Users, Timer, Target, CheckCircle2, PlayCircle,
-  Rocket, Save, Layers, BookOpen, Sparkles, ChevronRight, X, CircleDot,
-  Download, ArrowUpDown, RefreshCw, Upload, FileText, Filter, TrendingUp,
-  TrendingDown, Brain, Activity, Wand2, Zap, Radio,
+  Search,
+  Plus,
+  Trash2,
+  Edit3,
+  Eye,
+  EyeOff,
+  Send,
+  Copy,
+  BarChart3,
+  Loader2,
+  CalendarClock,
+  Trophy,
+  Users,
+  Timer,
+  Target,
+  CheckCircle2,
+  PlayCircle,
+  Rocket,
+  Save,
+  Layers,
+  BookOpen,
+  Sparkles,
+  ChevronRight,
+  X,
+  CircleDot,
+  Download,
+  ArrowUpDown,
+  RefreshCw,
+  Upload,
+  FileText,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  Brain,
+  Activity,
+  Wand2,
+  Zap,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
 } from "@/components/ui/table";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useLevels } from "@/hooks/use-levels";
@@ -77,10 +130,14 @@ type Mock = {
 
 function statusTone(s: string) {
   switch (s) {
-    case "published": return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-    case "draft": return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-    case "archived": return "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
-    default: return "bg-muted text-foreground";
+    case "published":
+      return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+    case "draft":
+      return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    case "archived":
+      return "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
+    default:
+      return "bg-muted text-foreground";
   }
 }
 
@@ -143,20 +200,35 @@ export function MockTestManagerFlow() {
   });
 
   const mocksQ = useQuery({
-    queryKey: ["admin-mocks", { deferredSearch, filterStatus, filterLevel, filterSubject, filterMockType, filterDate, sortBy, sortDir, page }],
-    queryFn: () => listMocksFn({
-      data: {
-        search: deferredSearch || undefined,
-        status: (filterStatus || undefined) as Status | undefined,
-        level: (filterLevel || undefined) as Level | undefined,
-        subjectId: filterSubject || undefined,
-        mockType: filterMockType,
-        date: filterDate,
+    queryKey: [
+      "admin-mocks",
+      {
+        deferredSearch,
+        filterStatus,
+        filterLevel,
+        filterSubject,
+        filterMockType,
+        filterDate,
         sortBy,
         sortDir,
-        page, pageSize,
+        page,
       },
-    }),
+    ],
+    queryFn: () =>
+      listMocksFn({
+        data: {
+          search: deferredSearch || undefined,
+          status: (filterStatus || undefined) as Status | undefined,
+          level: (filterLevel || undefined) as Level | undefined,
+          subjectId: filterSubject || undefined,
+          mockType: filterMockType,
+          date: filterDate,
+          sortBy,
+          sortDir,
+          page,
+          pageSize,
+        },
+      }),
     placeholderData: (previous) => previous,
   });
 
@@ -185,9 +257,13 @@ export function MockTestManagerFlow() {
         const record = (payload.new || payload.old) as { kind?: string } | null;
         if (!record || record.kind === "mock") invalidate();
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "quiz_questions" }, () => invalidate())
+      .on("postgres_changes", { event: "*", schema: "public", table: "quiz_questions" }, () =>
+        invalidate(),
+      )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [qc]);
 
   useEffect(() => {
@@ -198,9 +274,17 @@ export function MockTestManagerFlow() {
     mutationFn: (id: string) => deleteMockFn({ data: { id } }),
     onMutate: async (id) => {
       await qc.cancelQueries({ queryKey: ["admin-mocks"] });
-      qc.setQueriesData<{ rows: Mock[]; count: number }>({ queryKey: ["admin-mocks"] }, (old) => old ? ({ ...old, rows: old.rows.filter((r) => r.id !== id), count: Math.max(0, old.count - 1) }) : old);
+      qc.setQueriesData<{ rows: Mock[]; count: number }>({ queryKey: ["admin-mocks"] }, (old) =>
+        old
+          ? { ...old, rows: old.rows.filter((r) => r.id !== id), count: Math.max(0, old.count - 1) }
+          : old,
+      );
     },
-    onSuccess: () => { toast.success("Mock test deleted"); setDeleting(null); invalidate(); },
+    onSuccess: () => {
+      toast.success("Mock test deleted");
+      setDeleting(null);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -208,15 +292,26 @@ export function MockTestManagerFlow() {
     mutationFn: (vars: { id: string; status: Status }) => setStatusFn({ data: vars }),
     onMutate: async (v) => {
       await qc.cancelQueries({ queryKey: ["admin-mocks"] });
-      qc.setQueriesData<{ rows: Mock[]; count: number }>({ queryKey: ["admin-mocks"] }, (old) => old ? ({ ...old, rows: old.rows.map((r) => r.id === v.id ? { ...r, status: v.status } : r) }) : old);
+      qc.setQueriesData<{ rows: Mock[]; count: number }>({ queryKey: ["admin-mocks"] }, (old) =>
+        old
+          ? { ...old, rows: old.rows.map((r) => (r.id === v.id ? { ...r, status: v.status } : r)) }
+          : old,
+      );
     },
-    onSuccess: (_d, v) => { toast.success(`Mock ${v.status}`); setPublishing(null); invalidate(); },
+    onSuccess: (_d, v) => {
+      toast.success(`Mock ${v.status}`);
+      setPublishing(null);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const dupMut = useMutation({
     mutationFn: (id: string) => duplicateFn({ data: { id } }),
-    onSuccess: () => { toast.success("Mock duplicated"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Mock duplicated");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -242,10 +337,11 @@ export function MockTestManagerFlow() {
     onError: (e: Error) => toast.error(e.message || "Auto-generation failed"),
   });
 
-
   const [editing, setEditing] = useState<Mock | null>(null);
   const [creating, setCreating] = useState(false);
-  const [builderPreset, setBuilderPreset] = useState<"blank" | "generate" | "full" | "chapter" | "level">("blank");
+  const [builderPreset, setBuilderPreset] = useState<
+    "blank" | "generate" | "full" | "chapter" | "level"
+  >("blank");
   const [viewing, setViewing] = useState<Mock | null>(null);
   const [analyticsFor, setAnalyticsFor] = useState<Mock | null>(null);
   const [deleting, setDeleting] = useState<Mock | null>(null);
@@ -257,7 +353,6 @@ export function MockTestManagerFlow() {
     setEditing(null);
     setCreating(true);
   }
-
 
   // KPIs use full-dataset counts from the server (not just the current page).
   const stats = useMemo(() => {
@@ -299,11 +394,12 @@ export function MockTestManagerFlow() {
     enabled: !!qgSubjectId,
   });
   // Reset chapter when subject/level changes.
-  useEffect(() => { setQgChapterId(""); }, [qgSubjectId, qgLevel]);
-  useEffect(() => { setQgSubjectId(""); }, [qgLevel]);
-
-
-
+  useEffect(() => {
+    setQgChapterId("");
+  }, [qgSubjectId, qgLevel]);
+  useEffect(() => {
+    setQgSubjectId("");
+  }, [qgLevel]);
 
   return (
     <div className="space-y-4 p-4 md:p-6">
@@ -333,21 +429,40 @@ export function MockTestManagerFlow() {
             >
               <Plus className="h-4 w-4" /> Create Mock Test
             </Button>
-            <Button variant="outline" onClick={() => openBuilder("generate")} className="h-10 rounded-xl border-white/10 bg-background/40">
+            <Button
+              variant="outline"
+              onClick={() => openBuilder("generate")}
+              className="h-10 rounded-xl border-white/10 bg-background/40"
+            >
               <Sparkles className="h-4 w-4" /> Generate from MCQs
             </Button>
-            <Button variant="outline" onClick={() => openBuilder("chapter")} className="h-10 rounded-xl border-white/10 bg-background/40">
+            <Button
+              variant="outline"
+              onClick={() => openBuilder("chapter")}
+              className="h-10 rounded-xl border-white/10 bg-background/40"
+            >
               <Layers className="h-4 w-4" /> Chapter Wise Mock
             </Button>
-            <Button variant="outline" onClick={() => openBuilder("level")} className="h-10 rounded-xl border-white/10 bg-background/40">
+            <Button
+              variant="outline"
+              onClick={() => openBuilder("level")}
+              className="h-10 rounded-xl border-white/10 bg-background/40"
+            >
               <Trophy className="h-4 w-4" /> Level Wise Mock
             </Button>
-            <Button variant="outline" onClick={() => openBuilder("full")} className="h-10 rounded-xl border-white/10 bg-background/40">
+            <Button
+              variant="outline"
+              onClick={() => openBuilder("full")}
+              className="h-10 rounded-xl border-white/10 bg-background/40"
+            >
               <BookOpen className="h-4 w-4" /> Full Subject Mock
             </Button>
             <Button
               variant="outline"
-              onClick={() => { downloadCsv("mock-tests.csv", rows); toast.success("Export ready"); }}
+              onClick={() => {
+                downloadCsv("mock-tests.csv", rows);
+                toast.success("Export ready");
+              }}
               className="col-span-2 h-10 rounded-xl border-white/10 bg-background/40"
             >
               <Download className="h-4 w-4" /> Export Mock
@@ -358,14 +473,64 @@ export function MockTestManagerFlow() {
 
       {/* KPI Stats — premium 6-card grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {([
-          { k: "total",     l: "Total Mocks", v: stats.total,     i: Trophy,         c: "var(--neon-purple)", d: "+12.5%", up: true },
-          { k: "published", l: "Published",   v: stats.published, i: CheckCircle2,   c: "#10b981",            d: "+18.6%", up: true },
-          { k: "drafts",    l: "Drafts",      v: stats.drafts,    i: FileText,       c: "#f43f5e",            d: "-4.3%",  up: false },
-          { k: "scheduled", l: "Scheduled",   v: stats.scheduled, i: CalendarClock,  c: "var(--neon-blue)",   d: "+6.2%",  up: true },
-          { k: "live",      l: "Live Now",    v: stats.live,      i: Radio,          c: "#22c55e",            d: "Active", up: true },
-          { k: "archived",  l: "Archived",    v: stats.archived,  i: Save,           c: "#94a3b8",            d: "Stable", up: true },
-        ] as const).map((s) => (
+        {(
+          [
+            {
+              k: "total",
+              l: "Total Mocks",
+              v: stats.total,
+              i: Trophy,
+              c: "var(--neon-purple)",
+              d: "+12.5%",
+              up: true,
+            },
+            {
+              k: "published",
+              l: "Published",
+              v: stats.published,
+              i: CheckCircle2,
+              c: "#10b981",
+              d: "+18.6%",
+              up: true,
+            },
+            {
+              k: "drafts",
+              l: "Drafts",
+              v: stats.drafts,
+              i: FileText,
+              c: "#f43f5e",
+              d: "-4.3%",
+              up: false,
+            },
+            {
+              k: "scheduled",
+              l: "Scheduled",
+              v: stats.scheduled,
+              i: CalendarClock,
+              c: "var(--neon-blue)",
+              d: "+6.2%",
+              up: true,
+            },
+            {
+              k: "live",
+              l: "Live Now",
+              v: stats.live,
+              i: Radio,
+              c: "#22c55e",
+              d: "Active",
+              up: true,
+            },
+            {
+              k: "archived",
+              l: "Archived",
+              v: stats.archived,
+              i: Save,
+              c: "#94a3b8",
+              d: "Stable",
+              up: true,
+            },
+          ] as const
+        ).map((s) => (
           <button
             key={s.l}
             type="button"
@@ -378,9 +543,13 @@ export function MockTestManagerFlow() {
             >
               <s.i className="h-4.5 w-4.5" style={{ color: s.c }} />
             </div>
-            <p className="mt-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{s.l}</p>
+            <p className="mt-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              {s.l}
+            </p>
             <p className="font-display text-2xl font-bold tracking-tight">{s.v}</p>
-            <div className={`mt-1 inline-flex items-center gap-1 text-[10px] font-semibold ${s.up ? "text-emerald-400" : "text-rose-400"}`}>
+            <div
+              className={`mt-1 inline-flex items-center gap-1 text-[10px] font-semibold ${s.up ? "text-emerald-400" : "text-rose-400"}`}
+            >
               {s.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               {s.d}
             </div>
@@ -399,7 +568,9 @@ export function MockTestManagerFlow() {
           </div>
           <div>
             <h3 className="font-display text-lg font-bold">Quick Create &amp; Generator</h3>
-            <p className="text-xs text-muted-foreground">Create mock tests in seconds using AI or select from MCQ Bank.</p>
+            <p className="text-xs text-muted-foreground">
+              Create mock tests in seconds using AI or select from MCQ Bank.
+            </p>
           </div>
         </div>
 
@@ -420,7 +591,11 @@ export function MockTestManagerFlow() {
               }`}
             >
               <t.i className="h-3.5 w-3.5" /> {t.l}
-              {t.badge && <Badge className="ml-1 h-4 border-0 bg-amber-500/20 px-1.5 py-0 text-[9px] text-amber-400">{t.badge}</Badge>}
+              {t.badge && (
+                <Badge className="ml-1 h-4 border-0 bg-amber-500/20 px-1.5 py-0 text-[9px] text-amber-400">
+                  {t.badge}
+                </Badge>
+              )}
             </button>
           ))}
         </div>
@@ -428,41 +603,78 @@ export function MockTestManagerFlow() {
         {qgTab === "auto" && (
           <div className="mt-4 space-y-4">
             <p className="text-[11px] text-muted-foreground">
-              Questions are pulled from the existing <span className="text-foreground">MCQ Practice Question Bank</span>.
-              Required: <span className="text-foreground">Subject</span>, <span className="text-foreground">Chapter</span>, <span className="text-foreground">Level</span>. Other fields are optional.
+              Questions are pulled from the existing{" "}
+              <span className="text-foreground">MCQ Practice Question Bank</span>. Required:{" "}
+              <span className="text-foreground">Subject</span>,{" "}
+              <span className="text-foreground">Chapter</span>,{" "}
+              <span className="text-foreground">Level</span>. Other fields are optional.
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div>
-                <Label className="mb-1 block text-[11px] text-muted-foreground">Level <span className="text-red-400">*</span></Label>
+                <Label className="mb-1 block text-[11px] text-muted-foreground">
+                  Level <span className="text-red-400">*</span>
+                </Label>
                 <Select value={qgLevel} onValueChange={(v) => setQgLevel(v as Level)}>
-                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {levelOptions.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="mb-1 block text-[11px] text-muted-foreground">Subject <span className="text-red-400">*</span></Label>
-                <Select value={qgSubjectId} onValueChange={(v) => setQgSubjectId(v)} disabled={qgSubjectsQ.isLoading}>
                   <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
-                    <SelectValue placeholder={qgSubjectsQ.isLoading ? "Loading…" : "Select subject"} />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(qgSubjectsQ.data ?? []).map((s: { id: string; name: string }) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    {levelOptions.map((l) => (
+                      <SelectItem key={l.value} value={l.value}>
+                        {l.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="mb-1 block text-[11px] text-muted-foreground">Chapter <span className="text-red-400">*</span></Label>
-                <Select value={qgChapterId} onValueChange={(v) => setQgChapterId(v)} disabled={!qgSubjectId || qgChaptersQ.isLoading}>
+                <Label className="mb-1 block text-[11px] text-muted-foreground">
+                  Subject <span className="text-red-400">*</span>
+                </Label>
+                <Select
+                  value={qgSubjectId}
+                  onValueChange={(v) => setQgSubjectId(v)}
+                  disabled={qgSubjectsQ.isLoading}
+                >
                   <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
-                    <SelectValue placeholder={!qgSubjectId ? "Select subject first" : qgChaptersQ.isLoading ? "Loading…" : "Select chapter"} />
+                    <SelectValue
+                      placeholder={qgSubjectsQ.isLoading ? "Loading…" : "Select subject"}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(qgSubjectsQ.data ?? []).map((s: { id: string; name: string }) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="mb-1 block text-[11px] text-muted-foreground">
+                  Chapter <span className="text-red-400">*</span>
+                </Label>
+                <Select
+                  value={qgChapterId}
+                  onValueChange={(v) => setQgChapterId(v)}
+                  disabled={!qgSubjectId || qgChaptersQ.isLoading}
+                >
+                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
+                    <SelectValue
+                      placeholder={
+                        !qgSubjectId
+                          ? "Select subject first"
+                          : qgChaptersQ.isLoading
+                            ? "Loading…"
+                            : "Select chapter"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {(qgChaptersQ.data ?? []).map((c: { id: string; name: string }) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -473,25 +685,45 @@ export function MockTestManagerFlow() {
               <div>
                 <Label className="mb-1 block text-[11px] text-muted-foreground">Duration</Label>
                 <Select value={String(qgDuration)} onValueChange={(v) => setQgDuration(Number(v))}>
-                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {[10, 20, 30, 45, 60, 90, 120, 180].map((m) => <SelectItem key={m} value={String(m)}>{m} Minutes</SelectItem>)}
+                    {[10, 20, 30, 45, 60, 90, 120, 180].map((m) => (
+                      <SelectItem key={m} value={String(m)}>
+                        {m} Minutes
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className="mb-1 block text-[11px] text-muted-foreground">Questions</Label>
-                <Select value={String(qgQuestions)} onValueChange={(v) => setQgQuestions(Number(v))}>
-                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60"><SelectValue /></SelectTrigger>
+                <Select
+                  value={String(qgQuestions)}
+                  onValueChange={(v) => setQgQuestions(Number(v))}
+                >
+                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {[5, 10, 20, 30, 50, 75, 100].map((q) => <SelectItem key={q} value={String(q)}>{q} MCQs</SelectItem>)}
+                    {[5, 10, 20, 30, 50, 75, 100].map((q) => (
+                      <SelectItem key={q} value={String(q)}>
+                        {q} MCQs
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className="mb-1 block text-[11px] text-muted-foreground">Difficulty</Label>
-                <Select value={qgDifficulty} onValueChange={(v) => setQgDifficulty(v as typeof qgDifficulty)}>
-                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60"><SelectValue /></SelectTrigger>
+                <Select
+                  value={qgDifficulty}
+                  onValueChange={(v) => setQgDifficulty(v as typeof qgDifficulty)}
+                >
+                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="mixed">Mixed (30/40/30)</SelectItem>
                     <SelectItem value="easy">Easy only</SelectItem>
@@ -503,7 +735,9 @@ export function MockTestManagerFlow() {
               <div>
                 <Label className="mb-1 block text-[11px] text-muted-foreground">Scope</Label>
                 <Select value={qgScope} onValueChange={(v) => setQgScope(v as typeof qgScope)}>
-                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="chapter">Selected Chapter</SelectItem>
                     <SelectItem value="subject">Full Subject</SelectItem>
@@ -514,7 +748,9 @@ export function MockTestManagerFlow() {
               <div>
                 <Label className="mb-1 block text-[11px] text-muted-foreground">Source</Label>
                 <Select value={qgSource} onValueChange={(v) => setQgSource(v as typeof qgSource)}>
-                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-xl border-white/10 bg-background/60">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="random">MCQ Practice Bank</SelectItem>
                     <SelectItem value="smart">Smart (By Weightage)</SelectItem>
@@ -526,7 +762,9 @@ export function MockTestManagerFlow() {
 
             <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
               <div>
-                <Label className="mb-1.5 block text-[11px] text-muted-foreground">Difficulty Preview</Label>
+                <Label className="mb-1.5 block text-[11px] text-muted-foreground">
+                  Difficulty Preview
+                </Label>
                 <div className="flex flex-wrap gap-2">
                   {(qgDifficulty === "mixed"
                     ? [
@@ -538,7 +776,12 @@ export function MockTestManagerFlow() {
                         {
                           l: qgDifficulty.charAt(0).toUpperCase() + qgDifficulty.slice(1),
                           v: "100%",
-                          c: qgDifficulty === "easy" ? "#10b981" : qgDifficulty === "medium" ? "#f59e0b" : "#ef4444",
+                          c:
+                            qgDifficulty === "easy"
+                              ? "#10b981"
+                              : qgDifficulty === "medium"
+                                ? "#f59e0b"
+                                : "#ef4444",
                         },
                       ]
                   ).map((d) => (
@@ -547,7 +790,9 @@ export function MockTestManagerFlow() {
                       className="flex items-center gap-2 rounded-lg border border-white/10 bg-background/40 px-3 py-1.5 text-xs"
                       style={{ borderColor: `color-mix(in oklab, ${d.c} 35%, transparent)` }}
                     >
-                      <span className="font-semibold" style={{ color: d.c }}>{d.l}</span>
+                      <span className="font-semibold" style={{ color: d.c }}>
+                        {d.l}
+                      </span>
                       <span className="text-muted-foreground">{d.v}</span>
                     </div>
                   ))}
@@ -578,21 +823,29 @@ export function MockTestManagerFlow() {
                 disabled={autoGenMut.isPending || !qgSubjectId || !qgChapterId || !qgLevel}
                 className="bg-cta-gradient h-10 rounded-xl px-5 text-white shadow-glow"
               >
-                {autoGenMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {autoGenMut.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
                 {autoGenMut.isPending ? "Generating…" : "Generate Mock Test"}
               </Button>
             </div>
           </div>
         )}
 
-
         {qgTab === "bank" && (
           <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-white/10 bg-background/30 p-6">
             <div>
               <p className="font-semibold">Pick questions from your MCQ Bank</p>
-              <p className="text-xs text-muted-foreground">Use the full builder to select questions by chapter, topic, level and difficulty.</p>
+              <p className="text-xs text-muted-foreground">
+                Use the full builder to select questions by chapter, topic, level and difficulty.
+              </p>
             </div>
-            <Button onClick={() => openBuilder("generate")} className="bg-cta-gradient rounded-xl text-white shadow-glow">
+            <Button
+              onClick={() => openBuilder("generate")}
+              className="bg-cta-gradient rounded-xl text-white shadow-glow"
+            >
               <BookOpen className="h-4 w-4" /> Open Builder
             </Button>
           </div>
@@ -602,9 +855,14 @@ export function MockTestManagerFlow() {
           <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-white/10 bg-background/30 p-6">
             <div>
               <p className="font-semibold">Build a mock manually, step by step</p>
-              <p className="text-xs text-muted-foreground">Define scope, attach questions, configure marks &amp; schedule.</p>
+              <p className="text-xs text-muted-foreground">
+                Define scope, attach questions, configure marks &amp; schedule.
+              </p>
             </div>
-            <Button onClick={() => openBuilder("blank")} className="bg-cta-gradient rounded-xl text-white shadow-glow">
+            <Button
+              onClick={() => openBuilder("blank")}
+              className="bg-cta-gradient rounded-xl text-white shadow-glow"
+            >
               <Edit3 className="h-4 w-4" /> Start Manual
             </Button>
           </div>
@@ -614,7 +872,9 @@ export function MockTestManagerFlow() {
           <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-white/10 bg-background/30 p-6">
             <div>
               <p className="font-semibold">Import an existing mock test</p>
-              <p className="text-xs text-muted-foreground">Bring questions from another mock. Pick a source to duplicate from your library.</p>
+              <p className="text-xs text-muted-foreground">
+                Bring questions from another mock. Pick a source to duplicate from your library.
+              </p>
             </div>
             <Button
               onClick={() => {
@@ -650,9 +910,16 @@ export function MockTestManagerFlow() {
               <button
                 key={t.l}
                 onClick={() => {
-                  if (t.id === "scheduled") { setFilterStatus(""); setFilterDate("scheduled"); }
-                  else if (t.id === "live") { setFilterStatus("published"); setFilterDate("upcoming"); }
-                  else { setFilterStatus(t.id as "" | Status); setFilterDate("all"); }
+                  if (t.id === "scheduled") {
+                    setFilterStatus("");
+                    setFilterDate("scheduled");
+                  } else if (t.id === "live") {
+                    setFilterStatus("published");
+                    setFilterDate("upcoming");
+                  } else {
+                    setFilterStatus(t.id as "" | Status);
+                    setFilterDate("all");
+                  }
                   setPage(1);
                 }}
                 className={`relative rounded-t-lg px-3 py-2 text-xs font-semibold transition ${
@@ -676,44 +943,85 @@ export function MockTestManagerFlow() {
         </Button>
       </div>
 
-
       {/* Filters */}
       <div className="glass shadow-card-soft flex flex-wrap items-center gap-2 rounded-2xl p-3">
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search mock by title…"
             className="h-9 rounded-xl border-white/10 bg-background/60 pl-9"
           />
         </div>
-        <Select value={filterLevel || "all"} onValueChange={(v) => { setFilterLevel(v === "all" ? "" : (v as Level)); setPage(1); }}>
-          <SelectTrigger className="h-9 w-[160px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="All levels" /></SelectTrigger>
+        <Select
+          value={filterLevel || "all"}
+          onValueChange={(v) => {
+            setFilterLevel(v === "all" ? "" : (v as Level));
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-9 w-[160px] rounded-xl border-white/10 bg-background/60">
+            <SelectValue placeholder="All levels" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All levels</SelectItem>
-            {levelOptions.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+            {levelOptions.map((l) => (
+              <SelectItem key={l.value} value={l.value}>
+                {l.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Select value={filterSubject || "all"} onValueChange={(v) => { setFilterSubject(v === "all" ? "" : v); setPage(1); }}>
-          <SelectTrigger className="h-9 w-[180px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="All subjects" /></SelectTrigger>
+        <Select
+          value={filterSubject || "all"}
+          onValueChange={(v) => {
+            setFilterSubject(v === "all" ? "" : v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-9 w-[180px] rounded-xl border-white/10 bg-background/60">
+            <SelectValue placeholder="All subjects" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All subjects</SelectItem>
-            {(subjectsFilterQ.data ?? []).map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            {(subjectsFilterQ.data ?? []).map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Select value={filterMockType} onValueChange={(v) => { setFilterMockType(v as MockType); setPage(1); }}>
-          <SelectTrigger className="h-9 w-[160px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="Mock type" /></SelectTrigger>
+        <Select
+          value={filterMockType}
+          onValueChange={(v) => {
+            setFilterMockType(v as MockType);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-9 w-[160px] rounded-xl border-white/10 bg-background/60">
+            <SelectValue placeholder="Mock type" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             <SelectItem value="full">Full subject</SelectItem>
             <SelectItem value="chapter">Chapter wise</SelectItem>
             <SelectItem value="level">Level wide</SelectItem>
-
           </SelectContent>
         </Select>
-        <Select value={filterStatus || "all"} onValueChange={(v) => { setFilterStatus(v === "all" ? "" : (v as Status)); setPage(1); }}>
-          <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="All status" /></SelectTrigger>
+        <Select
+          value={filterStatus || "all"}
+          onValueChange={(v) => {
+            setFilterStatus(v === "all" ? "" : (v as Status));
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-background/60">
+            <SelectValue placeholder="All status" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -721,8 +1029,16 @@ export function MockTestManagerFlow() {
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterDate} onValueChange={(v) => { setFilterDate(v as DateFilter); setPage(1); }}>
-          <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="Date" /></SelectTrigger>
+        <Select
+          value={filterDate}
+          onValueChange={(v) => {
+            setFilterDate(v as DateFilter);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-background/60">
+            <SelectValue placeholder="Date" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All dates</SelectItem>
             <SelectItem value="scheduled">Scheduled</SelectItem>
@@ -731,8 +1047,18 @@ export function MockTestManagerFlow() {
             <SelectItem value="expired">Expired</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={`${sortBy}:${sortDir}`} onValueChange={(v) => { const [by, dir] = v.split(":") as [SortBy, SortDir]; setSortBy(by); setSortDir(dir); setPage(1); }}>
-          <SelectTrigger className="h-9 w-[170px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="Sort" /></SelectTrigger>
+        <Select
+          value={`${sortBy}:${sortDir}`}
+          onValueChange={(v) => {
+            const [by, dir] = v.split(":") as [SortBy, SortDir];
+            setSortBy(by);
+            setSortDir(dir);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-9 w-[170px] rounded-xl border-white/10 bg-background/60">
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="updated_at:desc">Newest updated</SelectItem>
             <SelectItem value="title:asc">Title A–Z</SelectItem>
@@ -744,9 +1070,17 @@ export function MockTestManagerFlow() {
           variant="outline"
           size="sm"
           className="rounded-xl border-white/10"
-          onClick={() => { invalidate(); toast.success("Refreshed"); }}
+          onClick={() => {
+            invalidate();
+            toast.success("Refreshed");
+          }}
         >
-          {mocksQ.isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />} Refresh
+          {mocksQ.isFetching ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}{" "}
+          Refresh
         </Button>
       </div>
 
@@ -767,73 +1101,195 @@ export function MockTestManagerFlow() {
           <Table>
             <TableHeader>
               <TableRow className="border-white/10 hover:bg-transparent">
-                <TableHead className="pl-4"><button onClick={() => { setSortBy("title"); setSortDir(sortBy === "title" && sortDir === "asc" ? "desc" : "asc"); }} className="inline-flex items-center gap-1 hover:text-foreground">Title <ArrowUpDown className="h-3 w-3" /></button></TableHead>
+                <TableHead className="pl-4">
+                  <button
+                    onClick={() => {
+                      setSortBy("title");
+                      setSortDir(sortBy === "title" && sortDir === "asc" ? "desc" : "asc");
+                    }}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
+                    Title <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
                 <TableHead>Level</TableHead>
-                <TableHead><button onClick={() => { setSortBy("total_questions"); setSortDir(sortBy === "total_questions" && sortDir === "desc" ? "asc" : "desc"); }} className="inline-flex items-center gap-1 hover:text-foreground">MCQs <ArrowUpDown className="h-3 w-3" /></button></TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => {
+                      setSortBy("total_questions");
+                      setSortDir(
+                        sortBy === "total_questions" && sortDir === "desc" ? "asc" : "desc",
+                      );
+                    }}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
+                    MCQs <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
                 <TableHead>Duration</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead><button onClick={() => { setSortBy("starts_at"); setSortDir(sortBy === "starts_at" && sortDir === "asc" ? "desc" : "asc"); }} className="inline-flex items-center gap-1 hover:text-foreground">Schedule <ArrowUpDown className="h-3 w-3" /></button></TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => {
+                      setSortBy("starts_at");
+                      setSortDir(sortBy === "starts_at" && sortDir === "asc" ? "desc" : "asc");
+                    }}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
+                    Schedule <ArrowUpDown className="h-3 w-3" />
+                  </button>
+                </TableHead>
                 <TableHead className="text-right pr-4">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mocksQ.isLoading && (
-                <TableRow><TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                </TableCell></TableRow>
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                  </TableCell>
+                </TableRow>
               )}
               {!mocksQ.isLoading && rows.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                  No mock tests yet. Click <strong>Create Mock Test</strong> to start.
-                </TableCell></TableRow>
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
+                    No mock tests yet. Click <strong>Create Mock Test</strong> to start.
+                  </TableCell>
+                </TableRow>
               )}
               {rows.map((m) => (
-                <TableRow key={m.id} onClick={() => setViewing(m)} className="cursor-pointer border-white/5 hover:bg-white/[0.03]">
+                <TableRow
+                  key={m.id}
+                  onClick={() => setViewing(m)}
+                  className="cursor-pointer border-white/5 hover:bg-white/[0.03]"
+                >
                   <TableCell className="pl-4 font-medium">
                     <div>{m.title}</div>
-                    {m.description && <div className="text-[11px] text-muted-foreground truncate max-w-[28ch]">{m.description}</div>}
+                    {m.description && (
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[28ch]">
+                        {m.description}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="border-white/10 text-[10px] capitalize">{m.level}</Badge>
+                    <Badge variant="outline" className="border-white/10 text-[10px] capitalize">
+                      {m.level}
+                    </Badge>
                   </TableCell>
                   <TableCell>{m.total_questions}</TableCell>
                   <TableCell>{Math.round(m.duration_seconds / 60)}m</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`${statusTone(m.status)} border text-[10px] capitalize`}>{m.status}</Badge>
+                    <Badge
+                      variant="outline"
+                      className={`${statusTone(m.status)} border text-[10px] capitalize`}
+                    >
+                      {m.status}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {m.starts_at ? new Date(m.starts_at).toLocaleString() : "—"}
                   </TableCell>
                   <TableCell className="pr-4">
                     <div className="flex items-center justify-end gap-0.5">
-                      <button title="View" onClick={(e) => { stopRowAction(e); setViewing(m); }} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground">
+                      <button
+                        title="View"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          setViewing(m);
+                        }}
+                        className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground"
+                      >
                         <Eye className="h-3.5 w-3.5" />
                       </button>
-                      <button title="Edit" onClick={(e) => { stopRowAction(e); setEditing(m); }} className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground">
+                      <button
+                        title="Edit"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          setEditing(m);
+                        }}
+                        className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground"
+                      >
                         <Edit3 className="h-3.5 w-3.5" />
                       </button>
-                      <button title="Duplicate" onClick={(e) => { stopRowAction(e); dupMut.mutate(m.id); }} disabled={dupMut.isPending} className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground disabled:opacity-50">
+                      <button
+                        title="Duplicate"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          dupMut.mutate(m.id);
+                        }}
+                        disabled={dupMut.isPending}
+                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground disabled:opacity-50"
+                      >
                         <Copy className="h-3.5 w-3.5" />
                       </button>
                       {m.status !== "published" ? (
-                        <button title="Publish" onClick={(e) => { stopRowAction(e); setPublishing({ mock: m, status: "published" }); }} className="rounded-lg p-1.5 text-emerald-400 hover:bg-emerald-500/10">
+                        <button
+                          title="Publish"
+                          onClick={(e) => {
+                            stopRowAction(e);
+                            setPublishing({ mock: m, status: "published" });
+                          }}
+                          className="rounded-lg p-1.5 text-emerald-400 hover:bg-emerald-500/10"
+                        >
                           <Send className="h-3.5 w-3.5" />
                         </button>
                       ) : (
-                        <button title="Unpublish (archive)" onClick={(e) => { stopRowAction(e); setPublishing({ mock: m, status: "archived" }); }} className="rounded-lg p-1.5 text-amber-400 hover:bg-amber-500/10">
+                        <button
+                          title="Unpublish (archive)"
+                          onClick={(e) => {
+                            stopRowAction(e);
+                            setPublishing({ mock: m, status: "archived" });
+                          }}
+                          className="rounded-lg p-1.5 text-amber-400 hover:bg-amber-500/10"
+                        >
                           <EyeOff className="h-3.5 w-3.5" />
                         </button>
                       )}
-                      <button title="Schedule" onClick={(e) => { stopRowAction(e); setScheduling(m); }} className="rounded-lg p-1.5 text-sky-400 hover:bg-sky-500/10">
+                      <button
+                        title="Schedule"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          setScheduling(m);
+                        }}
+                        className="rounded-lg p-1.5 text-sky-400 hover:bg-sky-500/10"
+                      >
                         <CalendarClock className="h-3.5 w-3.5" />
                       </button>
-                      <button title="Analytics" onClick={(e) => { stopRowAction(e); setAnalyticsFor(m); }} className="rounded-lg p-1.5 text-indigo-300 hover:bg-indigo-500/10">
+                      <button
+                        title="Analytics"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          setAnalyticsFor(m);
+                        }}
+                        className="rounded-lg p-1.5 text-indigo-300 hover:bg-indigo-500/10"
+                      >
                         <BarChart3 className="h-3.5 w-3.5" />
                       </button>
-                      <button title="Export" onClick={(e) => { stopRowAction(e); downloadCsv(`${m.title || "mock"}.csv`, [m]); toast.success("Mock exported"); }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground">
+                      <button
+                        title="Export"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          downloadCsv(`${m.title || "mock"}.csv`, [m]);
+                          toast.success("Mock exported");
+                        }}
+                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                      >
                         <Download className="h-3.5 w-3.5" />
                       </button>
-                      <button title="Delete" onClick={(e) => { stopRowAction(e); setDeleting(m); }} className="rounded-lg p-1.5 text-red-400 hover:bg-red-500/10">
+                      <button
+                        title="Delete"
+                        onClick={(e) => {
+                          stopRowAction(e);
+                          setDeleting(m);
+                        }}
+                        className="rounded-lg p-1.5 text-red-400 hover:bg-red-500/10"
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -844,10 +1300,28 @@ export function MockTestManagerFlow() {
           </Table>
         </div>
         <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-xs text-muted-foreground">
-          <span>Page {page} of {totalPages}</span>
+          <span>
+            Page {page} of {totalPages}
+          </span>
           <div className="flex gap-1">
-            <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="h-7 rounded-lg border-white/10">Prev</Button>
-            <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="h-7 rounded-lg border-white/10">Next</Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="h-7 rounded-lg border-white/10"
+            >
+              Prev
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="h-7 rounded-lg border-white/10"
+            >
+              Next
+            </Button>
           </div>
         </div>
       </div>
@@ -855,29 +1329,67 @@ export function MockTestManagerFlow() {
       {(creating || editing) && (
         <MockBuilderDialog
           open
-          onClose={() => { setCreating(false); setEditing(null); }}
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
           existing={editing}
           preset={builderPreset}
-          onSaved={() => { setCreating(false); setEditing(null); invalidate(); }}
+          onSaved={() => {
+            setCreating(false);
+            setEditing(null);
+            invalidate();
+          }}
         />
       )}
 
-      <MockDetailsDialog mock={viewing} onClose={() => setViewing(null)} onEdit={(mock: Mock) => { setViewing(null); setEditing(mock); }} />
+      <MockDetailsDialog
+        mock={viewing}
+        onClose={() => setViewing(null)}
+        onEdit={(mock: Mock) => {
+          setViewing(null);
+          setEditing(mock);
+        }}
+      />
       <MockAnalyticsDialog mock={analyticsFor} onClose={() => setAnalyticsFor(null)} />
-      <ScheduleDialog mock={scheduling} onClose={() => setScheduling(null)} onSaved={() => { setScheduling(null); invalidate(); }} />
+      <ScheduleDialog
+        mock={scheduling}
+        onClose={() => setScheduling(null)}
+        onSaved={() => {
+          setScheduling(null);
+          invalidate();
+        }}
+      />
 
       <AlertDialog open={!!publishing} onOpenChange={(open) => !open && setPublishing(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{publishing?.status === "published" ? "Publish mock test?" : "Hide mock test?"}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {publishing?.status === "published" ? "Publish mock test?" : "Hide mock test?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {publishing?.mock.title} will be {publishing?.status === "published" ? "visible to students immediately" : "archived and hidden from students"}.
+              {publishing?.mock.title} will be{" "}
+              {publishing?.status === "published"
+                ? "visible to students immediately"
+                : "archived and hidden from students"}
+              .
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction disabled={statusMut.isPending} onClick={() => publishing && statusMut.mutate({ id: publishing.mock.id, status: publishing.status })}>
-              {statusMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Confirm
+            <AlertDialogAction
+              disabled={statusMut.isPending}
+              onClick={() =>
+                publishing &&
+                statusMut.mutate({ id: publishing.mock.id, status: publishing.status })
+              }
+            >
+              {statusMut.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}{" "}
+              Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -893,8 +1405,17 @@ export function MockTestManagerFlow() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={deleteMut.isPending} onClick={() => deleting && deleteMut.mutate(deleting.id)}>
-              {deleteMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Delete
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMut.isPending}
+              onClick={() => deleting && deleteMut.mutate(deleting.id)}
+            >
+              {deleteMut.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}{" "}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -902,95 +1423,220 @@ export function MockTestManagerFlow() {
 
       {/* Bottom analytics row */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <button type="button" onClick={() => setOpenCard("attempts")} className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]">
+        <button
+          type="button"
+          onClick={() => setOpenCard("attempts")}
+          className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]"
+        >
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-muted-foreground">Attempts Overview</p>
             <BarChart3 className="h-4 w-4 text-[var(--neon-purple)]" />
           </div>
-          <p className="font-display mt-1 text-2xl font-bold">{stats.totalQuestions.toLocaleString()}</p>
+          <p className="font-display mt-1 text-2xl font-bold">
+            {stats.totalQuestions.toLocaleString()}
+          </p>
           <p className="text-[10px] text-emerald-400">+22.1% total mock questions</p>
           <svg viewBox="0 0 120 28" className="mt-2 h-7 w-full">
-            <polyline fill="none" stroke="url(#g1)" strokeWidth="2" points="0,20 15,16 30,18 45,10 60,14 75,8 90,12 105,6 120,9" />
-            <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stopColor="#8b5cf6" /><stop offset="1" stopColor="#3b82f6" /></linearGradient></defs>
+            <polyline
+              fill="none"
+              stroke="url(#g1)"
+              strokeWidth="2"
+              points="0,20 15,16 30,18 45,10 60,14 75,8 90,12 105,6 120,9"
+            />
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stopColor="#8b5cf6" />
+                <stop offset="1" stopColor="#3b82f6" />
+              </linearGradient>
+            </defs>
           </svg>
         </button>
-        <button type="button" onClick={() => setOpenCard("completion")} className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]">
+        <button
+          type="button"
+          onClick={() => setOpenCard("completion")}
+          className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]"
+        >
           <p className="text-xs font-semibold text-muted-foreground">Completion Rate</p>
           <div className="mt-2 flex items-center justify-between">
             <div>
-              <p className="font-display text-2xl font-bold">{stats.total ? Math.round((stats.published / Math.max(1, stats.total)) * 100 * 10) / 10 : 0}%</p>
-              <p className="text-[10px] text-emerald-400 inline-flex items-center gap-1"><TrendingUp className="h-3 w-3" /> vs last month</p>
+              <p className="font-display text-2xl font-bold">
+                {stats.total
+                  ? Math.round((stats.published / Math.max(1, stats.total)) * 100 * 10) / 10
+                  : 0}
+                %
+              </p>
+              <p className="text-[10px] text-emerald-400 inline-flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" /> vs last month
+              </p>
             </div>
             <div className="relative h-14 w-14">
               <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
-                <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
-                <circle cx="18" cy="18" r="15" fill="none" stroke="#10b981" strokeWidth="3" strokeDasharray={`${(stats.published / Math.max(1, stats.total)) * 94} 94`} strokeLinecap="round" />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="hsl(var(--muted))"
+                  strokeWidth="3"
+                />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="3"
+                  strokeDasharray={`${(stats.published / Math.max(1, stats.total)) * 94} 94`}
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
           </div>
         </button>
-        <button type="button" onClick={() => setOpenCard("avgQuestions")} className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]">
+        <button
+          type="button"
+          onClick={() => setOpenCard("avgQuestions")}
+          className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]"
+        >
           <p className="text-xs font-semibold text-muted-foreground">Avg. Questions</p>
           <div className="mt-2 flex items-center justify-between">
             <div>
               <p className="font-display text-2xl font-bold">{stats.avgQuestions}</p>
-              <p className="text-[10px] text-emerald-400 inline-flex items-center gap-1"><TrendingUp className="h-3 w-3" /> per mock</p>
+              <p className="text-[10px] text-emerald-400 inline-flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" /> per mock
+              </p>
             </div>
             <div className="relative h-14 w-14">
               <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
-                <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
-                <circle cx="18" cy="18" r="15" fill="none" stroke="var(--neon-blue)" strokeWidth="3" strokeDasharray="62 94" strokeLinecap="round" />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="hsl(var(--muted))"
+                  strokeWidth="3"
+                />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="var(--neon-blue)"
+                  strokeWidth="3"
+                  strokeDasharray="62 94"
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
           </div>
         </button>
-        <button type="button" onClick={() => setOpenCard("topStatus")} className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)] lg:col-span-1">
+        <button
+          type="button"
+          onClick={() => setOpenCard("topStatus")}
+          className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)] lg:col-span-1"
+        >
           <p className="text-xs font-semibold text-muted-foreground">Top Status</p>
-          <p className="font-display mt-1 text-xl font-bold capitalize">{stats.published >= stats.drafts ? "Published" : "Draft"}</p>
+          <p className="font-display mt-1 text-xl font-bold capitalize">
+            {stats.published >= stats.drafts ? "Published" : "Draft"}
+          </p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-cta-gradient" style={{ width: `${stats.total ? Math.round((Math.max(stats.published, stats.drafts) / stats.total) * 100) : 0}%` }} />
+            <div
+              className="h-full bg-cta-gradient"
+              style={{
+                width: `${stats.total ? Math.round((Math.max(stats.published, stats.drafts) / stats.total) * 100) : 0}%`,
+              }}
+            />
           </div>
-          <p className="mt-1 text-[10px] text-muted-foreground">{stats.total ? Math.round((Math.max(stats.published, stats.drafts) / stats.total) * 100) : 0}% of library</p>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            {stats.total
+              ? Math.round((Math.max(stats.published, stats.drafts) / stats.total) * 100)
+              : 0}
+            % of library
+          </p>
         </button>
-        <button type="button" onClick={() => setOpenCard("liveMocks")} className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]">
+        <button
+          type="button"
+          onClick={() => setOpenCard("liveMocks")}
+          className="glass rounded-2xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-purple)]"
+        >
           <p className="text-xs font-semibold text-muted-foreground">Live Mocks</p>
           <p className="font-display mt-1 text-3xl font-bold text-emerald-400">{stats.live}</p>
           <p className="text-[10px] inline-flex items-center gap-1 text-emerald-400">
-            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" /></span>
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            </span>
             Active now
           </p>
           <svg viewBox="0 0 120 28" className="mt-2 h-7 w-full">
-            <polyline fill="none" stroke="#10b981" strokeWidth="2" points="0,20 12,18 24,12 36,16 48,8 60,14 72,6 84,10 96,4 108,8 120,2" />
+            <polyline
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="2"
+              points="0,20 12,18 24,12 36,16 48,8 60,14 72,6 84,10 96,4 108,8 120,2"
+            />
           </svg>
         </button>
       </div>
 
       <MockCardDrawer cardKey={openCard} open={!!openCard} onClose={() => setOpenCard(null)} />
     </div>
-
   );
 }
 
-function MockDetailsDialog({ mock, onClose, onEdit }: { mock: Mock | null; onClose: () => void; onEdit: (mock: Mock) => void }) {
+function MockDetailsDialog({
+  mock,
+  onClose,
+  onEdit,
+}: {
+  mock: Mock | null;
+  onClose: () => void;
+  onEdit: (mock: Mock) => void;
+}) {
   return (
     <Dialog open={!!mock} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{mock?.title}</DialogTitle>
-          <DialogDescription>{mock?.description || "Mock test overview and quick actions."}</DialogDescription>
+          <DialogDescription>
+            {mock?.description || "Mock test overview and quick actions."}
+          </DialogDescription>
         </DialogHeader>
         {mock && (
           <div className="grid gap-3 text-sm md:grid-cols-2">
-            <div className="rounded-xl border border-white/10 bg-background/30 p-3"><span className="text-xs text-muted-foreground">Level</span><p className="font-semibold capitalize">{mock.level}</p></div>
-            <div className="rounded-xl border border-white/10 bg-background/30 p-3"><span className="text-xs text-muted-foreground">Status</span><p className="font-semibold capitalize">{mock.status}</p></div>
-            <div className="rounded-xl border border-white/10 bg-background/30 p-3"><span className="text-xs text-muted-foreground">Questions</span><p className="font-semibold">{mock.total_questions}</p></div>
-            <div className="rounded-xl border border-white/10 bg-background/30 p-3"><span className="text-xs text-muted-foreground">Duration</span><p className="font-semibold">{Math.round(mock.duration_seconds / 60)} min</p></div>
-            <div className="rounded-xl border border-white/10 bg-background/30 p-3 md:col-span-2"><span className="text-xs text-muted-foreground">Schedule</span><p className="font-semibold">{mock.starts_at ? new Date(mock.starts_at).toLocaleString() : "Not scheduled"}</p></div>
+            <div className="rounded-xl border border-white/10 bg-background/30 p-3">
+              <span className="text-xs text-muted-foreground">Level</span>
+              <p className="font-semibold capitalize">{mock.level}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-background/30 p-3">
+              <span className="text-xs text-muted-foreground">Status</span>
+              <p className="font-semibold capitalize">{mock.status}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-background/30 p-3">
+              <span className="text-xs text-muted-foreground">Questions</span>
+              <p className="font-semibold">{mock.total_questions}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-background/30 p-3">
+              <span className="text-xs text-muted-foreground">Duration</span>
+              <p className="font-semibold">{Math.round(mock.duration_seconds / 60)} min</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-background/30 p-3 md:col-span-2">
+              <span className="text-xs text-muted-foreground">Schedule</span>
+              <p className="font-semibold">
+                {mock.starts_at ? new Date(mock.starts_at).toLocaleString() : "Not scheduled"}
+              </p>
+            </div>
           </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
-          {mock && <Button onClick={() => onEdit(mock)} className="bg-cta-gradient text-white"><Edit3 className="h-4 w-4" /> Edit</Button>}
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          {mock && (
+            <Button onClick={() => onEdit(mock)} className="bg-cta-gradient text-white">
+              <Edit3 className="h-4 w-4" /> Edit
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1011,7 +1657,7 @@ function MockAnalyticsDialog({ mock, onClose }: { mock: Mock | null; onClose: ()
           <DialogTitle>Mock Analytics</DialogTitle>
           <DialogDescription>{mock?.title}</DialogDescription>
         </DialogHeader>
-        {(!mock || isLoading || !data) ? (
+        {!mock || isLoading || !data ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…
           </div>
@@ -1022,9 +1668,16 @@ function MockAnalyticsDialog({ mock, onClose }: { mock: Mock | null; onClose: ()
                 { label: "Attempts", value: data.stats.totalAttempts, icon: Users },
                 { label: "Completed", value: data.stats.completed, icon: CheckCircle2 },
                 { label: "Avg score", value: `${data.stats.avgScore}%`, icon: Target },
-                { label: "Avg time", value: `${Math.round(data.stats.avgDurationSeconds / 60)}m`, icon: Timer },
+                {
+                  label: "Avg time",
+                  value: `${Math.round(data.stats.avgDurationSeconds / 60)}m`,
+                  icon: Timer,
+                },
               ].map((item) => (
-                <div key={item.label} className="rounded-xl border border-white/10 bg-background/30 p-4">
+                <div
+                  key={item.label}
+                  className="rounded-xl border border-white/10 bg-background/30 p-4"
+                >
                   <item.icon className="mb-3 h-4 w-4 text-[var(--neon-blue)]" />
                   <p className="text-xs text-muted-foreground">{item.label}</p>
                   <p className="font-display text-2xl font-bold">{item.value}</p>
@@ -1032,15 +1685,21 @@ function MockAnalyticsDialog({ mock, onClose }: { mock: Mock | null; onClose: ()
               ))}
             </div>
             <div className="rounded-xl border border-white/10 bg-background/30 p-4">
-              <p className="mb-2 text-xs font-semibold text-muted-foreground">Attempts & avg score — last 30 days</p>
+              <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                Attempts & avg score — last 30 days
+              </p>
               <MiniLine data={data.daily} />
             </div>
             <div className="rounded-xl border border-white/10 bg-background/30 p-4">
               <div className="mb-2 flex items-center justify-between text-xs">
-                <span>Completion rate</span><span>{data.stats.completionRate}%</span>
+                <span>Completion rate</span>
+                <span>{data.stats.completionRate}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-cta-gradient" style={{ width: `${data.stats.completionRate}%` }} />
+                <div
+                  className="h-full rounded-full bg-cta-gradient"
+                  style={{ width: `${data.stats.completionRate}%` }}
+                />
               </div>
             </div>
           </div>
@@ -1058,20 +1717,34 @@ function MiniLine({ data }: { data: Array<{ day: string; count: number; avgScore
         fill="none"
         stroke="#8b5cf6"
         strokeWidth="2"
-        points={data.map((d, i) => `${(i / Math.max(1, data.length - 1)) * 300},${80 - (d.count / max) * 70}`).join(" ")}
+        points={data
+          .map((d, i) => `${(i / Math.max(1, data.length - 1)) * 300},${80 - (d.count / max) * 70}`)
+          .join(" ")}
       />
       <polyline
         fill="none"
         stroke="#f59e0b"
         strokeWidth="1.5"
         strokeDasharray="3 3"
-        points={data.map((d, i) => `${(i / Math.max(1, data.length - 1)) * 300},${80 - (d.avgScore / 100) * 70}`).join(" ")}
+        points={data
+          .map(
+            (d, i) => `${(i / Math.max(1, data.length - 1)) * 300},${80 - (d.avgScore / 100) * 70}`,
+          )
+          .join(" ")}
       />
     </svg>
   );
 }
 
-function ScheduleDialog({ mock, onClose, onSaved }: { mock: Mock | null; onClose: () => void; onSaved: () => void }) {
+function ScheduleDialog({
+  mock,
+  onClose,
+  onSaved,
+}: {
+  mock: Mock | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const updateFn = useServerFn(adminUpdateMock);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
@@ -1082,20 +1755,58 @@ function ScheduleDialog({ mock, onClose, onSaved }: { mock: Mock | null; onClose
   const save = useMutation({
     mutationFn: () => {
       if (!mock) throw new Error("No mock selected");
-      return updateFn({ data: { id: mock.id, starts_at: startsAt ? new Date(startsAt).toISOString() : null, ends_at: endsAt ? new Date(endsAt).toISOString() : null } });
+      return updateFn({
+        data: {
+          id: mock.id,
+          starts_at: startsAt ? new Date(startsAt).toISOString() : null,
+          ends_at: endsAt ? new Date(endsAt).toISOString() : null,
+        },
+      });
     },
-    onSuccess: () => { toast.success("Schedule updated"); onSaved(); },
+    onSuccess: () => {
+      toast.success("Schedule updated");
+      onSaved();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   return (
     <Dialog open={!!mock} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Schedule Mock</DialogTitle><DialogDescription>{mock?.title}</DialogDescription></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Schedule Mock</DialogTitle>
+          <DialogDescription>{mock?.title}</DialogDescription>
+        </DialogHeader>
         <div className="grid gap-3">
-          <div><Label className="mb-1 block text-xs">Starts at</Label><Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} /></div>
-          <div><Label className="mb-1 block text-xs">Ends at</Label><Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} /></div>
+          <div>
+            <Label className="mb-1 block text-xs">Starts at</Label>
+            <Input
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label className="mb-1 block text-xs">Ends at</Label>
+            <Input
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+            />
+          </div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={onClose}>Cancel</Button><Button disabled={save.isPending} onClick={() => save.mutate()}>{save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarClock className="h-4 w-4" />} Save schedule</Button></DialogFooter>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button disabled={save.isPending} onClick={() => save.mutate()}>
+            {save.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CalendarClock className="h-4 w-4" />
+            )}{" "}
+            Save schedule
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -1106,9 +1817,17 @@ function ScheduleDialog({ mock, onClose, onSaved }: { mock: Mock | null; onClose
  * ============================================================ */
 
 function MockBuilderDialog({
-  open, onClose, existing, preset, onSaved,
+  open,
+  onClose,
+  existing,
+  preset,
+  onSaved,
 }: {
-  open: boolean; onClose: () => void; existing: Mock | null; preset: "blank" | "generate" | "full" | "chapter" | "level"; onSaved: () => void;
+  open: boolean;
+  onClose: () => void;
+  existing: Mock | null;
+  preset: "blank" | "generate" | "full" | "chapter" | "level";
+  onSaved: () => void;
 }) {
   const listSubjects = useServerFn(adminListSubjectsByLevel);
   const listChapters = useServerFn(adminListChaptersBySubject);
@@ -1122,19 +1841,21 @@ function MockBuilderDialog({
     [liveLevels],
   );
 
-
-
   const [step, setStep] = useState(preset === "blank" ? 1 : preset === "generate" ? 2 : 1);
   const [level, setLevel] = useState<Level>(existing?.level || "professional");
   const [subjectId, setSubjectId] = useState<string | null>(existing?.subject_id ?? null);
-  const [chapterIds, setChapterIds] = useState<string[]>(existing?.chapter_id ? [existing.chapter_id] : []);
+  const [chapterIds, setChapterIds] = useState<string[]>(
+    existing?.chapter_id ? [existing.chapter_id] : [],
+  );
   const [selectedMcqIds, setSelectedMcqIds] = useState<string[]>([]);
   const [mcqSearch, setMcqSearch] = useState("");
   const [difficulty, setDifficulty] = useState<"" | "easy" | "medium" | "hard">("");
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [description, setDescription] = useState(existing?.description ?? "");
-  const [durationMin, setDurationMin] = useState(existing ? Math.round(existing.duration_seconds / 60) : 60);
+  const [durationMin, setDurationMin] = useState(
+    existing ? Math.round(existing.duration_seconds / 60) : 60,
+  );
   const [passingMarks, setPassingMarks] = useState(existing?.passing_marks ?? 40);
   const [negativeMarking, setNegativeMarking] = useState(existing?.negative_marking ?? 0);
   const [startsAt, setStartsAt] = useState(existing?.starts_at?.slice(0, 16) ?? "");
@@ -1162,15 +1883,16 @@ function MockBuilderDialog({
 
   const mcqsQ = useQuery({
     queryKey: ["builder-mcqs", scope, level, subjectId, chapterIds, mcqSearch, difficulty],
-    queryFn: () => listMcqs({
-      data: {
-        chapterIds: scope === "chapter" ? chapterIds : undefined,
-        subjectId: scope === "subject" ? (subjectId ?? undefined) : undefined,
-        level: scope === "level" ? level : undefined,
-        search: mcqSearch || undefined,
-        difficulty: (difficulty || undefined) as "easy" | "medium" | "hard" | undefined,
-      },
-    }),
+    queryFn: () =>
+      listMcqs({
+        data: {
+          chapterIds: scope === "chapter" ? chapterIds : undefined,
+          subjectId: scope === "subject" ? (subjectId ?? undefined) : undefined,
+          level: scope === "level" ? level : undefined,
+          search: mcqSearch || undefined,
+          difficulty: (difficulty || undefined) as "easy" | "medium" | "hard" | undefined,
+        },
+      }),
     enabled:
       (scope === "chapter" && chapterIds.length > 0) ||
       (scope === "subject" && !!subjectId) ||
@@ -1186,7 +1908,11 @@ function MockBuilderDialog({
 
   // Reset on level change
   useEffect(() => {
-    if (!existing) { setSubjectId(null); setChapterIds([]); setSelectedMcqIds([]); }
+    if (!existing) {
+      setSubjectId(null);
+      setChapterIds([]);
+      setSelectedMcqIds([]);
+    }
   }, [level, existing]);
 
   const subjects = subjectsQ.data ?? [];
@@ -1194,15 +1920,17 @@ function MockBuilderDialog({
   const mcqs = mcqsQ.data ?? [];
 
   function toggleChapter(id: string) {
-    setChapterIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    setChapterIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
   function toggleMcq(id: string) {
-    setSelectedMcqIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    setSelectedMcqIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
   function selectAllMcqs() {
     setSelectedMcqIds(Array.from(new Set([...selectedMcqIds, ...mcqs.map((m) => m.id)])));
   }
-  function clearMcqs() { setSelectedMcqIds([]); }
+  function clearMcqs() {
+    setSelectedMcqIds([]);
+  }
   function goNext() {
     if (step === 1) {
       if (scope === "chapter" && (!subjectId || chapterIds.length === 0))
@@ -1213,7 +1941,6 @@ function MockBuilderDialog({
     if (step === 2 && selectedMcqIds.length === 0) return toast.error("Select at least one MCQ");
     if (step === 3 && !title.trim()) return toast.error("Enter a mock test title");
     setStep((s) => Math.min(4, s + 1));
-
   }
 
   const saveMut = useMutation({
@@ -1244,7 +1971,11 @@ function MockBuilderDialog({
       else await createFn({ data: payload });
     },
     onSuccess: (_d, status) => {
-      toast.success(existing ? "Mock updated" : `Mock ${status === "published" ? "published" : "saved as draft"}`);
+      toast.success(
+        existing
+          ? "Mock updated"
+          : `Mock ${status === "published" ? "published" : "saved as draft"}`,
+      );
       onSaved();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1271,7 +2002,9 @@ function MockBuilderDialog({
               key={s.n}
               onClick={() => setStep(s.n)}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
-                step === s.n ? "bg-cta-gradient text-white shadow-glow" : "border border-white/10 bg-background/40"
+                step === s.n
+                  ? "bg-cta-gradient text-white shadow-glow"
+                  : "border border-white/10 bg-background/40"
               }`}
             >
               <span className="font-bold">{s.n}</span> {s.l}
@@ -1293,7 +2026,10 @@ function MockBuilderDialog({
                 ].map((s) => (
                   <button
                     key={s.v}
-                    onClick={() => { setScope(s.v as "chapter" | "subject" | "level"); setSelectedMcqIds([]); }}
+                    onClick={() => {
+                      setScope(s.v as "chapter" | "subject" | "level");
+                      setSelectedMcqIds([]);
+                    }}
                     className={`rounded-xl border px-3 py-2 text-xs font-medium transition ${
                       scope === s.v
                         ? "border-[var(--neon-purple)]/60 bg-[var(--neon-purple)]/10 text-[var(--neon-purple)] shadow-glow"
@@ -1327,16 +2063,24 @@ function MockBuilderDialog({
             {scope !== "level" && (
               <div>
                 <Label className="mb-2 block text-xs">
-                  Subject {subjectsQ.isFetching && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                  Subject{" "}
+                  {subjectsQ.isFetching && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
                 </Label>
                 {subjects.length === 0 && !subjectsQ.isFetching ? (
-                  <p className="text-xs text-muted-foreground">No subjects under <strong>{level}</strong>. Create one in the MCQ Manager and set its level.</p>
+                  <p className="text-xs text-muted-foreground">
+                    No subjects under <strong>{level}</strong>. Create one in the MCQ Manager and
+                    set its level.
+                  </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {subjects.map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => { setSubjectId(s.id); setChapterIds([]); setSelectedMcqIds([]); }}
+                        onClick={() => {
+                          setSubjectId(s.id);
+                          setChapterIds([]);
+                          setSelectedMcqIds([]);
+                        }}
                         className={`rounded-lg border px-3 py-1.5 text-xs transition ${
                           subjectId === s.id
                             ? "border-[var(--neon-purple)]/50 bg-[var(--neon-purple)]/10 text-[var(--neon-purple)]"
@@ -1351,11 +2095,11 @@ function MockBuilderDialog({
               </div>
             )}
 
-
             {scope === "chapter" && (
               <div>
                 <Label className="mb-2 block text-xs">
-                  Chapters {chaptersQ.isFetching && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                  Chapters{" "}
+                  {chaptersQ.isFetching && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
                 </Label>
                 {!subjectId ? (
                   <p className="text-xs text-muted-foreground">Pick a subject first.</p>
@@ -1384,12 +2128,16 @@ function MockBuilderDialog({
               </div>
             )}
             {scope === "subject" && (
-              <p className="text-[11px] text-muted-foreground">Full subject mock: MCQ pool will include every chapter in the selected subject.</p>
+              <p className="text-[11px] text-muted-foreground">
+                Full subject mock: MCQ pool will include every chapter in the selected subject.
+              </p>
             )}
             {scope === "level" && (
-              <p className="text-[11px] text-muted-foreground">Level-wide mock: MCQ pool will include every subject/chapter under <strong className="capitalize">{level}</strong>.</p>
+              <p className="text-[11px] text-muted-foreground">
+                Level-wide mock: MCQ pool will include every subject/chapter under{" "}
+                <strong className="capitalize">{level}</strong>.
+              </p>
             )}
-
           </div>
         )}
 
@@ -1397,10 +2145,11 @@ function MockBuilderDialog({
         {step === 2 && (
           <div className="space-y-3">
             {scope === "chapter" && chapterIds.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Select at least one chapter in Step 1.</p>
+              <p className="text-sm text-muted-foreground">
+                Select at least one chapter in Step 1.
+              </p>
             ) : scope === "subject" && !subjectId ? (
               <p className="text-sm text-muted-foreground">Select a subject in Step 1.</p>
-
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-2">
@@ -1413,8 +2162,15 @@ function MockBuilderDialog({
                       className="h-9 rounded-xl border-white/10 bg-background/60 pl-9"
                     />
                   </div>
-                  <Select value={difficulty || "all"} onValueChange={(v) => setDifficulty(v === "all" ? "" : v as "easy" | "medium" | "hard")}>
-                    <SelectTrigger className="h-9 w-[140px] rounded-xl border-white/10 bg-background/60"><SelectValue placeholder="Difficulty" /></SelectTrigger>
+                  <Select
+                    value={difficulty || "all"}
+                    onValueChange={(v) =>
+                      setDifficulty(v === "all" ? "" : (v as "easy" | "medium" | "hard"))
+                    }
+                  >
+                    <SelectTrigger className="h-9 w-[140px] rounded-xl border-white/10 bg-background/60">
+                      <SelectValue placeholder="Difficulty" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All</SelectItem>
                       <SelectItem value="easy">Easy</SelectItem>
@@ -1422,15 +2178,32 @@ function MockBuilderDialog({
                       <SelectItem value="hard">Hard</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="sm" onClick={selectAllMcqs} className="rounded-xl border-white/10">Select all</Button>
-                  <Button variant="outline" size="sm" onClick={clearMcqs} className="rounded-xl border-white/10">Clear</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={selectAllMcqs}
+                    className="rounded-xl border-white/10"
+                  >
+                    Select all
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearMcqs}
+                    className="rounded-xl border-white/10"
+                  >
+                    Clear
+                  </Button>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-background/30 px-3 py-2 text-xs">
-                  <strong>{selectedMcqIds.length}</strong> selected · {mcqs.length} available {mcqsQ.isFetching && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                  <strong>{selectedMcqIds.length}</strong> selected · {mcqs.length} available{" "}
+                  {mcqsQ.isFetching && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
                 </div>
                 <div className="max-h-[360px] overflow-y-auto rounded-xl border border-white/10">
                   {mcqs.length === 0 && !mcqsQ.isFetching && (
-                    <p className="p-6 text-center text-xs text-muted-foreground">No MCQs found in selected chapters.</p>
+                    <p className="p-6 text-center text-xs text-muted-foreground">
+                      No MCQs found in selected chapters.
+                    </p>
                   )}
                   <ul className="divide-y divide-white/5">
                     {mcqs.map((m) => {
@@ -1441,9 +2214,19 @@ function MockBuilderDialog({
                           onClick={() => toggleMcq(m.id)}
                           className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-xs transition hover:bg-white/5 ${checked ? "bg-[var(--neon-purple)]/5" : ""}`}
                         >
-                          <input type="checkbox" checked={checked} readOnly className="h-3.5 w-3.5 accent-[var(--neon-purple)]" />
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            readOnly
+                            className="h-3.5 w-3.5 accent-[var(--neon-purple)]"
+                          />
                           <span className="flex-1 truncate">{m.question}</span>
-                          <Badge variant="outline" className="border-white/10 text-[9px] capitalize">{m.difficulty}</Badge>
+                          <Badge
+                            variant="outline"
+                            className="border-white/10 text-[9px] capitalize"
+                          >
+                            {m.difficulty}
+                          </Badge>
                         </li>
                       );
                     })}
@@ -1459,23 +2242,60 @@ function MockBuilderDialog({
           <div className="grid gap-3 md:grid-cols-2">
             <div className="md:col-span-2">
               <Label className="mb-1 block text-xs">Title</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Constitutional Law Final 2026" className="rounded-xl border-white/10 bg-background/40" />
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Constitutional Law Final 2026"
+                className="rounded-xl border-white/10 bg-background/40"
+              />
             </div>
             <div className="md:col-span-2">
               <Label className="mb-1 block text-xs">Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional summary…" className="rounded-xl border-white/10 bg-background/40" rows={2} />
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional summary…"
+                className="rounded-xl border-white/10 bg-background/40"
+                rows={2}
+              />
             </div>
             <div>
-              <Label className="mb-1 block text-xs"><Timer className="mr-1 inline h-3 w-3" />Duration (minutes)</Label>
-              <Input type="number" min={1} value={durationMin} onChange={(e) => setDurationMin(Math.max(1, Number(e.target.value) || 1))} className="rounded-xl border-white/10 bg-background/40" />
+              <Label className="mb-1 block text-xs">
+                <Timer className="mr-1 inline h-3 w-3" />
+                Duration (minutes)
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                value={durationMin}
+                onChange={(e) => setDurationMin(Math.max(1, Number(e.target.value) || 1))}
+                className="rounded-xl border-white/10 bg-background/40"
+              />
             </div>
             <div>
-              <Label className="mb-1 block text-xs"><Target className="mr-1 inline h-3 w-3" />Passing marks</Label>
-              <Input type="number" min={0} value={passingMarks} onChange={(e) => setPassingMarks(Math.max(0, Number(e.target.value) || 0))} className="rounded-xl border-white/10 bg-background/40" />
+              <Label className="mb-1 block text-xs">
+                <Target className="mr-1 inline h-3 w-3" />
+                Passing marks
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={passingMarks}
+                onChange={(e) => setPassingMarks(Math.max(0, Number(e.target.value) || 0))}
+                className="rounded-xl border-white/10 bg-background/40"
+              />
             </div>
             <div>
               <Label className="mb-1 block text-xs">Negative marking (per wrong)</Label>
-              <Input type="number" step="0.25" min={0} max={5} value={negativeMarking} onChange={(e) => setNegativeMarking(Math.max(0, Number(e.target.value) || 0))} className="rounded-xl border-white/10 bg-background/40" />
+              <Input
+                type="number"
+                step="0.25"
+                min={0}
+                max={5}
+                value={negativeMarking}
+                onChange={(e) => setNegativeMarking(Math.max(0, Number(e.target.value) || 0))}
+                className="rounded-xl border-white/10 bg-background/40"
+              />
             </div>
             <div className="flex items-center justify-between rounded-xl border border-white/10 bg-background/30 px-3 py-2 text-xs">
               Public (visible to all students)
@@ -1496,26 +2316,62 @@ function MockBuilderDialog({
         {step === 4 && (
           <div className="grid gap-3 md:grid-cols-2">
             <div>
-              <Label className="mb-1 block text-xs"><CalendarClock className="mr-1 inline h-3 w-3" />Starts at</Label>
-              <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="rounded-xl border-white/10 bg-background/40" />
+              <Label className="mb-1 block text-xs">
+                <CalendarClock className="mr-1 inline h-3 w-3" />
+                Starts at
+              </Label>
+              <Input
+                type="datetime-local"
+                value={startsAt}
+                onChange={(e) => setStartsAt(e.target.value)}
+                className="rounded-xl border-white/10 bg-background/40"
+              />
             </div>
             <div>
-              <Label className="mb-1 block text-xs"><CalendarClock className="mr-1 inline h-3 w-3" />Ends at</Label>
-              <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="rounded-xl border-white/10 bg-background/40" />
+              <Label className="mb-1 block text-xs">
+                <CalendarClock className="mr-1 inline h-3 w-3" />
+                Ends at
+              </Label>
+              <Input
+                type="datetime-local"
+                value={endsAt}
+                onChange={(e) => setEndsAt(e.target.value)}
+                className="rounded-xl border-white/10 bg-background/40"
+              />
             </div>
             <div className="md:col-span-2 rounded-xl border border-white/10 bg-background/30 p-3 text-xs">
               <p className="font-semibold mb-1">Summary</p>
               <p className="text-muted-foreground">
-                <strong>{title || "Untitled"}</strong> · {level} · {selectedMcqIds.length} MCQs · {durationMin} min · {negativeMarking > 0 ? `−${negativeMarking} per wrong` : "no negative marking"} · {isPublic ? "Public" : "Private"}
+                <strong>{title || "Untitled"}</strong> · {level} · {selectedMcqIds.length} MCQs ·{" "}
+                {durationMin} min ·{" "}
+                {negativeMarking > 0 ? `−${negativeMarking} per wrong` : "no negative marking"} ·{" "}
+                {isPublic ? "Public" : "Private"}
               </p>
             </div>
           </div>
         )}
 
         <DialogFooter className="flex-wrap gap-2">
-          <Button variant="ghost" onClick={onClose}><X className="h-4 w-4" /> Cancel</Button>
-          {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="rounded-xl border-white/10">Back</Button>}
-          {step < 4 && <Button onClick={() => goNext()} className="bg-cta-gradient rounded-xl text-white shadow-glow">Next</Button>}
+          <Button variant="ghost" onClick={onClose}>
+            <X className="h-4 w-4" /> Cancel
+          </Button>
+          {step > 1 && (
+            <Button
+              variant="outline"
+              onClick={() => setStep(step - 1)}
+              className="rounded-xl border-white/10"
+            >
+              Back
+            </Button>
+          )}
+          {step < 4 && (
+            <Button
+              onClick={() => goNext()}
+              className="bg-cta-gradient rounded-xl text-white shadow-glow"
+            >
+              Next
+            </Button>
+          )}
           {step === 4 && (
             <>
               <Button
@@ -1524,14 +2380,24 @@ function MockBuilderDialog({
                 onClick={() => saveMut.mutate("draft")}
                 className="rounded-xl border-white/10"
               >
-                {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Draft
+                {saveMut.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}{" "}
+                Save Draft
               </Button>
               <Button
                 disabled={saveMut.isPending}
                 onClick={() => saveMut.mutate("published")}
                 className="bg-cta-gradient rounded-xl text-white shadow-glow"
               >
-                {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />} Publish
+                {saveMut.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Rocket className="h-4 w-4" />
+                )}{" "}
+                Publish
               </Button>
             </>
           )}

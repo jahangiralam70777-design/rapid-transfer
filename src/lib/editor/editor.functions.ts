@@ -19,7 +19,11 @@ const PAGE_ID = (v: unknown): string => {
 const STATE = (v: unknown): PageState => {
   if (!v || typeof v !== "object") throw new Error("invalid state");
   const s = v as PageState;
-  if (typeof s.pageId !== "string" || typeof s.versionId !== "string" || !Array.isArray(s.sections)) {
+  if (
+    typeof s.pageId !== "string" ||
+    typeof s.versionId !== "string" ||
+    !Array.isArray(s.sections)
+  ) {
     throw new Error("invalid state shape");
   }
   return s;
@@ -43,11 +47,13 @@ export const fetchDraft = createServerFn({ method: "POST" })
 
 export const saveDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { pageId: string; expectedVersion: string | null; state: PageState }) => ({
-    pageId: PAGE_ID(input.pageId),
-    expectedVersion: input.expectedVersion ?? null,
-    state: STATE(input.state),
-  }))
+  .inputValidator(
+    (input: { pageId: string; expectedVersion: string | null; state: PageState }) => ({
+      pageId: PAGE_ID(input.pageId),
+      expectedVersion: input.expectedVersion ?? null,
+      state: STATE(input.state),
+    }),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     // Conflict check: only when the row already exists with a different version.
@@ -101,12 +107,19 @@ export const listSnapshots = createServerFn({ method: "POST" })
 
 export const createSnapshot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { pageId: string; state: PageState; summary?: string; parentVersionId?: string | null }) => ({
-    pageId: PAGE_ID(input.pageId),
-    state: STATE(input.state),
-    summary: input.summary?.slice(0, 500) ?? null,
-    parentVersionId: input.parentVersionId ?? null,
-  }))
+  .inputValidator(
+    (input: {
+      pageId: string;
+      state: PageState;
+      summary?: string;
+      parentVersionId?: string | null;
+    }) => ({
+      pageId: PAGE_ID(input.pageId),
+      state: STATE(input.state),
+      summary: input.summary?.slice(0, 500) ?? null,
+      parentVersionId: input.parentVersionId ?? null,
+    }),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase.from("editor_snapshots").insert({
@@ -132,16 +145,22 @@ export const createSnapshot = createServerFn({ method: "POST" })
 
 export const publishPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { pageId: string; expectedVersion: string | null; state: PageState; summary?: string }) => ({
-    pageId: PAGE_ID(input.pageId),
-    expectedVersion: input.expectedVersion ?? null,
-    state: STATE(input.state),
-    summary: input.summary?.slice(0, 500) ?? null,
-  }))
+  .inputValidator(
+    (input: {
+      pageId: string;
+      expectedVersion: string | null;
+      state: PageState;
+      summary?: string;
+    }) => ({
+      pageId: PAGE_ID(input.pageId),
+      expectedVersion: input.expectedVersion ?? null,
+      state: STATE(input.state),
+      summary: input.summary?.slice(0, 500) ?? null,
+    }),
+  )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const newVersion =
-      (globalThis.crypto?.randomUUID?.() ?? data.state.versionId);
+    const newVersion = globalThis.crypto?.randomUUID?.() ?? data.state.versionId;
     const { data: published, error } = await supabase.rpc("editor_publish_page", {
       _page_id: data.pageId,
       _expected_version: data.expectedVersion ?? "",

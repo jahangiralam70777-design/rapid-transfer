@@ -95,13 +95,16 @@ export function SiteManagementFlow() {
                 Site Management
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                Build pages, edit sections, manage media & theme — all visually.
-                Live preview shows your real published site.
+                Build pages, edit sections, manage media & theme — all visually. Live preview shows
+                your real published site.
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="gap-1 rounded-full border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <Badge
+              variant="outline"
+              className="gap-1 rounded-full border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            >
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
               Live publishing
             </Badge>
@@ -116,25 +119,47 @@ export function SiteManagementFlow() {
 
       <Tabs defaultValue="sections" className="space-y-4">
         <TabsList className="glass flex w-full flex-wrap gap-1 rounded-2xl p-1">
-          <TabsTrigger value="sections" className="flex-1 gap-1"><Layers className="h-3.5 w-3.5" />Pages & Sections</TabsTrigger>
-          <TabsTrigger value="theme" className="flex-1 gap-1"><Palette className="h-3.5 w-3.5" />Theme</TabsTrigger>
-          <TabsTrigger value="navigation" className="flex-1 gap-1"><MenuSquare className="h-3.5 w-3.5" />Nav & Footer</TabsTrigger>
-          <TabsTrigger value="media" className="flex-1 gap-1"><ImageIco className="h-3.5 w-3.5" />Media</TabsTrigger>
-          <TabsTrigger value="history" className="flex-1 gap-1"><History className="h-3.5 w-3.5" />History</TabsTrigger>
+          <TabsTrigger value="sections" className="flex-1 gap-1">
+            <Layers className="h-3.5 w-3.5" />
+            Pages & Sections
+          </TabsTrigger>
+          <TabsTrigger value="theme" className="flex-1 gap-1">
+            <Palette className="h-3.5 w-3.5" />
+            Theme
+          </TabsTrigger>
+          <TabsTrigger value="navigation" className="flex-1 gap-1">
+            <MenuSquare className="h-3.5 w-3.5" />
+            Nav & Footer
+          </TabsTrigger>
+          <TabsTrigger value="media" className="flex-1 gap-1">
+            <ImageIco className="h-3.5 w-3.5" />
+            Media
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex-1 gap-1">
+            <History className="h-3.5 w-3.5" />
+            History
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="sections"><SectionsTab /></TabsContent>
-        <TabsContent value="theme"><ThemeTab /></TabsContent>
-        <TabsContent value="navigation"><NavigationTab /></TabsContent>
-        <TabsContent value="media"><MediaTab /></TabsContent>
-        <TabsContent value="history"><HistoryTab /></TabsContent>
+        <TabsContent value="sections">
+          <SectionsTab />
+        </TabsContent>
+        <TabsContent value="theme">
+          <ThemeTab />
+        </TabsContent>
+        <TabsContent value="navigation">
+          <NavigationTab />
+        </TabsContent>
+        <TabsContent value="media">
+          <MediaTab />
+        </TabsContent>
+        <TabsContent value="history">
+          <HistoryTab />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-
-
-
 
 // ============================================================
 // SECTIONS TAB
@@ -213,10 +238,7 @@ function SectionsTab() {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[240px,260px,minmax(0,1fr)]">
       {/* PAGES */}
-      <PagesPanel
-        activePageId={activePage?.id ?? null}
-        onActivate={setActivePage}
-      />
+      <PagesPanel activePageId={activePage?.id ?? null} onActivate={setActivePage} />
 
       {/* SECTIONS LIST */}
       <aside className="glass shadow-card-soft flex flex-col gap-2 rounded-2xl p-3">
@@ -230,24 +252,19 @@ function SectionsTab() {
         </div>
         {!isHomePage ? (
           <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-            Section editor for custom pages coming soon. Use the Pages panel to
-            edit SEO and status.
+            Section editor for custom pages coming soon. Use the Pages panel to edit SEO and status.
           </div>
         ) : (
           <ul className="space-y-1">
             {sections.map((s, i) => {
               const isActive = active?.section_key === s.section_key;
-              const dirty =
-                JSON.stringify(s.draft_content) !==
-                JSON.stringify(s.published_content);
+              const dirty = JSON.stringify(s.draft_content) !== JSON.stringify(s.published_content);
               const label = SECTION_LABELS[s.section_key] ?? s.section_key;
               return (
                 <li
                   key={s.id}
                   className={`group flex items-center gap-1 rounded-xl px-2 py-1.5 text-sm transition ${
-                    isActive
-                      ? "bg-cta-gradient text-white shadow-glow"
-                      : "hover:bg-muted/60"
+                    isActive ? "bg-cta-gradient text-white shadow-glow" : "hover:bg-muted/60"
                   }`}
                 >
                   <span
@@ -338,9 +355,7 @@ function SectionsTab() {
                 </span>
               )}
             </h2>
-            <p className="truncate text-xs text-muted-foreground">
-              {previewPath}
-            </p>
+            <p className="truncate text-xs text-muted-foreground">{previewPath}</p>
           </div>
           <div className="flex items-center gap-2">
             <Badge
@@ -393,9 +408,8 @@ function SectionsTab() {
                 Section editor for custom pages — coming next
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                You can already create, rename, duplicate, reorder and set this
-                page's SEO. Adding sections to non-homepage pages ships in the
-                next update.
+                You can already create, rename, duplicate, reorder and set this page's SEO. Adding
+                sections to non-homepage pages ships in the next update.
               </p>
             </div>
             <LivePreviewFrame path={previewPath} title={activePage?.title ?? "Page"} />
@@ -425,9 +439,7 @@ function SectionFloatingToolbar({
   busy: boolean;
 }) {
   const label = SECTION_LABELS[section.section_key] ?? section.section_key;
-  const dirty =
-    JSON.stringify(section.draft_content) !==
-    JSON.stringify(section.published_content);
+  const dirty = JSON.stringify(section.draft_content) !== JSON.stringify(section.published_content);
 
   return (
     <div className="sticky top-2 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-border/60 bg-card/95 px-3 py-2 shadow-card-soft backdrop-blur supports-[backdrop-filter]:bg-card/70">
@@ -437,7 +449,10 @@ function SectionFloatingToolbar({
         </span>
         <span className="font-display text-sm font-semibold capitalize">{label}</span>
         {dirty && (
-          <Badge variant="outline" className="h-5 gap-1 rounded-full border-amber-500/40 bg-amber-500/10 text-[10px] text-amber-600">
+          <Badge
+            variant="outline"
+            className="h-5 gap-1 rounded-full border-amber-500/40 bg-amber-500/10 text-[10px] text-amber-600"
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
             unsaved draft
           </Badge>
@@ -501,7 +516,6 @@ function SectionFloatingToolbar({
   );
 }
 
-
 // ============================================================
 // LIVE PREVIEW — renders the REAL site in an iframe (no mock data)
 // ============================================================
@@ -538,9 +552,7 @@ function LivePreviewFrame({ path, title }: { path: string; title: string }) {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "/") {
         e.preventDefault();
-        setDevice((d) =>
-          d === "desktop" ? "tablet" : d === "tablet" ? "mobile" : "desktop",
-        );
+        setDevice((d) => (d === "desktop" ? "tablet" : d === "tablet" ? "mobile" : "desktop"));
       } else if (e.key === "Escape") {
         setDevice("desktop");
       } else if (mod && e.key.toLowerCase() === "s") {
@@ -554,7 +566,6 @@ function LivePreviewFrame({ path, title }: { path: string; title: string }) {
   }, []);
 
   const src = `${path}${path.includes("?") ? "&" : "?"}site-preview=1&__preview=1&__theme=${theme}&__nonce=${nonce}`;
-
 
   const widths: Record<typeof device, string> = {
     desktop: "100%",
@@ -657,15 +668,12 @@ function LivePreviewFrame({ path, title }: { path: string; title: string }) {
         </div>
       </div>
       <p className="px-1 text-[11px] text-muted-foreground">
-        Preview reflects the real published site. Saving a draft refreshes it automatically. Press <kbd className="rounded border border-border/60 bg-muted px-1">⌘ /</kbd> to switch device.
+        Preview reflects the real published site. Saving a draft refreshes it automatically. Press{" "}
+        <kbd className="rounded border border-border/60 bg-muted px-1">⌘ /</kbd> to switch device.
       </p>
-
     </div>
   );
 }
-
-
-
 
 // ============================================================
 // THEME / NAVIGATION tabs (settings-backed)
@@ -879,7 +887,11 @@ function MediaCard({ item }: { item: MediaItem }) {
         data: {
           id: item.id,
           altText: alt || undefined,
-          tags: tags.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 20),
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+            .slice(0, 20),
         },
       }),
     onSuccess: () => {
@@ -913,21 +925,50 @@ function MediaCard({ item }: { item: MediaItem }) {
     <div className="glass shadow-card-soft flex flex-col gap-2 rounded-2xl p-2">
       <div className="aspect-square overflow-hidden rounded-xl bg-muted">
         {isImage ? (
-          <img src={item.publicUrl} alt={alt || item.file_name} loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={item.publicUrl}
+            alt={alt || item.file_name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
             {item.mime_type}
           </div>
         )}
       </div>
-      <p className="truncate text-[11px] font-medium" title={item.file_name}>{item.file_name}</p>
-      <Input value={alt} onChange={(e) => setAlt(e.target.value)} placeholder="Alt text" className="h-7 text-xs" />
-      <Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="tags, comma, separated" className="h-7 text-xs" />
+      <p className="truncate text-[11px] font-medium" title={item.file_name}>
+        {item.file_name}
+      </p>
+      <Input
+        value={alt}
+        onChange={(e) => setAlt(e.target.value)}
+        placeholder="Alt text"
+        className="h-7 text-xs"
+      />
+      <Input
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+        placeholder="tags, comma, separated"
+        className="h-7 text-xs"
+      />
       <div className="flex gap-1">
-        <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => save.mutate()} disabled={save.isPending}>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 flex-1 text-xs"
+          onClick={() => save.mutate()}
+          disabled={save.isPending}
+        >
           Save
         </Button>
-        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={copyUrl} title="Copy URL">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 text-xs"
+          onClick={copyUrl}
+          title="Copy URL"
+        >
           <Copy className="h-3 w-3" />
         </Button>
         <AlertDialog>
@@ -940,7 +981,8 @@ function MediaCard({ item }: { item: MediaItem }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete this file?</AlertDialogTitle>
               <AlertDialogDescription>
-                Removes from storage and the media library. References in sections/theme will break if not updated.
+                Removes from storage and the media library. References in sections/theme will break
+                if not updated.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -965,7 +1007,11 @@ function HistoryTab() {
   const targets = useMemo(() => {
     const out: { kind: "section" | "setting"; key: string; label: string }[] = [];
     for (const s of (sectionsQ.data?.sections ?? []) as SectionRow[]) {
-      out.push({ kind: "section", key: s.section_key, label: SECTION_LABELS[s.section_key] ?? s.section_key });
+      out.push({
+        kind: "section",
+        key: s.section_key,
+        label: SECTION_LABELS[s.section_key] ?? s.section_key,
+      });
     }
     for (const s of (settingsQ.data?.settings ?? []) as SettingRow[]) {
       out.push({ kind: "setting", key: s.key, label: s.key });
@@ -973,7 +1019,9 @@ function HistoryTab() {
     return out;
   }, [sectionsQ.data, settingsQ.data]);
 
-  const [selected, setSelected] = useState<{ kind: "section" | "setting"; key: string } | null>(null);
+  const [selected, setSelected] = useState<{ kind: "section" | "setting"; key: string } | null>(
+    null,
+  );
   useEffect(() => {
     if (!selected && targets[0]) setSelected({ kind: targets[0].kind, key: targets[0].key });
   }, [selected, targets]);
@@ -1003,7 +1051,9 @@ function HistoryTab() {
           })}
         </ul>
       </aside>
-      <div>{selected ? <VersionList target={selected} /> : <LoadingPanel label="Pick a target…" />}</div>
+      <div>
+        {selected ? <VersionList target={selected} /> : <LoadingPanel label="Pick a target…" />}
+      </div>
     </div>
   );
 }
@@ -1012,7 +1062,8 @@ function VersionList({ target }: { target: { kind: "section" | "setting"; key: s
   const qc = useQueryClient();
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin-versions", target.kind, target.key],
-    queryFn: () => adminListVersions({ data: { targetKind: target.kind, targetKey: target.key, limit: 50 } }),
+    queryFn: () =>
+      adminListVersions({ data: { targetKind: target.kind, targetKey: target.key, limit: 50 } }),
     staleTime: 10_000,
   });
 
@@ -1045,7 +1096,9 @@ function VersionList({ target }: { target: { kind: "section" | "setting"; key: s
         </h3>
       </div>
       {versions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No published versions yet. Publish a change to create the first snapshot.</p>
+        <p className="text-sm text-muted-foreground">
+          No published versions yet. Publish a change to create the first snapshot.
+        </p>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {versions.map((v, idx) => (
@@ -1079,7 +1132,9 @@ function VersionCard({
           {version.label && <p className="text-xs text-muted-foreground">{version.label}</p>}
         </div>
         {isLatest && (
-          <Badge variant="secondary" className="text-[10px]">Current live</Badge>
+          <Badge variant="secondary" className="text-[10px]">
+            Current live
+          </Badge>
         )}
       </div>
       <div className="flex flex-wrap gap-2">
@@ -1108,8 +1163,8 @@ function VersionCard({
             <AlertDialogHeader>
               <AlertDialogTitle>Restore this version?</AlertDialogTitle>
               <AlertDialogDescription>
-                The snapshot becomes your current draft. Your live content is unchanged
-                until you open the editor and publish.
+                The snapshot becomes your current draft. Your live content is unchanged until you
+                open the editor and publish.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -1133,24 +1188,36 @@ function SnapshotPreview({ snapshot }: { snapshot: Json }) {
     <div className="max-h-[60vh] space-y-3 overflow-y-auto">
       {entries.map(([k, v]) => (
         <div key={k} className="rounded-lg border border-border bg-card/30 p-3">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{k}</p>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {k}
+          </p>
           {Array.isArray(v) ? (
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">{v.length} item{v.length === 1 ? "" : "s"}</p>
+              <p className="text-xs text-muted-foreground">
+                {v.length} item{v.length === 1 ? "" : "s"}
+              </p>
               <ul className="ml-4 list-disc text-sm">
                 {(v as unknown[]).slice(0, 6).map((it, i) => (
                   <li key={i} className="truncate">
                     {typeof it === "object" && it
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      ? (it as any).title || (it as any).label || (it as any).question || (it as any).name || JSON.stringify(it).slice(0, 80)
+                      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (it as any).title ||
+                        (it as any).label ||
+                        (it as any).question ||
+                        (it as any).name ||
+                        JSON.stringify(it).slice(0, 80)
                       : String(it)}
                   </li>
                 ))}
-                {v.length > 6 && <li className="text-xs text-muted-foreground">…and {v.length - 6} more</li>}
+                {v.length > 6 && (
+                  <li className="text-xs text-muted-foreground">…and {v.length - 6} more</li>
+                )}
               </ul>
             </div>
           ) : typeof v === "object" && v ? (
-            <pre className="overflow-x-auto rounded bg-muted/40 p-2 text-[11px]">{JSON.stringify(v, null, 2)}</pre>
+            <pre className="overflow-x-auto rounded bg-muted/40 p-2 text-[11px]">
+              {JSON.stringify(v, null, 2)}
+            </pre>
           ) : (
             <p className="text-sm">{String(v ?? "—")}</p>
           )}
@@ -1177,7 +1244,9 @@ function ErrorPanel({ error, onRetry }: { error: Error; onRetry: () => void }) {
     <div className="glass shadow-card-soft space-y-2 rounded-2xl p-4 text-sm">
       <p className="font-medium text-destructive">Something went wrong</p>
       <p className="text-xs text-muted-foreground">{error.message}</p>
-      <Button size="sm" variant="outline" onClick={onRetry}>Retry</Button>
+      <Button size="sm" variant="outline" onClick={onRetry}>
+        Retry
+      </Button>
     </div>
   );
 }

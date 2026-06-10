@@ -1,11 +1,30 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Save, Trash2, Plus, ArrowUp, ArrowDown, ImageIcon, Search, Upload, X, Check } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  Trash2,
+  Plus,
+  ArrowUp,
+  ArrowDown,
+  ImageIcon,
+  Search,
+  Upload,
+  X,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,7 +108,11 @@ export function EditorShell({
         <div className="flex flex-wrap items-center gap-2">
           {rightSlot}
           <Button variant="outline" size="sm" onClick={onSave} disabled={saving || !dirty}>
-            {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}
+            {saving ? (
+              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="mr-1 h-3.5 w-3.5" />
+            )}
             Save draft
           </Button>
           <AlertDialog>
@@ -103,7 +126,8 @@ export function EditorShell({
               <AlertDialogHeader>
                 <AlertDialogTitle>Publish to the live site?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Your saved draft will go live immediately. A version snapshot is saved automatically — you can roll back from History.
+                  Your saved draft will go live immediately. A version snapshot is saved
+                  automatically — you can roll back from History.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -174,7 +198,13 @@ export function Repeater<T>({
               Item {i + 1}
             </span>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, -1)} disabled={i === 0}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+              >
                 <ArrowUp className="h-3.5 w-3.5" />
               </Button>
               <Button
@@ -186,7 +216,12 @@ export function Repeater<T>({
               >
                 <ArrowDown className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(i)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-destructive"
+                onClick={() => remove(i)}
+              >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -226,7 +261,12 @@ export function ColorField({
           className="h-9 w-12 cursor-pointer rounded-md border border-border bg-transparent"
           aria-label={`${label} color`}
         />
-        <Input value={value ?? ""} onChange={(e) => onChange(e.target.value)} placeholder="#3b82f6 or oklch(...)" className="h-9 flex-1" />
+        <Input
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="#3b82f6 or oklch(...)"
+          className="h-9 flex-1"
+        />
       </div>
     </Field>
   );
@@ -235,19 +275,33 @@ export function ColorField({
 // -------------------- Icon picker (Lucide) --------------------
 
 const ICON_CHOICES = [
-  "ListChecks", "FileText", "Brain", "Trophy", "BookOpen", "GraduationCap",
-  "Sparkles", "Target", "BarChart3", "Lightbulb", "Rocket", "Star",
-  "Shield", "Award", "Users", "MessageCircle", "Calendar", "Clock",
-  "Layers", "Compass", "Zap", "Heart", "CheckCircle", "TrendingUp",
+  "ListChecks",
+  "FileText",
+  "Brain",
+  "Trophy",
+  "BookOpen",
+  "GraduationCap",
+  "Sparkles",
+  "Target",
+  "BarChart3",
+  "Lightbulb",
+  "Rocket",
+  "Star",
+  "Shield",
+  "Award",
+  "Users",
+  "MessageCircle",
+  "Calendar",
+  "Clock",
+  "Layers",
+  "Compass",
+  "Zap",
+  "Heart",
+  "CheckCircle",
+  "TrendingUp",
 ];
 
-export function IconPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+export function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Current = (LucideIcons as any)[value] ?? LucideIcons.Sparkles;
@@ -333,7 +387,13 @@ export function MediaPickerButton({
             <ImageIcon className="mr-1 h-3.5 w-3.5" /> {value ? "Change" : "Choose image"}
           </Button>
           {value && (
-            <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={() => onChange(null)}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-destructive"
+              onClick={() => onChange(null)}
+            >
               <X className="mr-1 h-3.5 w-3.5" /> Remove
             </Button>
           )}
@@ -457,7 +517,8 @@ export function MediaPickerDialog({
             />
           </div>
           <Button size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
-            <Upload className="mr-1 h-3.5 w-3.5" /> {uploading ? `Uploading ${progress}%` : "Upload new"}
+            <Upload className="mr-1 h-3.5 w-3.5" />{" "}
+            {uploading ? `Uploading ${progress}%` : "Upload new"}
           </Button>
           <input
             ref={fileRef}
@@ -471,7 +532,9 @@ export function MediaPickerDialog({
         <div className="max-h-[60vh] overflow-y-auto">
           {isLoading && <p className="p-6 text-center text-sm text-muted-foreground">Loading…</p>}
           {!isLoading && items.length === 0 && (
-            <p className="p-6 text-center text-sm text-muted-foreground">No images yet. Upload one to get started.</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">
+              No images yet. Upload one to get started.
+            </p>
           )}
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {items
@@ -483,7 +546,12 @@ export function MediaPickerDialog({
                   onClick={() => onPick(m.publicUrl)}
                   className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted transition hover:ring-2 hover:ring-primary"
                 >
-                  <img src={m.publicUrl} alt={m.alt_text ?? m.file_name} className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={m.publicUrl}
+                    alt={m.alt_text ?? m.file_name}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                   <span className="absolute inset-x-0 bottom-0 truncate bg-black/60 px-1 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100">
                     {m.file_name}
                   </span>
@@ -492,7 +560,9 @@ export function MediaPickerDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -514,8 +584,10 @@ export function useDraft<T>(initial: T, key: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(initial)]);
   const setField = useMemo(
-    () => <K extends keyof T>(k: K, v: T[K]) => setValue((prev) => ({ ...prev, [k]: v })),
-    []
+    () =>
+      <K extends keyof T>(k: K, v: T[K]) =>
+        setValue((prev) => ({ ...prev, [k]: v })),
+    [],
   );
   return { value, setValue, setField };
 }

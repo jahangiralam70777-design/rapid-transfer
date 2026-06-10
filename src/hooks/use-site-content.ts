@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import {
-  publicGetHomepageContent,
-  publicGetSiteSettings,
-} from "@/lib/site-management.functions";
+import { publicGetHomepageContent, publicGetSiteSettings } from "@/lib/site-management.functions";
 
 /**
  * Public read hooks for the admin-managed site content.

@@ -1,7 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { reportError } from "@/lib/error-reporter";
 
-interface State { error: Error | null }
+interface State {
+  error: Error | null;
+}
 
 /**
  * Top-level React error boundary. Catches crashes that escape route-level

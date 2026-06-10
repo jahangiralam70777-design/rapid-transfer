@@ -6,7 +6,11 @@ export const Route = createFileRoute("/_student/daily-progress")({
   head: () => ({
     meta: [
       { title: "Daily Progress · CA Aspire BD" },
-      { name: "description", content: "Track daily, weekly and monthly study progress across subjects and chapters with live analytics." },
+      {
+        name: "description",
+        content:
+          "Track daily, weekly and monthly study progress across subjects and chapters with live analytics.",
+      },
     ],
   }),
 });

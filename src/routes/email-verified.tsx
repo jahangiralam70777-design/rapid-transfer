@@ -10,7 +10,10 @@ export const Route = createFileRoute("/email-verified")({
       { title: "Email Verified · CA Aspire BD" },
       { name: "description", content: "Your email is verified. Welcome aboard CA Aspire BD." },
       { property: "og:title", content: "Email Verified · CA Aspire BD" },
-      { property: "og:description", content: "You're all set — continue to your personalized dashboard." },
+      {
+        property: "og:description",
+        content: "You're all set — continue to your personalized dashboard.",
+      },
     ],
   }),
 });
@@ -22,7 +25,13 @@ function Confetti() {
       {pieces.map((_, i) => {
         const left = (i * 41) % 100;
         const delay = (i % 7) * 0.4;
-        const colors = ["var(--neon-purple)", "var(--neon-blue)", "var(--neon-pink)", "#34d399", "#fbbf24"];
+        const colors = [
+          "var(--neon-purple)",
+          "var(--neon-blue)",
+          "var(--neon-pink)",
+          "#34d399",
+          "#fbbf24",
+        ];
         return (
           <span
             key={i}

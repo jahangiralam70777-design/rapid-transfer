@@ -34,9 +34,7 @@ export const TitleWithTooltip = React.forwardRef<HTMLSpanElement, TitleWithToolt
               {text}
             </Inner>
           </TooltipTrigger>
-          <TooltipContent className="max-w-[min(90vw,420px)] break-words">
-            {text}
-          </TooltipContent>
+          <TooltipContent className="max-w-[min(90vw,420px)] break-words">{text}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
@@ -49,7 +47,10 @@ TitleWithTooltip.displayName = "TitleWithTooltip";
  * Standard row layout: [leading] [title/subtitle - flex-grow + truncated] [actions - pinned right].
  * Guarantees actions stay visible no matter how long the title is.
  */
-export interface ResponsiveListItemProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ResponsiveListItemProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "title"
+> {
   leading?: React.ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
@@ -78,7 +79,9 @@ export const ResponsiveListItem = React.forwardRef<HTMLDivElement, ResponsiveLis
         {subtitle ? (
           <div className="min-w-0 truncate-safe text-xs text-muted-foreground">{subtitle}</div>
         ) : null}
-        {meta ? <div className="min-w-0 truncate-safe text-xs text-muted-foreground">{meta}</div> : null}
+        {meta ? (
+          <div className="min-w-0 truncate-safe text-xs text-muted-foreground">{meta}</div>
+        ) : null}
       </div>
       {actions ? <div className="row-safe-actions">{actions}</div> : null}
     </div>
@@ -91,20 +94,21 @@ ResponsiveListItem.displayName = "ResponsiveListItem";
  * Card with built-in min-w-0 and overflow protection so badges/buttons
  * never get pushed out by long titles.
  */
-export const ResponsiveCard = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...rest }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        "min-w-0 max-w-full overflow-hidden rounded-xl border border-border/40 bg-card/50 p-4",
-        className,
-      )}
-      {...rest}
-    >
-      {children}
-    </div>
-  ),
-);
+export const ResponsiveCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "min-w-0 max-w-full overflow-hidden rounded-xl border border-border/40 bg-card/50 p-4",
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </div>
+));
 ResponsiveCard.displayName = "ResponsiveCard";
 
 /**

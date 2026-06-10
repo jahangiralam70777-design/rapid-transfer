@@ -3,26 +3,57 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import {
-  BookOpen, CheckCircle2, CircleDashed, Loader2, Sparkles,
-  ArrowRight, Layers, Target,
+  BookOpen,
+  CheckCircle2,
+  CircleDashed,
+  Loader2,
+  Sparkles,
+  ArrowRight,
+  Layers,
+  Target,
 } from "lucide-react";
 import { studentCompletionTracker } from "@/lib/student-performance.functions";
 import { useRealtimeActivity } from "@/hooks/use-realtime-invalidator";
 
-function Ring({ pct, size = 56, stroke = 6, tone = "var(--neon-purple)" }: {
-  pct: number; size?: number; stroke?: number; tone?: string;
+function Ring({
+  pct,
+  size = 56,
+  stroke = 6,
+  tone = "var(--neon-purple)",
+}: {
+  pct: number;
+  size?: number;
+  stroke?: number;
+  tone?: string;
 }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const dash = (Math.min(100, Math.max(0, pct)) / 100) * c;
   return (
     <svg width={size} height={size} className="shrink-0 -rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} stroke="currentColor"
-        strokeWidth={stroke} fill="none" className="text-muted/40" />
-      <circle cx={size / 2} cy={size / 2} r={r} stroke={tone}
-        strokeWidth={stroke} fill="none" strokeLinecap="round"
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke="currentColor"
+        strokeWidth={stroke}
+        fill="none"
+        className="text-muted/40"
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke={tone}
+        strokeWidth={stroke}
+        fill="none"
+        strokeLinecap="round"
         strokeDasharray={`${dash} ${c}`}
-        style={{ filter: `drop-shadow(0 0 6px ${tone})`, transition: "stroke-dasharray 700ms ease" }} />
+        style={{
+          filter: `drop-shadow(0 0 6px ${tone})`,
+          transition: "stroke-dasharray 700ms ease",
+        }}
+      />
     </svg>
   );
 }
@@ -56,7 +87,8 @@ export function CompletionTracker() {
 
   const [activeSubject, setActiveSubject] = useState<string | "all">("all");
   const filteredChapters = useMemo(
-    () => activeSubject === "all" ? chapters : chapters.filter((c) => c.subjectId === activeSubject),
+    () =>
+      activeSubject === "all" ? chapters : chapters.filter((c) => c.subjectId === activeSubject),
     [chapters, activeSubject],
   );
 
@@ -84,7 +116,8 @@ export function CompletionTracker() {
             Completion <span className="text-gradient">Tracker</span>
           </h2>
           <p className="text-xs text-muted-foreground">
-            Subject &amp; chapter coverage · {overall?.chaptersDone ?? 0}/{overall?.chaptersTotal ?? 0} chapters · {overall?.completionPct ?? 0}% overall
+            Subject &amp; chapter coverage · {overall?.chaptersDone ?? 0}/
+            {overall?.chaptersTotal ?? 0} chapters · {overall?.completionPct ?? 0}% overall
           </p>
         </div>
         <div className="hidden items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground sm:inline-flex">
@@ -103,22 +136,30 @@ export function CompletionTracker() {
               onClick={() => setActiveSubject(activeSubject === s.id ? "all" : s.id)}
               className={`glass shadow-card-soft group relative overflow-hidden rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${activeSubject === s.id ? "ring-2 ring-[var(--neon-purple)]" : ""}`}
             >
-              <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30 blur-2xl"
-                style={{ background: tone }} />
+              <div
+                className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30 blur-2xl"
+                style={{ background: tone }}
+              />
               <div className="flex items-start gap-3">
                 <Ring pct={s.completionPct} tone={tone} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <p className="font-display text-sm font-bold line-clamp-1">{s.name}</p>
-                    <span className="font-display text-lg font-bold" style={{ color: tone }}>{s.completionPct}%</span>
+                    <span className="font-display text-lg font-bold" style={{ color: tone }}>
+                      {s.completionPct}%
+                    </span>
                   </div>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">
                     {s.mcqsDone}/{s.mcqsTotal} MCQs · acc {s.accuracy}%
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5 text-[10px]">
-                    <span className="rounded-full bg-background/50 px-1.5 py-0.5">Q {s.quizzes}</span>
+                    <span className="rounded-full bg-background/50 px-1.5 py-0.5">
+                      Q {s.quizzes}
+                    </span>
                     <span className="rounded-full bg-background/50 px-1.5 py-0.5">M {s.mocks}</span>
-                    <span className="rounded-full bg-background/50 px-1.5 py-0.5">CE {s.customExams}</span>
+                    <span className="rounded-full bg-background/50 px-1.5 py-0.5">
+                      CE {s.customExams}
+                    </span>
                     <span className="rounded-full bg-amber-400/15 px-1.5 py-0.5 text-amber-400">
                       {s.pendingChapters} pending
                     </span>
@@ -139,13 +180,23 @@ export function CompletionTracker() {
                 <Layers className="h-4 w-4 text-[var(--neon-blue)]" /> Chapter Completion
               </h3>
               <p className="text-xs text-muted-foreground">
-                {activeSubject === "all" ? "All subjects · click a subject above to filter" : "Tap a subject to clear filter"}
+                {activeSubject === "all"
+                  ? "All subjects · click a subject above to filter"
+                  : "Tap a subject to clear filter"}
               </p>
             </div>
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT.completed}`} /> done</span>
-              <span className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT.in_progress}`} /> in progress</span>
-              <span className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT.not_started}`} /> not started</span>
+              <span className="flex items-center gap-1">
+                <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT.completed}`} /> done
+              </span>
+              <span className="flex items-center gap-1">
+                <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT.in_progress}`} /> in
+                progress
+              </span>
+              <span className="flex items-center gap-1">
+                <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT.not_started}`} /> not
+                started
+              </span>
             </div>
           </div>
 
@@ -165,11 +216,15 @@ export function CompletionTracker() {
                       {c.subjectName} · {c.mcqsDone}/{c.mcqsTotal} MCQs · {c.attempts} sessions
                     </p>
                   </div>
-                  <span className={`font-display text-xs font-bold ${
-                    c.status === "completed" ? "text-emerald-400"
-                      : c.status === "in_progress" ? "text-amber-400"
-                      : "text-muted-foreground"
-                  }`}>
+                  <span
+                    className={`font-display text-xs font-bold ${
+                      c.status === "completed"
+                        ? "text-emerald-400"
+                        : c.status === "in_progress"
+                          ? "text-amber-400"
+                          : "text-muted-foreground"
+                    }`}
+                  >
                     {c.completionPct}%
                   </span>
                 </div>
@@ -178,11 +233,12 @@ export function CompletionTracker() {
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${c.completionPct}%`,
-                      background: c.status === "completed"
-                        ? "linear-gradient(90deg, oklch(0.78 0.18 150), oklch(0.7 0.18 170))"
-                        : c.status === "in_progress"
-                          ? "linear-gradient(90deg, oklch(0.82 0.18 80), var(--neon-pink))"
-                          : "var(--muted)",
+                      background:
+                        c.status === "completed"
+                          ? "linear-gradient(90deg, oklch(0.78 0.18 150), oklch(0.7 0.18 170))"
+                          : c.status === "in_progress"
+                            ? "linear-gradient(90deg, oklch(0.82 0.18 80), var(--neon-pink))"
+                            : "var(--muted)",
                     }}
                   />
                 </div>
@@ -200,29 +256,35 @@ export function CompletionTracker() {
           </div>
           <p className="text-xs text-muted-foreground">Smart recommendations</p>
           <ul className="mt-4 space-y-2">
-            {recs.length ? recs.map((r) => (
-              <li key={r.chapterId} className="rounded-2xl bg-background/40 p-3">
-                <div className="flex items-start gap-2">
-                  <BookOpen className="mt-0.5 h-3.5 w-3.5 text-[var(--neon-blue)]" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-sm font-bold line-clamp-1">{r.title}</p>
-                    <p className="text-[10px] text-muted-foreground line-clamp-2">
-                      {r.subjectName} · {r.reason}
-                    </p>
+            {recs.length ? (
+              recs.map((r) => (
+                <li key={r.chapterId} className="rounded-2xl bg-background/40 p-3">
+                  <div className="flex items-start gap-2">
+                    <BookOpen className="mt-0.5 h-3.5 w-3.5 text-[var(--neon-blue)]" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display text-sm font-bold line-clamp-1">{r.title}</p>
+                      <p className="text-[10px] text-muted-foreground line-clamp-2">
+                        {r.subjectName} · {r.reason}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <Link to="/mcq-practice"
-                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--neon-purple)]/15 px-2 py-1 text-[10px] font-bold text-[var(--neon-purple)] hover:bg-[var(--neon-purple)]/25">
-                    Practice <ArrowRight className="h-3 w-3" />
-                  </Link>
-                  <Link to="/flash-cards"
-                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl bg-background/60 px-2 py-1 text-[10px] font-bold hover:bg-background/80">
-                    Revise
-                  </Link>
-                </div>
-              </li>
-            )) : (
+                  <div className="mt-2 flex gap-2">
+                    <Link
+                      to="/mcq-practice"
+                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl bg-[var(--neon-purple)]/15 px-2 py-1 text-[10px] font-bold text-[var(--neon-purple)] hover:bg-[var(--neon-purple)]/25"
+                    >
+                      Practice <ArrowRight className="h-3 w-3" />
+                    </Link>
+                    <Link
+                      to="/flash-cards"
+                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl bg-background/60 px-2 py-1 text-[10px] font-bold hover:bg-background/80"
+                    >
+                      Revise
+                    </Link>
+                  </div>
+                </li>
+              ))
+            ) : (
               <li className="flex items-center gap-2 text-xs text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 All caught up — keep going!

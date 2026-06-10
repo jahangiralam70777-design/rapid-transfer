@@ -27,7 +27,6 @@ const NAVBAR_DEFAULTS: NavbarSettings = {
   ],
 };
 
-
 function scrollToHash(hash: string) {
   const el = document.getElementById(hash);
   if (!el) return;
@@ -44,14 +43,14 @@ export function Navbar() {
   const user = useAppStore((s) => s.user);
   const sessionReady = useAppStore((s) => s.sessionReady);
   const nav = useSetting<NavbarSettings>("navbar", NAVBAR_DEFAULTS);
-  const LINKS: NavLink[] = Array.isArray(nav.links) && nav.links.length > 0 ? nav.links : NAVBAR_DEFAULTS.links;
+  const LINKS: NavLink[] =
+    Array.isArray(nav.links) && nav.links.length > 0 ? nav.links : NAVBAR_DEFAULTS.links;
   // Gate any UI that depends on browser-only state (theme from localStorage,
   // user session restored by hydrate()) until after the first client commit
   // so SSR HTML and the first client render are byte-identical.
   const hydrated = useHydrated();
   const showAuthedNav = hydrated && sessionReady && Boolean(user);
   const themeIsDark = hydrated && theme === "dark";
-
 
   useEffect(() => {
     const onScroll = () => {
@@ -99,12 +98,12 @@ export function Navbar() {
             </div>
             <div className="leading-tight">
               <p className="font-display text-[15px] font-bold tracking-tight sm:text-base">
-                {nav.brand_primary}<span className="text-gradient"> {nav.brand_secondary}</span>
+                {nav.brand_primary}
+                <span className="text-gradient"> {nav.brand_secondary}</span>
               </p>
               <p className="hidden text-[9px] uppercase tracking-[0.22em] text-muted-foreground sm:block">
                 {nav.tagline}
               </p>
-
             </div>
           </Link>
 
@@ -117,9 +116,7 @@ export function Navbar() {
                     type="button"
                     onClick={() => scrollToHash(l.hash)}
                     className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                      isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {l.label}

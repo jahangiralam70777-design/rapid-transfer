@@ -84,8 +84,7 @@ export function WhatsAppPopup() {
         <div
           className="px-6 pt-8 pb-6 text-center"
           style={{
-            background:
-              "linear-gradient(135deg, rgba(37,211,102,0.18), rgba(37,211,102,0.02))",
+            background: "linear-gradient(135deg, rgba(37,211,102,0.18), rgba(37,211,102,0.02))",
           }}
         >
           <div

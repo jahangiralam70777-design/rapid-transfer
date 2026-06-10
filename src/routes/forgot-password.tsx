@@ -44,7 +44,9 @@ function ForgotPassword() {
       <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] text-white shadow-[0_0_30px_var(--neon-purple)]">
         <Lock className="h-6 w-6" />
       </div>
-      <h2 className="text-center font-display text-3xl font-bold tracking-tight">Forgot password?</h2>
+      <h2 className="text-center font-display text-3xl font-bold tracking-tight">
+        Forgot password?
+      </h2>
       <p className="mt-1.5 text-center text-sm text-muted-foreground">
         Recover your account securely — we'll email you a one-time link.
       </p>
@@ -61,13 +63,15 @@ function ForgotPassword() {
           />
         </div>
         <NeonButton type="submit" disabled={loading}>
-          <Send className="h-4 w-4" /> {loading ? "Sending…" : sent ? "Resend recovery link" : "Send recovery link"}
+          <Send className="h-4 w-4" />{" "}
+          {loading ? "Sending…" : sent ? "Resend recovery link" : "Send recovery link"}
         </NeonButton>
       </form>
 
       {sent && (
         <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center text-xs text-emerald-300">
-          If an account exists for <span className="font-semibold">{email}</span>, a reset link is on its way.
+          If an account exists for <span className="font-semibold">{email}</span>, a reset link is
+          on its way.
         </p>
       )}
 

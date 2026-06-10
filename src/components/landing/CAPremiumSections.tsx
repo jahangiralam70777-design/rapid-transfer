@@ -69,7 +69,8 @@ function LearningPaths() {
             A clear road to <span className="text-gradient">Chartered Accountancy</span>
           </h2>
           <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-            Three structured stages aligned with the ICAB qualification — from foundations to finalist.
+            Three structured stages aligned with the ICAB qualification — from foundations to
+            finalist.
           </p>
         </div>
 
@@ -146,14 +147,44 @@ function LearningPaths() {
 /* ---------------- Subject Categories ---------------- */
 
 const SUBJECTS: { icon: LucideIcon; name: string; sub: string; tone: string }[] = [
-  { icon: Calculator, name: "Financial Accounting", sub: "Ledgers · Standards · IFRS", tone: "var(--neon-blue)" },
-  { icon: Coins, name: "Cost & Management", sub: "Costing · Budgeting · Variance", tone: "var(--neon-purple)" },
-  { icon: ShieldCheck, name: "Audit & Assurance", sub: "ISA · Risk · Sampling", tone: "var(--neon-pink)" },
+  {
+    icon: Calculator,
+    name: "Financial Accounting",
+    sub: "Ledgers · Standards · IFRS",
+    tone: "var(--neon-blue)",
+  },
+  {
+    icon: Coins,
+    name: "Cost & Management",
+    sub: "Costing · Budgeting · Variance",
+    tone: "var(--neon-purple)",
+  },
+  {
+    icon: ShieldCheck,
+    name: "Audit & Assurance",
+    sub: "ISA · Risk · Sampling",
+    tone: "var(--neon-pink)",
+  },
   { icon: Receipt, name: "Taxation", sub: "Income · VAT · Corporate", tone: "var(--neon-blue)" },
-  { icon: TrendingUp, name: "Financial Management", sub: "Capital · Valuation · Risk", tone: "var(--neon-purple)" },
-  { icon: Scale, name: "Business Law", sub: "Contract · Company · Ethics", tone: "var(--neon-pink)" },
+  {
+    icon: TrendingUp,
+    name: "Financial Management",
+    sub: "Capital · Valuation · Risk",
+    tone: "var(--neon-purple)",
+  },
+  {
+    icon: Scale,
+    name: "Business Law",
+    sub: "Contract · Company · Ethics",
+    tone: "var(--neon-pink)",
+  },
   { icon: Cpu, name: "ICT", sub: "Systems · Controls · Data", tone: "var(--neon-blue)" },
-  { icon: Landmark, name: "Corporate Reporting", sub: "Group · Consolidation · IFRS", tone: "var(--neon-purple)" },
+  {
+    icon: Landmark,
+    name: "Corporate Reporting",
+    sub: "Group · Consolidation · IFRS",
+    tone: "var(--neon-purple)",
+  },
 ];
 
 function SubjectCategories() {
@@ -169,7 +200,8 @@ function SubjectCategories() {
             Every CA subject, <span className="text-gradient">deeply covered</span>
           </h2>
           <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-            Chapter-wise practice across the full ICAB syllabus — accounting, audit, tax, finance, law and beyond.
+            Chapter-wise practice across the full ICAB syllabus — accounting, audit, tax, finance,
+            law and beyond.
           </p>
         </div>
 
@@ -189,7 +221,9 @@ function SubjectCategories() {
                   />
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-glow transition-transform duration-300 group-hover:scale-110"
-                    style={{ background: `linear-gradient(135deg, ${s.tone}, color-mix(in oklab, ${s.tone} 50%, black))` }}
+                    style={{
+                      background: `linear-gradient(135deg, ${s.tone}, color-mix(in oklab, ${s.tone} 50%, black))`,
+                    }}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
@@ -209,12 +243,42 @@ function SubjectCategories() {
 /* ---------------- Exam Preparation System ---------------- */
 
 const EXAM_TOOLS = [
-  { icon: ListChecks, title: "MCQ Practice", desc: "Unlimited ICAB-aligned MCQs with instant explanations.", tone: "var(--neon-purple)" },
-  { icon: Trophy, title: "Mock Tests", desc: "Full-length CA mock papers with rank prediction.", tone: "var(--neon-blue)" },
-  { icon: Timer, title: "Quiz Engine", desc: "Sharp 10-question timed challenges to stay exam-ready.", tone: "var(--neon-pink)" },
-  { icon: LineChart, title: "Performance Tracking", desc: "Realtime accuracy, time-per-question & subject heatmaps.", tone: "var(--neon-blue)" },
-  { icon: Target, title: "Weak Topic Analysis", desc: "AI-surfaced weak chapters with targeted revision.", tone: "var(--neon-purple)" },
-  { icon: Activity, title: "Study Streaks", desc: "Daily progress, XP, streaks and consistency analytics.", tone: "var(--neon-pink)" },
+  {
+    icon: ListChecks,
+    title: "MCQ Practice",
+    desc: "Unlimited ICAB-aligned MCQs with instant explanations.",
+    tone: "var(--neon-purple)",
+  },
+  {
+    icon: Trophy,
+    title: "Mock Tests",
+    desc: "Full-length CA mock papers with rank prediction.",
+    tone: "var(--neon-blue)",
+  },
+  {
+    icon: Timer,
+    title: "Quiz Engine",
+    desc: "Sharp 10-question timed challenges to stay exam-ready.",
+    tone: "var(--neon-pink)",
+  },
+  {
+    icon: LineChart,
+    title: "Performance Tracking",
+    desc: "Realtime accuracy, time-per-question & subject heatmaps.",
+    tone: "var(--neon-blue)",
+  },
+  {
+    icon: Target,
+    title: "Weak Topic Analysis",
+    desc: "AI-surfaced weak chapters with targeted revision.",
+    tone: "var(--neon-purple)",
+  },
+  {
+    icon: Activity,
+    title: "Study Streaks",
+    desc: "Daily progress, XP, streaks and consistency analytics.",
+    tone: "var(--neon-pink)",
+  },
 ];
 
 function ExamSystem() {
@@ -235,7 +299,8 @@ function ExamSystem() {
               The complete <span className="text-gradient">CA exam engine</span>
             </h2>
             <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Practice, mocks, quizzes and analytics built for ICAB success — every attempt makes you measurably sharper.
+              Practice, mocks, quizzes and analytics built for ICAB success — every attempt makes
+              you measurably sharper.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">
@@ -271,7 +336,9 @@ function ExamSystem() {
                   />
                   <div
                     className="flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-glow"
-                    style={{ background: `linear-gradient(135deg, ${t.tone}, color-mix(in oklab, ${t.tone} 55%, black))` }}
+                    style={{
+                      background: `linear-gradient(135deg, ${t.tone}, color-mix(in oklab, ${t.tone} 55%, black))`,
+                    }}
                   >
                     <Icon className="h-5 w-5" />
                   </div>

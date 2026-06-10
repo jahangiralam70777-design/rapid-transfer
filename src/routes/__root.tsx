@@ -21,8 +21,6 @@ import { ActivityTracker } from "@/components/tracking/ActivityTracker";
 import { RootErrorBoundary } from "@/components/RootErrorBoundary";
 import { installGlobalErrorReporter, reportError } from "@/lib/error-reporter";
 
-
-
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -97,11 +95,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "CA Aspire BD — Professional ICAB & Chartered Accountancy Learning Platform" },
-      { name: "description", content: "CA Aspire BD — Professional CA learning platform for ICAB students with MCQ practice, mock tests, quizzes, flash cards, notes, analytics and performance tracking across Financial Accounting, Audit, Taxation and Business Law." },
-      { name: "keywords", content: "CA Aspire BD, ICAB, Chartered Accountancy, CA exam preparation, CA MCQ practice, CA mock test, Financial Accounting, Audit, Taxation, Business Law, Financial Reporting, Management Accounting, CA Bangladesh" },
+      {
+        name: "description",
+        content:
+          "CA Aspire BD — Professional CA learning platform for ICAB students with MCQ practice, mock tests, quizzes, flash cards, notes, analytics and performance tracking across Financial Accounting, Audit, Taxation and Business Law.",
+      },
+      {
+        name: "keywords",
+        content:
+          "CA Aspire BD, ICAB, Chartered Accountancy, CA exam preparation, CA MCQ practice, CA mock test, Financial Accounting, Audit, Taxation, Business Law, Financial Reporting, Management Accounting, CA Bangladesh",
+      },
       { name: "author", content: "CA Aspire BD" },
-      { property: "og:title", content: "CA Aspire BD — ICAB & Chartered Accountancy Learning Platform" },
-      { property: "og:description", content: "Professional CA learning platform for ICAB students — MCQ practice, mock tests, flash cards, notes & analytics." },
+      {
+        property: "og:title",
+        content: "CA Aspire BD — ICAB & Chartered Accountancy Learning Platform",
+      },
+      {
+        property: "og:description",
+        content:
+          "Professional CA learning platform for ICAB students — MCQ practice, mock tests, flash cards, notes & analytics.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -136,7 +149,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -148,12 +160,33 @@ function RootComponent() {
         <Toaster position="top-right" richColors closeButton />
       </QueryClientProvider>
     </RootErrorBoundary>
-
   );
 }
 
-const AUTH_ROUTES = ["/login", "/signup", "/register", "/admin/login", "/forgot-password", "/reset-password", "/email-verified"];
-const STUDENT_ROUTES = ["/dashboard", "/mcq-practice", "/quiz", "/custom-exam", "/mock-test", "/flash-cards", "/short-notes", "/qns-bank", "/classes", "/notifications", "/profile", "/bookmarks", "/wrong-questions"];
+const AUTH_ROUTES = [
+  "/login",
+  "/signup",
+  "/register",
+  "/admin/login",
+  "/forgot-password",
+  "/reset-password",
+  "/email-verified",
+];
+const STUDENT_ROUTES = [
+  "/dashboard",
+  "/mcq-practice",
+  "/quiz",
+  "/custom-exam",
+  "/mock-test",
+  "/flash-cards",
+  "/short-notes",
+  "/qns-bank",
+  "/classes",
+  "/notifications",
+  "/profile",
+  "/bookmarks",
+  "/wrong-questions",
+];
 
 function RootInner() {
   const location = useLocation();

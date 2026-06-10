@@ -8,35 +8,39 @@ const statusEnum = z.enum(["draft", "published", "archived"]);
 const kindEnum = z.enum(["text", "pdf", "doc"]);
 const typeEnum = z.enum(["important", "pyq", "model", "notes", "text"]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols =
   "id,title,summary,level,subject_id,chapter_id,kind,resource_type,body,file_url,file_name,file_size_bytes,question_count,tags,status,is_hidden,scheduled_at,view_count,download_count,created_at,updated_at";
 
 // ---------- ADMIN LIST ----------
 export const adminListQuestionBank = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: {
-    search?: string;
-    level?: string;
-    subjectId?: string;
-    chapterId?: string;
-    kind?: "text" | "pdf" | "doc" | "all";
-    resourceType?: "important" | "pyq" | "model" | "notes" | "text" | "all";
-    status?: "draft" | "published" | "archived" | "hidden" | "all";
-    page?: number;
-    pageSize?: number;
-  }) =>
-    z.object({
-      search: z.string().trim().max(200).optional(),
-      level: z.string().trim().max(40).optional(),
-      subjectId: z.string().uuid().optional(),
-      chapterId: z.string().uuid().optional(),
-      kind: z.enum(["text", "pdf", "doc", "all"]).default("all"),
-      resourceType: z.enum(["important", "pyq", "model", "notes", "text", "all"]).default("all"),
-      status: z.enum(["draft", "published", "archived", "hidden", "all"]).default("all"),
-      page: z.number().int().min(1).max(2000).default(1),
-      pageSize: z.number().int().min(1).max(100).default(20),
-    }).parse(i),
+  .inputValidator(
+    (i: {
+      search?: string;
+      level?: string;
+      subjectId?: string;
+      chapterId?: string;
+      kind?: "text" | "pdf" | "doc" | "all";
+      resourceType?: "important" | "pyq" | "model" | "notes" | "text" | "all";
+      status?: "draft" | "published" | "archived" | "hidden" | "all";
+      page?: number;
+      pageSize?: number;
+    }) =>
+      z
+        .object({
+          search: z.string().trim().max(200).optional(),
+          level: z.string().trim().max(40).optional(),
+          subjectId: z.string().uuid().optional(),
+          chapterId: z.string().uuid().optional(),
+          kind: z.enum(["text", "pdf", "doc", "all"]).default("all"),
+          resourceType: z
+            .enum(["important", "pyq", "model", "notes", "text", "all"])
+            .default("all"),
+          status: z.enum(["draft", "published", "archived", "hidden", "all"]).default("all"),
+          page: z.number().int().min(1).max(2000).default(1),
+          pageSize: z.number().int().min(1).max(100).default(20),
+        })
+        .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -51,7 +55,8 @@ export const adminListQuestionBank = createServerFn({ method: "POST" })
     if (data.subjectId) q = q.eq("subject_id", data.subjectId);
     if (data.chapterId) q = q.eq("chapter_id", data.chapterId);
     if (data.kind && data.kind !== "all") q = q.eq("kind", data.kind);
-    if (data.resourceType && data.resourceType !== "all") q = q.eq("resource_type", data.resourceType);
+    if (data.resourceType && data.resourceType !== "all")
+      q = q.eq("resource_type", data.resourceType);
     if (data.status === "hidden") q = q.eq("is_hidden", true);
     else if (data.status && data.status !== "all") q = q.eq("status", data.status);
     if (data.search) {
@@ -113,19 +118,23 @@ export const adminSetQuestionBankVisibility = createServerFn({ method: "POST" })
 export const listPublicQuestionBank = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { subjectId?: string; chapterId?: string; level?: string; limit?: number }) =>
-    z.object({
-      subjectId: z.string().uuid().optional(),
-      chapterId: z.string().uuid().optional(),
-      level: z.string().trim().max(40).optional(),
-      limit: z.number().int().min(1).max(500).default(120),
-    }).parse(i),
+    z
+      .object({
+        subjectId: z.string().uuid().optional(),
+        chapterId: z.string().uuid().optional(),
+        level: z.string().trim().max(40).optional(),
+        limit: z.number().int().min(1).max(500).default(120),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const vis = await loadVisibility(context.supabase);
     if (vis.section_hidden) return { hidden: true as const, rows: [] };
     if (data.level && vis.hidden_levels.includes(data.level)) return { hidden: false, rows: [] };
-    if (data.subjectId && vis.hidden_subject_ids.includes(data.subjectId)) return { hidden: false, rows: [] };
-    if (data.chapterId && vis.hidden_chapter_ids.includes(data.chapterId)) return { hidden: false, rows: [] };
+    if (data.subjectId && vis.hidden_subject_ids.includes(data.subjectId))
+      return { hidden: false, rows: [] };
+    if (data.chapterId && vis.hidden_chapter_ids.includes(data.chapterId))
+      return { hidden: false, rows: [] };
 
     let q = context.supabase
       .from("question_bank_resources")
@@ -202,7 +211,10 @@ export const adminDeleteQuestionBank = createServerFn({ method: "POST" })
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
-    const { error } = await context.supabase.from("question_bank_resources").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("question_bank_resources")
+      .delete()
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -243,11 +255,20 @@ export const adminDuplicateQuestionBank = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
     const { data: src, error: se } = await context.supabase
-      .from("question_bank_resources").select(cols).eq("id", data.id).single();
+      .from("question_bank_resources")
+      .select(cols)
+      .eq("id", data.id)
+      .single();
     if (se) throw se;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _i, created_at: _c, updated_at: _u, view_count: _v, download_count: _d, ...rest } =
-      src as Record<string, unknown>;
+
+    const {
+      id: _i,
+      created_at: _c,
+      updated_at: _u,
+      view_count: _v,
+      download_count: _d,
+      ...rest
+    } = src as Record<string, unknown>;
     const payload = {
       ...(rest as Record<string, unknown>),
       status: "draft",

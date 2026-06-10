@@ -48,12 +48,19 @@ export function LiveMonitoringPanel() {
       try {
         const [l, a] = await Promise.all([fetchRecentLogins(25), fetchRecentActivity(40)]);
         if (cancelled) return;
-        const ids = [...l.map((x) => x.user_id), ...a.map((x) => x.user_id).filter(Boolean) as string[]];
+        const ids = [
+          ...l.map((x) => x.user_id),
+          ...(a.map((x) => x.user_id).filter(Boolean) as string[]),
+        ];
         const names = await fetchDisplayNames(ids);
         if (cancelled) return;
         setLogins(l.map((x) => ({ ...x, display_name: names.get(x.user_id) })));
-        setActivity(a.map((x) => ({ ...x, display_name: x.user_id ? names.get(x.user_id) : undefined })));
-      } catch { /* silent — RLS or transient error */ }
+        setActivity(
+          a.map((x) => ({ ...x, display_name: x.user_id ? names.get(x.user_id) : undefined })),
+        );
+      } catch {
+        /* silent — RLS or transient error */
+      }
     })();
 
     const offLogins = subscribeToLogins((row) => loginBuffer.current.push(row));
@@ -76,7 +83,10 @@ export function LiveMonitoringPanel() {
         setTick((t) => (t + 1) % 1_000_000); // keep active-now window fresh
         return;
       }
-      const ids = [...l.map((x) => x.user_id), ...a.map((x) => x.user_id).filter(Boolean) as string[]];
+      const ids = [
+        ...l.map((x) => x.user_id),
+        ...(a.map((x) => x.user_id).filter(Boolean) as string[]),
+      ];
       const names = await fetchDisplayNames(ids);
       if (l.length > 0) {
         const enriched: LoginRow[] = l.map((x) => ({ ...x, display_name: names.get(x.user_id) }));
@@ -85,7 +95,10 @@ export function LiveMonitoringPanel() {
         window.setTimeout(() => setHighlightLogin(null), 1500);
       }
       if (a.length > 0) {
-        const enriched: ActivityRow[] = a.map((x) => ({ ...x, display_name: x.user_id ? names.get(x.user_id) : undefined }));
+        const enriched: ActivityRow[] = a.map((x) => ({
+          ...x,
+          display_name: x.user_id ? names.get(x.user_id) : undefined,
+        }));
         setActivity((prev) => [...enriched.reverse(), ...prev].slice(0, MAX_FEED));
         setHighlightActivity(enriched[0]?.id ?? null);
         window.setTimeout(() => setHighlightActivity(null), 1500);
@@ -103,9 +116,10 @@ export function LiveMonitoringPanel() {
   const deviceBreakdown = useMemo(() => {
     const counts = new Map<DeviceType, number>();
     for (const l of logins) {
-      const d = (l.device && /mobile|tablet|desktop/i.test(l.device)
-        ? ((l.device[0].toUpperCase() + l.device.slice(1).toLowerCase()) as DeviceType)
-        : deriveDeviceType(l.user_agent));
+      const d =
+        l.device && /mobile|tablet|desktop/i.test(l.device)
+          ? ((l.device[0].toUpperCase() + l.device.slice(1).toLowerCase()) as DeviceType)
+          : deriveDeviceType(l.user_agent);
       counts.set(d, (counts.get(d) ?? 0) + 1);
     }
     const total = logins.length || 1;
@@ -142,18 +156,29 @@ export function LiveMonitoringPanel() {
           </div>
           <div className="space-y-2.5">
             {deviceBreakdown.map((d) => {
-              const Icon = d.label === "Mobile" ? Smartphone : d.label === "Tablet" ? Tablet : Monitor;
-              const grad = d.label === "Mobile" ? "from-violet-500 to-fuchsia-500"
-                : d.label === "Tablet" ? "from-amber-500 to-orange-500"
-                : "from-emerald-500 to-teal-500";
+              const Icon =
+                d.label === "Mobile" ? Smartphone : d.label === "Tablet" ? Tablet : Monitor;
+              const grad =
+                d.label === "Mobile"
+                  ? "from-violet-500 to-fuchsia-500"
+                  : d.label === "Tablet"
+                    ? "from-amber-500 to-orange-500"
+                    : "from-emerald-500 to-teal-500";
               return (
                 <div key={d.label}>
                   <div className="mb-1 flex items-center justify-between text-[11px]">
-                    <span className="inline-flex items-center gap-1.5"><Icon className="h-3 w-3" /> {d.label}</span>
-                    <span className="text-muted-foreground tabular-nums">{d.percent}% · {d.count}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Icon className="h-3 w-3" /> {d.label}
+                    </span>
+                    <span className="text-muted-foreground tabular-nums">
+                      {d.percent}% · {d.count}
+                    </span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-background/40">
-                    <div className={`h-full rounded-full bg-gradient-to-r ${grad} transition-all duration-700`} style={{ width: `${d.percent}%` }} />
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r ${grad} transition-all duration-700`}
+                      style={{ width: `${d.percent}%` }}
+                    />
                   </div>
                 </div>
               );
@@ -175,22 +200,31 @@ export function LiveMonitoringPanel() {
         className="lg:col-span-4"
       >
         {logins.map((l) => {
-          const device = (l.device && /mobile|tablet|desktop/i.test(l.device)
-            ? l.device[0].toUpperCase() + l.device.slice(1).toLowerCase()
-            : deriveDeviceType(l.user_agent));
+          const device =
+            l.device && /mobile|tablet|desktop/i.test(l.device)
+              ? l.device[0].toUpperCase() + l.device.slice(1).toLowerCase()
+              : deriveDeviceType(l.user_agent);
           return (
             <li
               key={l.id}
               className={`rounded-xl border border-border/40 bg-background/40 p-2.5 text-xs transition-all duration-500 ${
-                highlightLogin === l.id ? "ring-1 ring-emerald-400/60 shadow-[0_0_18px_rgba(16,185,129,0.25)]" : ""
+                highlightLogin === l.id
+                  ? "ring-1 ring-emerald-400/60 shadow-[0_0_18px_rgba(16,185,129,0.25)]"
+                  : ""
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate font-medium">{l.display_name ?? l.user_id.slice(0, 8) + "…"}</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums">{relativeTime(l.login_at)}</span>
+                <span className="truncate font-medium">
+                  {l.display_name ?? l.user_id.slice(0, 8) + "…"}
+                </span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">
+                  {relativeTime(l.login_at)}
+                </span>
               </div>
               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
-                <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-violet-300">{device}</span>
+                <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-violet-300">
+                  {device}
+                </span>
                 {l.browser && <span>{l.browser}</span>}
                 {l.ip && <span className="font-mono">{l.ip}</span>}
               </div>
@@ -212,15 +246,23 @@ export function LiveMonitoringPanel() {
           <li
             key={a.id}
             className={`rounded-xl border border-border/40 bg-background/40 p-2.5 text-xs transition-all duration-500 ${
-              highlightActivity === a.id ? "ring-1 ring-fuchsia-400/60 shadow-[0_0_18px_rgba(217,70,239,0.25)]" : ""
+              highlightActivity === a.id
+                ? "ring-1 ring-fuchsia-400/60 shadow-[0_0_18px_rgba(217,70,239,0.25)]"
+                : ""
             }`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="truncate font-medium">{a.display_name ?? (a.user_id ? a.user_id.slice(0, 8) + "…" : "Anonymous")}</span>
-              <span className="text-[10px] text-muted-foreground tabular-nums">{relativeTime(a.created_at)}</span>
+              <span className="truncate font-medium">
+                {a.display_name ?? (a.user_id ? a.user_id.slice(0, 8) + "…" : "Anonymous")}
+              </span>
+              <span className="text-[10px] text-muted-foreground tabular-nums">
+                {relativeTime(a.created_at)}
+              </span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
-              <span className="rounded-md bg-fuchsia-500/15 px-1.5 py-0.5 text-fuchsia-300">{a.event_type}</span>
+              <span className="rounded-md bg-fuchsia-500/15 px-1.5 py-0.5 text-fuchsia-300">
+                {a.event_type}
+              </span>
               {a.element_label && <span className="truncate">{a.element_label}</span>}
               {a.page_path && <span className="truncate font-mono">{a.page_path}</span>}
             </div>
@@ -232,7 +274,13 @@ export function LiveMonitoringPanel() {
 }
 
 function FeedCard({
-  title, icon, children, paused, onTogglePause, empty, className = "",
+  title,
+  icon,
+  children,
+  paused,
+  onTogglePause,
+  empty,
+  className = "",
 }: {
   title: string;
   icon: React.ReactNode;
@@ -260,14 +308,25 @@ function FeedCard({
             onClick={onTogglePause}
             className="inline-flex items-center gap-1 rounded-md bg-background/40 px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground"
           >
-            {paused ? <><Play className="h-3 w-3" /> Resume</> : <><Pause className="h-3 w-3" /> Pause</>}
+            {paused ? (
+              <>
+                <Play className="h-3 w-3" /> Resume
+              </>
+            ) : (
+              <>
+                <Pause className="h-3 w-3" /> Pause
+              </>
+            )}
           </button>
         </div>
       </div>
       {empty ? (
         <p className="py-10 text-center text-xs text-muted-foreground">Waiting for live events…</p>
       ) : (
-        <ul className={`space-y-1.5 overflow-y-auto pr-1 ${hover ? "" : ""}`} style={{ maxHeight: 360 }}>
+        <ul
+          className={`space-y-1.5 overflow-y-auto pr-1 ${hover ? "" : ""}`}
+          style={{ maxHeight: 360 }}
+        >
           {children}
         </ul>
       )}

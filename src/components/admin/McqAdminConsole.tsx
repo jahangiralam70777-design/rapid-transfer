@@ -300,7 +300,8 @@ export function McqAdminConsole() {
         option_b: isTF ? "False" : d.option_b.trim(),
         option_c: isTF ? null : d.option_c.trim(),
         option_d: isTF ? null : d.option_d.trim(),
-        correct_option: isTF && !["A", "B"].includes(d.correct_option) ? "A" as const : d.correct_option,
+        correct_option:
+          isTF && !["A", "B"].includes(d.correct_option) ? ("A" as const) : d.correct_option,
         explanation: d.explanation.trim() || null,
         difficulty: d.difficulty,
         status: d.status,
@@ -1506,7 +1507,16 @@ function EditDialog({
                 ...draft,
                 question_type: qt,
                 ...(qt === "true_false"
-                  ? { option_a: "True", option_b: "False", option_c: "", option_d: "", correct_option: draft.correct_option === "C" || draft.correct_option === "D" ? "A" : draft.correct_option }
+                  ? {
+                      option_a: "True",
+                      option_b: "False",
+                      option_c: "",
+                      option_d: "",
+                      correct_option:
+                        draft.correct_option === "C" || draft.correct_option === "D"
+                          ? "A"
+                          : draft.correct_option,
+                    }
                   : {}),
               });
             }}
@@ -1524,8 +1534,20 @@ function EditDialog({
           />
         </Field>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {(draft.question_type === "true_false" ? (["A", "B"] as const) : (["A", "B", "C", "D"] as const)).map((k) => (
-            <Field key={k} label={draft.question_type === "true_false" ? (k === "A" ? "True" : "False") : `Option ${k}`}>
+          {(draft.question_type === "true_false"
+            ? (["A", "B"] as const)
+            : (["A", "B", "C", "D"] as const)
+          ).map((k) => (
+            <Field
+              key={k}
+              label={
+                draft.question_type === "true_false"
+                  ? k === "A"
+                    ? "True"
+                    : "False"
+                  : `Option ${k}`
+              }
+            >
               <input
                 value={(draft as unknown as Record<string, string>)[`option_${k.toLowerCase()}`]}
                 onChange={(e) =>
@@ -1927,10 +1949,18 @@ function parseSingleBlock(block: string, source: string): ParsedImportRow | null
     const a = ansM[1].toLowerCase().replace(/[^a-z]/g, "");
     const correct: "A" | "B" = a === "true" || a === "t" || a === "a" ? "A" : "B";
     return {
-      source, question: q, question_type: "true_false",
-      option_a: "True", option_b: "False", option_c: null, option_d: null,
-      correct_option: correct, explanation: expM?.[1]?.trim() || null,
-      difficulty: "medium", status: "published", tags: [],
+      source,
+      question: q,
+      question_type: "true_false",
+      option_a: "True",
+      option_b: "False",
+      option_c: null,
+      option_d: null,
+      correct_option: correct,
+      explanation: expM?.[1]?.trim() || null,
+      difficulty: "medium",
+      status: "published",
+      tags: [],
     };
   }
 

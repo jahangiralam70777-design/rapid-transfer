@@ -102,9 +102,7 @@ export function SessionTimeoutGuard() {
   useEffect(() => {
     if (!user) return;
     const handler = () => recordActivity();
-    ACTIVITY_EVENTS.forEach((ev) =>
-      window.addEventListener(ev, handler, { passive: true }),
-    );
+    ACTIVITY_EVENTS.forEach((ev) => window.addEventListener(ev, handler, { passive: true }));
     // Cross-tab sync: when another tab updates activity, mirror it locally.
     const onStorage = (e: StorageEvent) => {
       if (e.key === SESSION_KEYS.LAST_ACTIVITY) {
@@ -125,9 +123,7 @@ export function SessionTimeoutGuard() {
       const last = readLastActivity();
       const elapsed = Date.now() - last;
       const rememberMe = getRememberMe();
-      const effectiveTimeout = rememberMe && !isAdmin
-        ? SESSION_TIMEOUTS.REMEMBER_ME_MS
-        : timeoutMs;
+      const effectiveTimeout = rememberMe && !isAdmin ? SESSION_TIMEOUTS.REMEMBER_ME_MS : timeoutMs;
 
       if (elapsed >= effectiveTimeout) {
         void performLogout("inactivity");
@@ -136,8 +132,8 @@ export function SessionTimeoutGuard() {
       const untilLogout = effectiveTimeout - elapsed;
       // Only show 5-min warning for normal (non remember-me) sessions, or
       // for admins (admin sessions always honor the strict timeout).
-      const shouldWarn = untilLogout <= SESSION_TIMEOUTS.WARNING_BEFORE_MS
-        && (!rememberMe || isAdmin);
+      const shouldWarn =
+        untilLogout <= SESSION_TIMEOUTS.WARNING_BEFORE_MS && (!rememberMe || isAdmin);
       if (shouldWarn) {
         setRemaining(untilLogout);
         setWarningOpen(true);
@@ -153,7 +149,12 @@ export function SessionTimeoutGuard() {
   if (!user) return null;
 
   return (
-    <Dialog open={warningOpen} onOpenChange={(open) => { if (!open) stayLoggedIn(); }}>
+    <Dialog
+      open={warningOpen}
+      onOpenChange={(open) => {
+        if (!open) stayLoggedIn();
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Your session is about to expire</DialogTitle>

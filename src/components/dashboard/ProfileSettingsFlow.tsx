@@ -69,7 +69,12 @@ function useInlineStatus() {
       timer.current = setTimeout(() => setStatus({ kind: "idle" }), 2200);
     }
   };
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
   return [status, update] as const;
 }
 
@@ -79,12 +84,18 @@ function StatusPill({ status }: { status: Status }) {
     status.kind === "error"
       ? "border-rose-400/40 bg-rose-500/10 text-rose-300"
       : status.kind === "saved"
-      ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
-      : "border-border/60 bg-background/60 text-muted-foreground";
+        ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+        : "border-border/60 bg-background/60 text-muted-foreground";
   const label =
-    status.kind === "saving" ? "Saving…" : status.kind === "saved" ? "Saved" : status.msg || "Error";
+    status.kind === "saving"
+      ? "Saving…"
+      : status.kind === "saved"
+        ? "Saved"
+        : status.msg || "Error";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${cls}`}
+    >
       {status.kind === "saving" && <Loader2 className="h-3 w-3 animate-spin" />}
       {status.kind === "saved" && <Check className="h-3 w-3" />}
       {status.kind === "error" && <AlertTriangle className="h-3 w-3" />}
@@ -177,7 +188,9 @@ export function ProfileSettingsFlow() {
             </div>
           </div>
 
-          {tab === "Personal" && <PersonalPanel profile={profileQ.data} userEmail={user?.email ?? ""} />}
+          {tab === "Personal" && (
+            <PersonalPanel profile={profileQ.data} userEmail={user?.email ?? ""} />
+          )}
           {tab === "Appearance" && (
             <AppearancePanel
               theme={theme}
@@ -212,7 +225,13 @@ function ProfileCard({ profile, userEmail }: { profile: any; userEmail: string }
   const displayName = profile?.display_name ?? user?.name ?? "Learner";
   const avatarUrl: string | undefined = profile?.avatar_url ?? undefined;
   const initials = useMemo(
-    () => displayName.split(/\s+/).map((x: string) => x[0]).join("").slice(0, 2).toUpperCase(),
+    () =>
+      displayName
+        .split(/\s+/)
+        .map((x: string) => x[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase(),
     [displayName],
   );
 
@@ -295,7 +314,14 @@ function ProfileCard({ profile, userEmail }: { profile: any; userEmail: string }
           </div>
           <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-muted-foreground sm:grid-cols-2">
             <InfoRow i={Mail} v={userEmail || "—"} />
-            <InfoRow i={CalendarDays} v={profile?.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString()}` : "—"} />
+            <InfoRow
+              i={CalendarDays}
+              v={
+                profile?.created_at
+                  ? `Joined ${new Date(profile.created_at).toLocaleDateString()}`
+                  : "—"
+              }
+            />
             {profile?.bio && <InfoRow i={User} v={profile.bio} />}
           </div>
         </div>
@@ -332,7 +358,9 @@ function StatsRow() {
               <p className="font-display mt-1 text-2xl font-bold">{s.v}</p>
               <p className="text-[10px] text-muted-foreground">{s.s}</p>
             </div>
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-muted/40 ${s.tint}`}>
+            <div
+              className={`flex h-9 w-9 items-center justify-center rounded-xl bg-muted/40 ${s.tint}`}
+            >
               <s.i className="h-4 w-4" />
             </div>
           </div>
@@ -433,8 +461,7 @@ function PersonalPanel({ profile, userEmail }: { profile: any; userEmail: string
 
   // Debounced autosave on blur change
   const dirty =
-    (profile?.display_name ?? "") !== name.trim() ||
-    (profile?.bio ?? "") !== (bio.trim() || null);
+    (profile?.display_name ?? "") !== name.trim() || (profile?.bio ?? "") !== (bio.trim() || null);
 
   const onSave = () => {
     if (!name.trim()) {
@@ -460,7 +487,9 @@ function PersonalPanel({ profile, userEmail }: { profile: any; userEmail: string
     setPwStatus({ kind: "saving" });
     try {
       await updatePassword(pw1);
-      setCur(""); setPw1(""); setPw2("");
+      setCur("");
+      setPw1("");
+      setPw2("");
       setPwStatus({ kind: "saved" });
     } catch (e: any) {
       setPwStatus({ kind: "error", msg: e?.message ?? "Failed" });
@@ -543,7 +572,10 @@ function AppearancePanel({
 }) {
   const colors = ["#a855f7", "#3b82f6", "#22d3ee", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
   return (
-    <Panel title="Appearance" desc="Customize how CA Aspire BD looks for you. Changes apply instantly.">
+    <Panel
+      title="Appearance"
+      desc="Customize how CA Aspire BD looks for you. Changes apply instantly."
+    >
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           onClick={() => theme !== "dark" && toggleTheme()}
@@ -676,19 +708,47 @@ function NotificationsPanel({ prefs }: { prefs: NotifPrefs }) {
       title="Notification Preferences"
       desc="Choose what you'd like to hear about. Saved automatically on this device."
     >
-      <PrefRow i={MailIcon} title="Email notifications" desc="Weekly digest + important alerts" on={prefs.email} onClick={() => toggle("email")} />
-      <PrefRow i={BellRing} title="Push notifications" desc="Realtime alerts in browser & app" on={prefs.push} onClick={() => toggle("push")} />
-      <PrefRow i={Trophy} title="Mock test reminders" desc="Get notified before scheduled mocks" on={prefs.mock} onClick={() => toggle("mock")} />
-      <PrefRow i={Sparkles} title="Quiz alerts" desc="New quizzes and results readiness" on={prefs.quiz} onClick={() => toggle("quiz")} />
-      <PrefRow i={PlayCircle} title="Class updates" desc="New videos & instructor notes" on={prefs.class} onClick={() => toggle("class")} />
+      <PrefRow
+        i={MailIcon}
+        title="Email notifications"
+        desc="Weekly digest + important alerts"
+        on={prefs.email}
+        onClick={() => toggle("email")}
+      />
+      <PrefRow
+        i={BellRing}
+        title="Push notifications"
+        desc="Realtime alerts in browser & app"
+        on={prefs.push}
+        onClick={() => toggle("push")}
+      />
+      <PrefRow
+        i={Trophy}
+        title="Mock test reminders"
+        desc="Get notified before scheduled mocks"
+        on={prefs.mock}
+        onClick={() => toggle("mock")}
+      />
+      <PrefRow
+        i={Sparkles}
+        title="Quiz alerts"
+        desc="New quizzes and results readiness"
+        on={prefs.quiz}
+        onClick={() => toggle("quiz")}
+      />
+      <PrefRow
+        i={PlayCircle}
+        title="Class updates"
+        desc="New videos & instructor notes"
+        on={prefs.class}
+        onClick={() => toggle("class")}
+      />
     </Panel>
   );
 }
 
 function PrivacyPanel({ twoFA }: { twoFA: boolean }) {
-  const devices = [
-    { d: "This device", loc: "Current session", time: "Active now", current: true },
-  ];
+  const devices = [{ d: "This device", loc: "Current session", time: "Active now", current: true }];
   return (
     <>
       <Panel title="Security" desc="Protect your account with extra verification.">
@@ -709,13 +769,18 @@ function PrivacyPanel({ twoFA }: { twoFA: boolean }) {
       <Panel title="Device & Login Activity" desc="Active sessions for your account.">
         <ul className="space-y-2">
           {devices.map((d) => (
-            <li key={d.d} className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
+            <li
+              key={d.d}
+              className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3"
+            >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/40">
                 <Smartphone className="h-4 w-4" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">{d.d}</p>
-                <p className="text-[11px] text-muted-foreground">{d.loc} · {d.time}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {d.loc} · {d.time}
+                </p>
               </div>
               <span className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-emerald-300">
                 This device
@@ -729,7 +794,15 @@ function PrivacyPanel({ twoFA }: { twoFA: boolean }) {
 }
 
 function LearningPrefsWidget({ selected }: { selected: string[] }) {
-  const subjects = ["Financial Accounting", "Audit", "Taxation", "Business Law", "Cost Accounting", "Management Accounting", "Corporate Finance"];
+  const subjects = [
+    "Financial Accounting",
+    "Audit",
+    "Taxation",
+    "Business Law",
+    "Cost Accounting",
+    "Management Accounting",
+    "Corporate Finance",
+  ];
   const toggle = (s: string) => {
     const next = selected.includes(s) ? selected.filter((x) => x !== s) : [...selected, s];
     setPrefs({ subjects: next });
@@ -784,9 +857,24 @@ function LearningPrefsWidget({ selected }: { selected: string[] }) {
 
 function AchievementsWidget() {
   const items = [
-    { i: Trophy, t: "Top 5%", s: "Class rank", c: "from-amber-500/30 to-yellow-500/10 text-amber-300" },
-    { i: Flame, t: "Streak", s: "Keep going!", c: "from-orange-500/30 to-rose-500/10 text-orange-300" },
-    { i: Medal, t: "Milestones", s: "Unlocking", c: "from-fuchsia-500/30 to-purple-500/10 text-fuchsia-300" },
+    {
+      i: Trophy,
+      t: "Top 5%",
+      s: "Class rank",
+      c: "from-amber-500/30 to-yellow-500/10 text-amber-300",
+    },
+    {
+      i: Flame,
+      t: "Streak",
+      s: "Keep going!",
+      c: "from-orange-500/30 to-rose-500/10 text-orange-300",
+    },
+    {
+      i: Medal,
+      t: "Milestones",
+      s: "Unlocking",
+      c: "from-fuchsia-500/30 to-purple-500/10 text-fuchsia-300",
+    },
     { i: Star, t: "Quiz Master", s: "High acc.", c: "from-sky-500/30 to-blue-500/10 text-sky-300" },
   ];
   return (
@@ -797,7 +885,10 @@ function AchievementsWidget() {
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {items.map((b) => (
-          <div key={b.t} className={`rounded-xl border border-white/10 bg-gradient-to-br ${b.c} p-3`}>
+          <div
+            key={b.t}
+            className={`rounded-xl border border-white/10 bg-gradient-to-br ${b.c} p-3`}
+          >
             <b.i className="h-5 w-5" />
             <p className="mt-1.5 text-xs font-semibold text-foreground">{b.t}</p>
             <p className="text-[10px] text-muted-foreground">{b.s}</p>
@@ -823,7 +914,10 @@ function RecentActivityWidget() {
       </div>
       <ul className="mt-3 space-y-2">
         {acts.map((a) => (
-          <li key={a.t} className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 p-2.5">
+          <li
+            key={a.t}
+            className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 p-2.5"
+          >
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted/40">
               <a.i className="h-3.5 w-3.5" />
             </div>

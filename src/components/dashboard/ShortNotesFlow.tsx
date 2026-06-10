@@ -4,9 +4,20 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { listPublicShortNotes } from "@/lib/admin-short-notes.functions";
 import {
-  EyeOff, Sparkles, ChevronRight, ChevronLeft, FileText, Search,
-  Download, File as FileIcon, BookOpen, Bookmark, ExternalLink,
-  NotebookPen, Maximize2, Loader2,
+  EyeOff,
+  Sparkles,
+  ChevronRight,
+  ChevronLeft,
+  FileText,
+  Search,
+  Download,
+  File as FileIcon,
+  BookOpen,
+  Bookmark,
+  ExternalLink,
+  NotebookPen,
+  Maximize2,
+  Loader2,
 } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3;
@@ -53,9 +64,21 @@ export function ShortNotesFlow() {
     queryKey: ["sn-academic-tree"],
     queryFn: async () => {
       const [{ data: lv }, { data: sj }, { data: ch }] = await Promise.all([
-        supabase.from("levels").select("code,name,sort_order").eq("status", "published").order("sort_order"),
-        supabase.from("subjects").select("id,name,level,sort_order").eq("status", "published").order("sort_order"),
-        supabase.from("chapters").select("id,name,subject_id,sort_order").eq("status", "published").order("sort_order"),
+        supabase
+          .from("levels")
+          .select("code,name,sort_order")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("subjects")
+          .select("id,name,level,sort_order")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("chapters")
+          .select("id,name,subject_id,sort_order")
+          .eq("status", "published")
+          .order("sort_order"),
       ]);
       return {
         levels: (lv ?? []) as LevelRow[],
@@ -69,10 +92,7 @@ export function ShortNotesFlow() {
   // notes for picked chapter / subject / level
   const notesQuery = useQuery({
     enabled: !!level,
-    queryKey: [
-      "public-short-notes", "list",
-      level?.code, subject?.id ?? null, chapter?.id ?? null,
-    ],
+    queryKey: ["public-short-notes", "list", level?.code, subject?.id ?? null, chapter?.id ?? null],
     queryFn: () =>
       publicFn({
         data: {
@@ -87,15 +107,46 @@ export function ShortNotesFlow() {
   useEffect(() => {
     const ch = supabase
       .channel(`snv-student-${Math.random().toString(36).slice(2, 8)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "short_notes_visibility" }, () => {
-        qc.invalidateQueries({ queryKey: ["public-short-notes"] });
-      })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "short_notes_visibility" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["public-short-notes"] });
+        },
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "short_notes" }, () => {
         qc.invalidateQueries({ queryKey: ["public-short-notes"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
+
+  const levels = tree.data?.levels ?? [];
+  const subjectsForLevel = useMemo(
+    () => (tree.data?.subjects ?? []).filter((s) => !level || s.level === level.code),
+    [tree.data, level],
+  );
+  const chaptersForSubject = useMemo(
+    () => (tree.data?.chapters ?? []).filter((c) => !subject || c.subject_id === subject.id),
+    [tree.data, subject],
+  );
+
+  const allNotes = useMemo(
+    () => (notesQuery.data && "rows" in notesQuery.data ? notesQuery.data.rows : []) as Note[],
+    [notesQuery.data],
+  );
+  const filteredNotes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return allNotes;
+    return allNotes.filter((n) =>
+      [n.title, n.summary ?? "", n.body ?? "", ...(n.tags ?? [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [allNotes, search]);
 
   if (visQuery.data?.hidden) {
     return (
@@ -108,26 +159,6 @@ export function ShortNotesFlow() {
       </div>
     );
   }
-
-  const levels = tree.data?.levels ?? [];
-  const subjectsForLevel = useMemo(
-    () => (tree.data?.subjects ?? []).filter((s) => !level || s.level === level.code),
-    [tree.data, level],
-  );
-  const chaptersForSubject = useMemo(
-    () => (tree.data?.chapters ?? []).filter((c) => !subject || c.subject_id === subject.id),
-    [tree.data, subject],
-  );
-
-  const allNotes = (notesQuery.data && "rows" in notesQuery.data ? notesQuery.data.rows : []) as Note[];
-  const filteredNotes = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return allNotes;
-    return allNotes.filter((n) =>
-      [n.title, n.summary ?? "", n.body ?? "", ...(n.tags ?? [])]
-        .join(" ").toLowerCase().includes(q),
-    );
-  }, [allNotes, search]);
 
   const goto = (s: Step) => {
     setStep(s);
@@ -157,7 +188,10 @@ export function ShortNotesFlow() {
               title={l.name}
               desc="Browse notes by subject"
               delay={i * 60}
-              onClick={() => { setLevel(l); setStep(1); }}
+              onClick={() => {
+                setLevel(l);
+                setStep(1);
+              }}
             />
           ))}
         </Grid>
@@ -172,7 +206,10 @@ export function ShortNotesFlow() {
               title={s.name}
               desc="View chapter-wise notes"
               delay={i * 50}
-              onClick={() => { setSubject(s); setStep(2); }}
+              onClick={() => {
+                setSubject(s);
+                setStep(2);
+              }}
             />
           ))}
         </Grid>
@@ -187,7 +224,10 @@ export function ShortNotesFlow() {
               title={c.name}
               desc="Open available notes"
               delay={i * 40}
-              onClick={() => { setChapter(c); setStep(3); }}
+              onClick={() => {
+                setChapter(c);
+                setStep(3);
+              }}
             />
           ))}
         </Grid>
@@ -220,7 +260,8 @@ export function ShortNotesFlow() {
               )}
               {filteredNotes.map((n) => {
                 const active = activeNote?.id === n.id;
-                const Icon = n.kind === "pdf" ? FileText : n.kind === "doc" ? FileIcon : NotebookPen;
+                const Icon =
+                  n.kind === "pdf" ? FileText : n.kind === "doc" ? FileIcon : NotebookPen;
                 return (
                   <button
                     key={n.id}
@@ -237,10 +278,14 @@ export function ShortNotesFlow() {
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-semibold text-foreground">{n.title}</div>
                       {n.summary && (
-                        <div className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">{n.summary}</div>
+                        <div className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
+                          {n.summary}
+                        </div>
                       )}
                       <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
-                        <span className="rounded-full bg-muted/60 px-1.5 py-0.5 uppercase">{n.kind}</span>
+                        <span className="rounded-full bg-muted/60 px-1.5 py-0.5 uppercase">
+                          {n.kind}
+                        </span>
                         <span>{new Date(n.updated_at).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -259,7 +304,8 @@ export function ShortNotesFlow() {
                 <BookOpen className="h-8 w-8 text-[var(--neon-purple)]" />
                 <p className="font-display text-lg font-bold">Select a note to start reading</p>
                 <p className="max-w-sm text-xs text-muted-foreground">
-                  PDFs open in an embedded viewer, DOC/DOCX render via document viewer, and text notes show inline.
+                  PDFs open in an embedded viewer, DOC/DOCX render via document viewer, and text
+                  notes show inline.
                 </p>
               </div>
             )}
@@ -293,9 +339,17 @@ function Header() {
 }
 
 function Stepper({
-  step, level, subject, chapter, setStep,
+  step,
+  level,
+  subject,
+  chapter,
+  setStep,
 }: {
-  step: Step; level: string; subject: string; chapter: string; setStep: (s: Step) => void;
+  step: Step;
+  level: string;
+  subject: string;
+  chapter: string;
+  setStep: (s: Step) => void;
 }) {
   const items = [
     { i: 0 as Step, l: "Level", v: level || "—" },
@@ -313,17 +367,26 @@ function Stepper({
             <button
               onClick={() => (done || active) && setStep(it.i)}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
-                active ? "bg-cta-gradient text-white shadow-glow"
-                  : done ? "bg-muted/60 text-foreground hover:bg-muted" : "text-muted-foreground"
+                active
+                  ? "bg-cta-gradient text-white shadow-glow"
+                  : done
+                    ? "bg-muted/60 text-foreground hover:bg-muted"
+                    : "text-muted-foreground"
               }`}
             >
-              <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                active ? "bg-white/20" : done ? "bg-emerald-500/20 text-emerald-400" : "bg-muted"
-              }`}>{done ? "✓" : it.i + 1}</span>
+              <span
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  active ? "bg-white/20" : done ? "bg-emerald-500/20 text-emerald-400" : "bg-muted"
+                }`}
+              >
+                {done ? "✓" : it.i + 1}
+              </span>
               <span>{it.l}:</span>
               <span className="opacity-80">{it.v}</span>
             </button>
-            {idx < items.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+            {idx < items.length - 1 && (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
           </div>
         );
       })}
@@ -344,13 +407,22 @@ function Empty({ children }: { children: React.ReactNode }) {
 }
 
 function SelectCard({
-  title, desc, onClick, delay,
+  title,
+  desc,
+  onClick,
+  delay,
 }: {
-  title: string; desc: string; onClick: () => void; delay: number;
+  title: string;
+  desc: string;
+  onClick: () => void;
+  delay: number;
 }) {
   return (
-    <button onClick={onClick} className="group relative animate-fade-in text-left"
-      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}>
+    <button
+      onClick={onClick}
+      className="group relative animate-fade-in text-left"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+    >
       <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] opacity-0 blur transition-opacity duration-300 group-hover:opacity-60" />
       <div className="glass relative h-full overflow-hidden rounded-3xl p-6 shadow-card-soft transition-transform duration-300 group-hover:-translate-y-1">
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-cta-gradient text-white shadow-glow">
@@ -381,7 +453,8 @@ function NoteReader({ note }: { note: Note }) {
         <div className="min-w-0">
           <h2 className="font-display truncate text-lg font-bold">{note.title}</h2>
           <p className="truncate text-[11px] text-muted-foreground">
-            <span className="uppercase">{note.kind}</span> · Updated {new Date(note.updated_at).toLocaleDateString()}
+            <span className="uppercase">{note.kind}</span> · Updated{" "}
+            {new Date(note.updated_at).toLocaleDateString()}
             {note.file_name ? ` · ${note.file_name}` : ""}
           </p>
         </div>
@@ -438,9 +511,15 @@ function NoteReader({ note }: { note: Note }) {
             />
             <p className="text-[11px] text-muted-foreground">
               If the preview does not load, use the Download or{" "}
-              <a href={note.file_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[var(--neon-blue)] underline">
+              <a
+                href={note.file_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--neon-blue)] underline"
+              >
                 Open in new tab <ExternalLink className="h-3 w-3" />
-              </a>.
+              </a>
+              .
             </p>
           </div>
         )}
@@ -451,14 +530,15 @@ function NoteReader({ note }: { note: Note }) {
           </article>
         )}
 
-        {note.kind !== "text" && !note.file_url && (
-          <Empty>This note has no file attached.</Empty>
-        )}
+        {note.kind !== "text" && !note.file_url && <Empty>This note has no file attached.</Empty>}
 
         {note.tags && note.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {note.tags.map((t) => (
-              <span key={t} className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+              <span
+                key={t}
+                className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground"
+              >
                 #{t}
               </span>
             ))}

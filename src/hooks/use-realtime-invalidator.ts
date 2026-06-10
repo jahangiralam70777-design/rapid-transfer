@@ -74,36 +74,268 @@ const STUDENT_AGGREGATE_KEYS = [
 ] as const;
 
 const TABLE_QUERY_KEYS: TableMap = {
-  mcqs: { keys: ["mcqs", "mcq", "question-bank", "builder-mcqs", "admin-mcqs", "academic-chapter-mcqs", "quiz-mcq-pool", "bulk-existing-mcqs", "custom-exam-mcq-counts", "fc-chapter-counts", "fc-subject-counts", "qb-chapter-counts", "qb-subject-counts", "subject-progress", "chapter-progress", ...STUDENT_AGGREGATE_KEYS], label: "MCQs" },
-  quizzes: { keys: ["quizzes", "quiz", "mock-tests", "mocks", "student-mocks", "admin-mocks", "admin-quizzes", "admin-academic-tree", ...STUDENT_AGGREGATE_KEYS], label: "Quizzes" },
-  quiz_questions: { keys: ["quizzes", "quiz", "mock-tests", "student-mocks", "admin-mocks", "mock-questions", "builder-mcqs", "admin-academic-tree", ...STUDENT_AGGREGATE_KEYS], label: "Quiz questions" },
-  short_notes: { keys: ["short-notes", "shortNotes", "public-short-notes", "sn-academic-tree", ...STUDENT_AGGREGATE_KEYS], label: "Short notes" },
-  short_notes_visibility: { keys: ["short-notes", "shortNotes", "public-short-notes", "short-notes-visibility", "sn-academic-tree", ...STUDENT_AGGREGATE_KEYS], label: "Notes visibility" },
-  flash_cards: { keys: ["flash-cards", "flashCards", "public-flash-cards", "fc-chapter-counts", "fc-subject-counts", "fc-tree", ...STUDENT_AGGREGATE_KEYS], label: "Flash cards" },
-  flash_card_visibility: { keys: ["flash-cards", "flashCards", "public-flash-cards", "flash-card-visibility", "fc-chapter-counts", "fc-subject-counts", "fc-tree", ...STUDENT_AGGREGATE_KEYS], label: "Flash cards visibility" },
-  video_classes: { keys: ["video-classes", "classes", "videoClasses", "public-video-classes", "student-academic-tree", ...STUDENT_AGGREGATE_KEYS], label: "Classes" },
-  video_class_visibility: { keys: ["video-classes", "classes", "videoClasses", "public-video-classes", "video-class-visibility", "student-academic-tree", ...STUDENT_AGGREGATE_KEYS], label: "Classes visibility" },
-  question_bank_resources: { keys: ["question-bank", "qns-bank", "questionBank", "public-qb", "qbank-public", "qbank-admin", "qb-chapter-counts", "qb-subject-counts", "qb-tree", ...STUDENT_AGGREGATE_KEYS], label: "Question bank" },
-  question_bank_visibility: { keys: ["question-bank", "qns-bank", "questionBank", "public-qb", "qbank-public", "qbank-admin", "question-bank-visibility", "qb-visibility", "qbank-visibility", "qb-chapter-counts", "qb-subject-counts", "qb-tree", ...STUDENT_AGGREGATE_KEYS], label: "Question bank visibility" },
-  notifications: { keys: ["notifications", "my-notifications", "admin-notifications", "admin-notif-stats", ...STUDENT_AGGREGATE_KEYS], label: "Notifications" },
-  notification_reads: { keys: ["notifications", "my-notifications", "admin-notifications", "admin-notif-stats", ...STUDENT_AGGREGATE_KEYS], label: "Notifications" },
-  levels: { keys: [...ACADEMIC_TREE_KEYS, "mock-filter-subjects", ...STUDENT_AGGREGATE_KEYS], label: "Levels" },
-  subjects: { keys: [...ACADEMIC_TREE_KEYS, "mock-filter-subjects", "subject-progress", "chapter-progress", ...STUDENT_AGGREGATE_KEYS], label: "Subjects" },
-  chapters: { keys: [...ACADEMIC_TREE_KEYS, "builder-mcqs", "academic-chapter-mcqs", "custom-exam-mcq-counts", "fc-chapter-counts", "qb-chapter-counts", "subject-progress", "chapter-progress", ...STUDENT_AGGREGATE_KEYS], label: "Chapters" },
+  mcqs: {
+    keys: [
+      "mcqs",
+      "mcq",
+      "question-bank",
+      "builder-mcqs",
+      "admin-mcqs",
+      "academic-chapter-mcqs",
+      "quiz-mcq-pool",
+      "bulk-existing-mcqs",
+      "custom-exam-mcq-counts",
+      "fc-chapter-counts",
+      "fc-subject-counts",
+      "qb-chapter-counts",
+      "qb-subject-counts",
+      "subject-progress",
+      "chapter-progress",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "MCQs",
+  },
+  quizzes: {
+    keys: [
+      "quizzes",
+      "quiz",
+      "mock-tests",
+      "mocks",
+      "student-mocks",
+      "admin-mocks",
+      "admin-quizzes",
+      "admin-academic-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Quizzes",
+  },
+  quiz_questions: {
+    keys: [
+      "quizzes",
+      "quiz",
+      "mock-tests",
+      "student-mocks",
+      "admin-mocks",
+      "mock-questions",
+      "builder-mcqs",
+      "admin-academic-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Quiz questions",
+  },
+  short_notes: {
+    keys: [
+      "short-notes",
+      "shortNotes",
+      "public-short-notes",
+      "sn-academic-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Short notes",
+  },
+  short_notes_visibility: {
+    keys: [
+      "short-notes",
+      "shortNotes",
+      "public-short-notes",
+      "short-notes-visibility",
+      "sn-academic-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Notes visibility",
+  },
+  flash_cards: {
+    keys: [
+      "flash-cards",
+      "flashCards",
+      "public-flash-cards",
+      "fc-chapter-counts",
+      "fc-subject-counts",
+      "fc-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Flash cards",
+  },
+  flash_card_visibility: {
+    keys: [
+      "flash-cards",
+      "flashCards",
+      "public-flash-cards",
+      "flash-card-visibility",
+      "fc-chapter-counts",
+      "fc-subject-counts",
+      "fc-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Flash cards visibility",
+  },
+  video_classes: {
+    keys: [
+      "video-classes",
+      "classes",
+      "videoClasses",
+      "public-video-classes",
+      "student-academic-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Classes",
+  },
+  video_class_visibility: {
+    keys: [
+      "video-classes",
+      "classes",
+      "videoClasses",
+      "public-video-classes",
+      "video-class-visibility",
+      "student-academic-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Classes visibility",
+  },
+  question_bank_resources: {
+    keys: [
+      "question-bank",
+      "qns-bank",
+      "questionBank",
+      "public-qb",
+      "qbank-public",
+      "qbank-admin",
+      "qb-chapter-counts",
+      "qb-subject-counts",
+      "qb-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Question bank",
+  },
+  question_bank_visibility: {
+    keys: [
+      "question-bank",
+      "qns-bank",
+      "questionBank",
+      "public-qb",
+      "qbank-public",
+      "qbank-admin",
+      "question-bank-visibility",
+      "qb-visibility",
+      "qbank-visibility",
+      "qb-chapter-counts",
+      "qb-subject-counts",
+      "qb-tree",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Question bank visibility",
+  },
+  notifications: {
+    keys: [
+      "notifications",
+      "my-notifications",
+      "admin-notifications",
+      "admin-notif-stats",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Notifications",
+  },
+  notification_reads: {
+    keys: [
+      "notifications",
+      "my-notifications",
+      "admin-notifications",
+      "admin-notif-stats",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Notifications",
+  },
+  levels: {
+    keys: [...ACADEMIC_TREE_KEYS, "mock-filter-subjects", ...STUDENT_AGGREGATE_KEYS],
+    label: "Levels",
+  },
+  subjects: {
+    keys: [
+      ...ACADEMIC_TREE_KEYS,
+      "mock-filter-subjects",
+      "subject-progress",
+      "chapter-progress",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Subjects",
+  },
+  chapters: {
+    keys: [
+      ...ACADEMIC_TREE_KEYS,
+      "builder-mcqs",
+      "academic-chapter-mcqs",
+      "custom-exam-mcq-counts",
+      "fc-chapter-counts",
+      "qb-chapter-counts",
+      "subject-progress",
+      "chapter-progress",
+      ...STUDENT_AGGREGATE_KEYS,
+    ],
+    label: "Chapters",
+  },
   profiles: { keys: ["profile", "profiles", "users"], label: "Profiles" },
   user_roles: { keys: ["users", "user-roles"], label: "Roles" },
-  exam_attempts: { keys: ["exam-attempts", "analytics", "stats", "student-dashboard-snapshot", "student-daily-progress", "student-performance-center", "student-completion-tracker", "subject-progress", "chapter-progress"], label: "Attempts" },
-  attempt_answers: { keys: ["student-daily-progress", "student-dashboard-snapshot", "student-performance-center", "student-completion-tracker", "subject-progress", "chapter-progress", "analytics"], label: "Answers" },
-  mcq_bookmarks: { keys: ["student-daily-progress", "bookmarks", "mcq-bookmarks", "my-bookmark-ids", "mcq-review-counts", "student-dashboard-snapshot"], label: "Bookmarks" },
-  mcq_wrong_questions: { keys: ["student-daily-progress", "wrong-questions", "mcq-wrong", "mcq-wrong-questions", "mcq-review-counts", "student-dashboard-snapshot"], label: "Wrong questions" },
+  exam_attempts: {
+    keys: [
+      "exam-attempts",
+      "analytics",
+      "stats",
+      "student-dashboard-snapshot",
+      "student-daily-progress",
+      "student-performance-center",
+      "student-completion-tracker",
+      "subject-progress",
+      "chapter-progress",
+    ],
+    label: "Attempts",
+  },
+  attempt_answers: {
+    keys: [
+      "student-daily-progress",
+      "student-dashboard-snapshot",
+      "student-performance-center",
+      "student-completion-tracker",
+      "subject-progress",
+      "chapter-progress",
+      "analytics",
+    ],
+    label: "Answers",
+  },
+  mcq_bookmarks: {
+    keys: [
+      "student-daily-progress",
+      "bookmarks",
+      "mcq-bookmarks",
+      "my-bookmark-ids",
+      "mcq-review-counts",
+      "student-dashboard-snapshot",
+    ],
+    label: "Bookmarks",
+  },
+  mcq_wrong_questions: {
+    keys: [
+      "student-daily-progress",
+      "wrong-questions",
+      "mcq-wrong",
+      "mcq-wrong-questions",
+      "mcq-review-counts",
+      "student-dashboard-snapshot",
+    ],
+    label: "Wrong questions",
+  },
   module_visibility: { keys: ["module-visibility"], label: "Module visibility" },
   user_goals: { keys: ["user-goals"], label: "Goals" },
-  homepage_sections: { keys: ["site-content", "admin-sections", "admin-versions"], label: "Homepage content" },
-  site_settings: { keys: ["site-settings", "admin-settings", "admin-versions"], label: "Site settings" },
+  homepage_sections: {
+    keys: ["site-content", "admin-sections", "admin-versions"],
+    label: "Homepage content",
+  },
+  site_settings: {
+    keys: ["site-settings", "admin-settings", "admin-versions"],
+    label: "Site settings",
+  },
   media_assets: { keys: ["admin-media"], label: "Media" },
   content_versions: { keys: ["admin-versions"], label: "Versions" },
 };
-
 
 export function useRealtimeInvalidator(enabled = true) {
   const qc = useQueryClient();
@@ -112,7 +344,9 @@ export function useRealtimeInvalidator(enabled = true) {
   useEffect(() => {
     if (!enabled) return;
 
-    const channel = supabase.channel(`global-realtime-invalidator-${Math.random().toString(36).slice(2, 8)}`);
+    const channel = supabase.channel(
+      `global-realtime-invalidator-${Math.random().toString(36).slice(2, 8)}`,
+    );
 
     for (const table of Object.keys(TABLE_QUERY_KEYS)) {
       channel.on(

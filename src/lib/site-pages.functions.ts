@@ -36,7 +36,7 @@ export const adminListPages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data, error } = await sb
       .from("site_pages")
       .select("*")
@@ -61,7 +61,7 @@ export const adminCreatePage = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: maxRow } = await sb
       .from("site_pages")
       .select("sort_order")
@@ -103,7 +103,7 @@ export const adminUpdatePage = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { id, ...patch } = data;
     const { data: row, error } = await sb
       .from("site_pages")
@@ -118,19 +118,18 @@ export const adminUpdatePage = createServerFn({ method: "POST" })
 // ---------- DELETE ----------
 export const adminDeletePage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: row, error: getErr } = await sb
       .from("site_pages")
       .select("is_home")
       .eq("id", data.id)
       .single();
     if (getErr) throw new Error(getErr.message);
-    if (row?.is_home) throw new Error("Cannot delete the homepage. Set another page as homepage first.");
+    if (row?.is_home)
+      throw new Error("Cannot delete the homepage. Set another page as homepage first.");
     const { error } = await sb.from("site_pages").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -139,12 +138,10 @@ export const adminDeletePage = createServerFn({ method: "POST" })
 // ---------- DUPLICATE ----------
 export const adminDuplicatePage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: src, error: getErr } = await sb
       .from("site_pages")
       .select("*")
@@ -203,12 +200,10 @@ export const adminDuplicatePage = createServerFn({ method: "POST" })
 // ---------- SET HOMEPAGE ----------
 export const adminSetHomepage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     // clear current
     const { error: clearErr } = await sb
       .from("site_pages")
@@ -238,7 +233,7 @@ export const adminReorderPages = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const sb = await getSb();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     for (const item of data.order) {
       const { error } = await sb
         .from("site_pages")

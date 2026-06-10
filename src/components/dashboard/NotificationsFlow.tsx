@@ -130,10 +130,7 @@ export function NotificationsFlow() {
     }
   }, [items, dismissed]);
 
-  const visibleItems = useMemo(
-    () => items.filter((n) => !dismissed.has(n.id)),
-    [items, dismissed],
-  );
+  const visibleItems = useMemo(() => items.filter((n) => !dismissed.has(n.id)), [items, dismissed]);
 
   const pinned = useMemo(
     () => visibleItems.filter((n) => n.priority === "critical" || n.priority === "high"),

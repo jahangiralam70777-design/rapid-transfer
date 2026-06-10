@@ -3,7 +3,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const PingSchema = z.object({
-  module: z.string().min(1).max(64).regex(/^[a-zA-Z0-9_\-\/]+$/).default("dashboard"),
+  module: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_\-\/]+$/)
+    .default("dashboard"),
   delta_seconds: z.number().int().min(0).max(120).default(60),
 });
 

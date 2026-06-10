@@ -24,13 +24,21 @@ const saveSchema = z.object({
   chapterId: z.string().uuid().nullable().optional(),
   level: z.string().trim().max(40).nullable().optional(),
   title: z.string().trim().max(200).nullable().optional(),
-  durationSeconds: z.number().int().min(0).max(60 * 60 * 6),
+  durationSeconds: z
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 60 * 6),
   answers: z
     .array(
       z.object({
         mcqId: z.string().uuid(),
         chosen: z.enum(["A", "B", "C", "D"]).nullable(),
-        timeMs: z.number().int().min(0).max(60 * 60 * 1000),
+        timeMs: z
+          .number()
+          .int()
+          .min(0)
+          .max(60 * 60 * 1000),
       }),
     )
     .max(500),
@@ -52,7 +60,9 @@ export const saveSessionAttempt = createServerFn({ method: "POST" })
         .select("id,correct_option")
         .in("id", ids);
       if (error) throw error;
-      correctMap = new Map((mcqs ?? []).map((m) => [m.id, normalizeChoice(m.correct_option) ?? ""]));
+      correctMap = new Map(
+        (mcqs ?? []).map((m) => [m.id, normalizeChoice(m.correct_option) ?? ""]),
+      );
     }
 
     let correct = 0;
@@ -187,8 +197,8 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
         ...a,
         subjectId,
         chapterId,
-        subjectName: subjectId ? subjectMap.get(subjectId)?.name ?? null : null,
-        chapterName: chapterId ? chapterMap.get(chapterId)?.name ?? null : null,
+        subjectName: subjectId ? (subjectMap.get(subjectId)?.name ?? null) : null,
+        chapterName: chapterId ? (chapterMap.get(chapterId)?.name ?? null) : null,
         quizTitle: q?.title ?? a.title ?? null,
       };
     };
@@ -198,7 +208,8 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
     const inProgress = enriched.filter((a) => a.status === "in_progress");
 
     const now = Date.now();
-    const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
     const startOfWeek = new Date(now - 7 * 24 * 60 * 60 * 1000);
     const startOfMonth = new Date(now - 30 * 24 * 60 * 60 * 1000);
 
@@ -206,7 +217,9 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
       !!iso && new Date(iso).getTime() >= from.getTime();
 
     const countByKind = (list: typeof enriched, kind: string, from?: Date) =>
-      list.filter((a) => a.kind === kind && (!from || inRange(a.completed_at ?? a.created_at, from))).length;
+      list.filter(
+        (a) => a.kind === kind && (!from || inRange(a.completed_at ?? a.created_at, from)),
+      ).length;
 
     const kinds = ["mcq_practice", "quiz", "mock", "custom_exam"] as const;
     const summary = kinds.map((k) => ({
@@ -220,8 +233,11 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
     // Accuracy trend (last 14 days)
     const trend: { label: string; date: string; accuracy: number; attempts: number }[] = [];
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
-      const next = new Date(d); next.setDate(d.getDate() + 1);
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const next = new Date(d);
+      next.setDate(d.getDate() + 1);
       const day = completed.filter((a) => {
         const t = new Date(a.completed_at ?? a.created_at).getTime();
         return t >= d.getTime() && t < next.getTime();
@@ -257,9 +273,7 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
       .sort((a, b) => b.accuracy - a.accuracy);
 
     const strongestSubject = subjectPerformance[0] ?? null;
-    const weakestSubject = subjectPerformance.length
-      ? [...subjectPerformance].reverse()[0]
-      : null;
+    const weakestSubject = subjectPerformance.length ? [...subjectPerformance].reverse()[0] : null;
 
     // Weak chapters (lowest accuracy, min 1 attempt)
     const chapAgg = new Map<string, { correct: number; total: number; attempts: number }>();
@@ -276,7 +290,7 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
         id,
         name: chapterMap.get(id)?.name ?? "Unknown",
         subjectName: chapterMap.get(id)?.subject_id
-          ? subjectMap.get(chapterMap.get(id)!.subject_id)?.name ?? null
+          ? (subjectMap.get(chapterMap.get(id)!.subject_id)?.name ?? null)
           : null,
         accuracy: v.total ? Math.round((v.correct / v.total) * 100) : 0,
         attempts: v.attempts,
@@ -301,7 +315,7 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
     }));
 
     // Retry / improvement tracking: group by quiz_id or chapter+kind
-    const groupKey = (a: typeof enriched[number]) =>
+    const groupKey = (a: (typeof enriched)[number]) =>
       a.quiz_id ? `q:${a.quiz_id}` : a.chapterId ? `${a.kind}:c:${a.chapterId}` : null;
     const groups = new Map<
       string,
@@ -349,9 +363,7 @@ export const studentPerformanceCenter = createServerFn({ method: "GET" })
     const overallAccuracy = totalAnswered
       ? Math.round((totalCorrect / totalAnswered) * 1000) / 10
       : 0;
-    const avgCompletionSec = completed.length
-      ? Math.round(totalDuration / completed.length)
-      : 0;
+    const avgCompletionSec = completed.length ? Math.round(totalDuration / completed.length) : 0;
 
     // Improvement % = (last7 accuracy − previous7 accuracy)
     const last7 = trend.slice(-7);
@@ -448,10 +460,7 @@ export const studentCompletionTracker = createServerFn({ method: "GET" })
         .eq("status", "published")
         .eq("level", level)
         .order("sort_order", { ascending: true }),
-      supabase
-        .from("quizzes")
-        .select("id,chapter_id,subject_id,kind")
-        .eq("status", "published"),
+      supabase.from("quizzes").select("id,chapter_id,subject_id,kind").eq("status", "published"),
     ]);
 
     const subjects = subjectsR.data ?? [];
@@ -459,19 +468,40 @@ export const studentCompletionTracker = createServerFn({ method: "GET" })
     const subjectIds = subjects.map((s) => s.id);
 
     type SubjectRow = {
-      id: string; name: string; color: string | null;
-      mcqsTotal: number; mcqsDone: number; completionPct: number;
-      accuracy: number; quizzes: number; mocks: number; customExams: number;
-      chaptersTotal: number; chaptersDone: number; chaptersInProgress: number;
+      id: string;
+      name: string;
+      color: string | null;
+      mcqsTotal: number;
+      mcqsDone: number;
+      completionPct: number;
+      accuracy: number;
+      quizzes: number;
+      mocks: number;
+      customExams: number;
+      chaptersTotal: number;
+      chaptersDone: number;
+      chaptersInProgress: number;
       pendingChapters: number;
     };
     type ChapterRow = {
-      id: string; name: string; subjectId: string; subjectName: string;
-      mcqsTotal: number; mcqsDone: number; completionPct: number;
-      accuracy: number; attempts: number;
+      id: string;
+      name: string;
+      subjectId: string;
+      subjectName: string;
+      mcqsTotal: number;
+      mcqsDone: number;
+      completionPct: number;
+      accuracy: number;
+      attempts: number;
       status: "completed" | "in_progress" | "not_started";
     };
-    type Rec = { chapterId: string; subjectId: string; subjectName: string; title: string; reason: string };
+    type Rec = {
+      chapterId: string;
+      subjectId: string;
+      subjectName: string;
+      title: string;
+      reason: string;
+    };
 
     if (!subjectIds.length) {
       return {
@@ -564,7 +594,13 @@ export const studentCompletionTracker = createServerFn({ method: "GET" })
       const acc = accByChapter.get(c.id);
       const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
       const status: ChapterRow["status"] =
-        total === 0 ? "not_started" : pct >= 95 ? "completed" : pct > 0 ? "in_progress" : "not_started";
+        total === 0
+          ? "not_started"
+          : pct >= 95
+            ? "completed"
+            : pct > 0
+              ? "in_progress"
+              : "not_started";
       return {
         id: c.id,
         name: c.name,

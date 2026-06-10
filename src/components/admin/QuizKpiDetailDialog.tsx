@@ -1,9 +1,31 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, Loader2, Send, EyeOff, Edit3, Archive, RotateCcw, Bot, TrendingUp, TrendingDown, Users, Trophy, Target, Gauge, PercentSquare, ListChecks, CalendarClock } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+  Search,
+  Loader2,
+  Send,
+  EyeOff,
+  Edit3,
+  Archive,
+  RotateCcw,
+  Bot,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Trophy,
+  Target,
+  Gauge,
+  PercentSquare,
+  ListChecks,
+  CalendarClock,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,26 +35,83 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export type KpiMetric =
-  | "total" | "published" | "draft" | "scheduled" | "archived"
-  | "attempts" | "completion_rate" | "avg_score"
-  | "active_users" | "performance_score" | "ai_generated";
+  | "total"
+  | "published"
+  | "draft"
+  | "scheduled"
+  | "archived"
+  | "attempts"
+  | "completion_rate"
+  | "avg_score"
+  | "active_users"
+  | "performance_score"
+  | "ai_generated";
 
-const TITLES: Record<KpiMetric, { title: string; desc: string; icon: React.ComponentType<{ className?: string }> }> = {
-  total: { title: "All Quizzes", desc: "Every quiz in the system with attempts, status and performance.", icon: ListChecks },
-  published: { title: "Published Quizzes", desc: "Live quizzes — publish dates, attempts and performance.", icon: Send },
-  draft: { title: "Draft Quizzes", desc: "Drafts in progress — last edited, edit and publish from here.", icon: Edit3 },
-  scheduled: { title: "Scheduled Quizzes", desc: "Published quizzes that go live in the future.", icon: CalendarClock },
-  archived: { title: "Archived Quizzes", desc: "Archived quizzes — restore at any time.", icon: Archive },
-  attempts: { title: "All Quiz Attempts", desc: "Recent attempts with student, score, accuracy and duration.", icon: Trophy },
-  completion_rate: { title: "Completion Analytics", desc: "Completed vs abandoned attempts, daily trend and per-subject breakdown.", icon: PercentSquare },
-  avg_score: { title: "Score Analytics", desc: "Score distribution, highest/lowest and averages by quiz and subject.", icon: Target },
-  active_users: { title: "Active Students (24h)", desc: "Students with quiz activity in the last 24 hours.", icon: Users },
-  performance_score: { title: "Performance Analytics", desc: "Top and weak performers with subject and chapter analysis.", icon: Gauge },
-  ai_generated: { title: "AI Generated Quizzes", desc: "Quizzes created by Auto-Generate with performance comparison.", icon: Bot },
+const TITLES: Record<
+  KpiMetric,
+  { title: string; desc: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  total: {
+    title: "All Quizzes",
+    desc: "Every quiz in the system with attempts, status and performance.",
+    icon: ListChecks,
+  },
+  published: {
+    title: "Published Quizzes",
+    desc: "Live quizzes — publish dates, attempts and performance.",
+    icon: Send,
+  },
+  draft: {
+    title: "Draft Quizzes",
+    desc: "Drafts in progress — last edited, edit and publish from here.",
+    icon: Edit3,
+  },
+  scheduled: {
+    title: "Scheduled Quizzes",
+    desc: "Published quizzes that go live in the future.",
+    icon: CalendarClock,
+  },
+  archived: {
+    title: "Archived Quizzes",
+    desc: "Archived quizzes — restore at any time.",
+    icon: Archive,
+  },
+  attempts: {
+    title: "All Quiz Attempts",
+    desc: "Recent attempts with student, score, accuracy and duration.",
+    icon: Trophy,
+  },
+  completion_rate: {
+    title: "Completion Analytics",
+    desc: "Completed vs abandoned attempts, daily trend and per-subject breakdown.",
+    icon: PercentSquare,
+  },
+  avg_score: {
+    title: "Score Analytics",
+    desc: "Score distribution, highest/lowest and averages by quiz and subject.",
+    icon: Target,
+  },
+  active_users: {
+    title: "Active Students (24h)",
+    desc: "Students with quiz activity in the last 24 hours.",
+    icon: Users,
+  },
+  performance_score: {
+    title: "Performance Analytics",
+    desc: "Top and weak performers with subject and chapter analysis.",
+    icon: Gauge,
+  },
+  ai_generated: {
+    title: "AI Generated Quizzes",
+    desc: "Quizzes created by Auto-Generate with performance comparison.",
+    icon: Bot,
+  },
 };
 
 export function QuizKpiDetailDialog({
-  metric, onClose, onOpenQuiz,
+  metric,
+  onClose,
+  onOpenQuiz,
 }: {
   metric: KpiMetric | null;
   onClose: () => void;
@@ -45,12 +124,14 @@ export function QuizKpiDetailDialog({
 
   const q = useQuery({
     queryKey: ["admin-quiz-card", metric, search],
-    queryFn: () => detailsFn({ data: { metric: metric!, search: search || undefined, limit: 150 } }),
+    queryFn: () =>
+      detailsFn({ data: { metric: metric!, search: search || undefined, limit: 150 } }),
     enabled: !!metric,
   });
 
   const setStatus = useMutation({
-    mutationFn: (v: { id: string; status: "published" | "draft" | "archived" }) => statusFn({ data: v }),
+    mutationFn: (v: { id: string; status: "published" | "draft" | "archived" }) =>
+      statusFn({ data: v }),
     onSuccess: (_d, v) => {
       toast.success(`Quiz ${v.status}`);
       qc.invalidateQueries({ queryKey: ["admin-quiz-card"] });
@@ -64,7 +145,14 @@ export function QuizKpiDetailDialog({
   const meta = TITLES[metric];
   const Icon = meta.icon;
   const data = q.data;
-  const showSearch = ["total","published","draft","scheduled","archived","ai_generated"].includes(metric);
+  const showSearch = [
+    "total",
+    "published",
+    "draft",
+    "scheduled",
+    "archived",
+    "ai_generated",
+  ].includes(metric);
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -82,7 +170,12 @@ export function QuizKpiDetailDialog({
         {showSearch && (
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search quizzes…" className="pl-9 h-10" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search quizzes…"
+              className="pl-9 h-10"
+            />
           </div>
         )}
 
@@ -92,9 +185,17 @@ export function QuizKpiDetailDialog({
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…
             </div>
           ) : !data ? (
-            <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No data.</div>
+            <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+              No data.
+            </div>
           ) : data.kind === "quiz_list" ? (
-            <QuizListView data={data} onOpenQuiz={onOpenQuiz} onSetStatus={(id, status) => setStatus.mutate({ id, status })} pending={setStatus.isPending} metric={metric} />
+            <QuizListView
+              data={data}
+              onOpenQuiz={onOpenQuiz}
+              onSetStatus={(id, status) => setStatus.mutate({ id, status })}
+              pending={setStatus.isPending}
+              metric={metric}
+            />
           ) : data.kind === "attempts" ? (
             <AttemptsView rows={data.rows} />
           ) : data.kind === "completion" ? (
@@ -135,8 +236,28 @@ function fmtCountdown(iso: string | null): string {
   return `in ${m}m`;
 }
 
-function QuizListView({ data, onOpenQuiz, onSetStatus, pending, metric }: {
-  data: { rows: Array<{ id: string; title: string; status: string; level: string | null; subject_name: string | null; total_questions: number; starts_at: string | null; attempts: number; avg_score: number; updated_at: string }>; breakdown: Record<string, number> };
+function QuizListView({
+  data,
+  onOpenQuiz,
+  onSetStatus,
+  pending,
+  metric,
+}: {
+  data: {
+    rows: Array<{
+      id: string;
+      title: string;
+      status: string;
+      level: string | null;
+      subject_name: string | null;
+      total_questions: number;
+      starts_at: string | null;
+      attempts: number;
+      avg_score: number;
+      updated_at: string;
+    }>;
+    breakdown: Record<string, number>;
+  };
   onOpenQuiz?: (id: string, a?: "preview" | "edit" | "builder") => void;
   onSetStatus: (id: string, status: "published" | "draft" | "archived") => void;
   pending: boolean;
@@ -148,7 +269,9 @@ function QuizListView({ data, onOpenQuiz, onSetStatus, pending, metric }: {
         {Object.entries(data.breakdown).map(([k, v]) => (
           <div key={k} className="rounded-lg border border-border/40 bg-card/40 p-2 text-center">
             <p className="font-mono text-lg font-bold">{v.toLocaleString()}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground capitalize">{k.replace("_", " ")}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground capitalize">
+              {k.replace("_", " ")}
+            </p>
           </div>
         ))}
       </div>
@@ -172,41 +295,84 @@ function QuizListView({ data, onOpenQuiz, onSetStatus, pending, metric }: {
             {data.rows.map((r) => (
               <tr key={r.id} className="border-b border-border/20 hover:bg-muted/30">
                 <td className="py-2 pr-2 font-medium">
-                  <button className="text-left hover:text-primary" onClick={() => onOpenQuiz?.(r.id, "preview")}>{r.title}</button>
+                  <button
+                    className="text-left hover:text-primary"
+                    onClick={() => onOpenQuiz?.(r.id, "preview")}
+                  >
+                    {r.title}
+                  </button>
                 </td>
                 <td className="px-2 text-muted-foreground">{r.subject_name ?? "—"}</td>
-                <td className="px-2"><Badge variant={r.status === "published" ? "default" : "secondary"} className="text-[10px] capitalize">{r.status}</Badge></td>
+                <td className="px-2">
+                  <Badge
+                    variant={r.status === "published" ? "default" : "secondary"}
+                    className="text-[10px] capitalize"
+                  >
+                    {r.status}
+                  </Badge>
+                </td>
                 <td className="px-2 text-right tabular-nums">{r.total_questions}</td>
                 <td className="px-2 text-right tabular-nums">{r.attempts}</td>
                 <td className="px-2 text-right tabular-nums">{r.avg_score}%</td>
                 <td className="px-2 text-muted-foreground">
-                  {metric === "scheduled"
-                    ? <span title={r.starts_at ?? ""}>{fmtCountdown(r.starts_at)}</span>
-                    : fmtRelative(r.updated_at)}
+                  {metric === "scheduled" ? (
+                    <span title={r.starts_at ?? ""}>{fmtCountdown(r.starts_at)}</span>
+                  ) : (
+                    fmtRelative(r.updated_at)
+                  )}
                 </td>
                 <td className="px-2 text-right">
                   <div className="inline-flex items-center gap-1">
                     {metric === "draft" && (
-                      <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={pending} onClick={() => onSetStatus(r.id, "published")}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[11px]"
+                        disabled={pending}
+                        onClick={() => onSetStatus(r.id, "published")}
+                      >
                         <Send className="mr-1 h-3 w-3" /> Publish
                       </Button>
                     )}
                     {metric === "published" && (
-                      <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={pending} onClick={() => onSetStatus(r.id, "draft")}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[11px]"
+                        disabled={pending}
+                        onClick={() => onSetStatus(r.id, "draft")}
+                      >
                         <EyeOff className="mr-1 h-3 w-3" /> Unpublish
                       </Button>
                     )}
                     {metric === "archived" && (
-                      <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={pending} onClick={() => onSetStatus(r.id, "draft")}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[11px]"
+                        disabled={pending}
+                        onClick={() => onSetStatus(r.id, "draft")}
+                      >
                         <RotateCcw className="mr-1 h-3 w-3" /> Restore
                       </Button>
                     )}
                     {metric === "scheduled" && (
-                      <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={pending} onClick={() => onSetStatus(r.id, "draft")}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[11px]"
+                        disabled={pending}
+                        onClick={() => onSetStatus(r.id, "draft")}
+                      >
                         Cancel
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => onOpenQuiz?.(r.id, "edit")}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-[11px]"
+                      onClick={() => onOpenQuiz?.(r.id, "edit")}
+                    >
                       <Edit3 className="mr-1 h-3 w-3" /> Edit
                     </Button>
                   </div>
@@ -220,8 +386,24 @@ function QuizListView({ data, onOpenQuiz, onSetStatus, pending, metric }: {
   );
 }
 
-function AttemptsView({ rows }: { rows: Array<{ id: string; student: string; title: string | null; score: number; total_count: number; accuracy: number; duration_seconds: number; status: string; created_at: string; completed_at: string | null }> }) {
-  if (rows.length === 0) return <p className="py-10 text-center text-sm text-muted-foreground">No attempts yet.</p>;
+function AttemptsView({
+  rows,
+}: {
+  rows: Array<{
+    id: string;
+    student: string;
+    title: string | null;
+    score: number;
+    total_count: number;
+    accuracy: number;
+    duration_seconds: number;
+    status: string;
+    created_at: string;
+    completed_at: string | null;
+  }>;
+}) {
+  if (rows.length === 0)
+    return <p className="py-10 text-center text-sm text-muted-foreground">No attempts yet.</p>;
   return (
     <table className="w-full text-xs">
       <thead className="text-left text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -240,10 +422,16 @@ function AttemptsView({ rows }: { rows: Array<{ id: string; student: string; tit
           <tr key={r.id} className="border-b border-border/20 hover:bg-muted/30">
             <td className="py-2 pl-3 pr-2 font-medium">{r.student}</td>
             <td className="px-2 text-muted-foreground truncate max-w-[260px]">{r.title ?? "—"}</td>
-            <td className="px-2 text-right tabular-nums">{r.score}/{r.total_count}</td>
+            <td className="px-2 text-right tabular-nums">
+              {r.score}/{r.total_count}
+            </td>
             <td className="px-2 text-right tabular-nums">{r.accuracy}%</td>
             <td className="px-2 text-right tabular-nums">{Math.round(r.duration_seconds / 60)}m</td>
-            <td className="px-2"><Badge variant="outline" className="text-[10px] capitalize">{r.status}</Badge></td>
+            <td className="px-2">
+              <Badge variant="outline" className="text-[10px] capitalize">
+                {r.status}
+              </Badge>
+            </td>
             <td className="px-2 pr-3 text-muted-foreground">{fmtRelative(r.created_at)}</td>
           </tr>
         ))}
@@ -252,19 +440,48 @@ function AttemptsView({ rows }: { rows: Array<{ id: string; student: string; tit
   );
 }
 
-function MiniBars({ series, valueKey, color = "#a855f7" }: { series: Array<Record<string, number | string>>; valueKey: string; color?: string }) {
+function MiniBars({
+  series,
+  valueKey,
+  color = "#a855f7",
+}: {
+  series: Array<Record<string, number | string>>;
+  valueKey: string;
+  color?: string;
+}) {
   const max = Math.max(1, ...series.map((s) => Number(s[valueKey] ?? 0)));
   return (
     <div className="flex h-24 items-end gap-px">
       {series.map((s, i) => {
         const v = Number(s[valueKey] ?? 0);
-        return <div key={i} title={`${s.d}: ${v}`} className="flex-1 rounded-t" style={{ height: `${(v / max) * 100}%`, background: color, minHeight: v ? 2 : 0 }} />;
+        return (
+          <div
+            key={i}
+            title={`${s.d}: ${v}`}
+            className="flex-1 rounded-t"
+            style={{ height: `${(v / max) * 100}%`, background: color, minHeight: v ? 2 : 0 }}
+          />
+        );
       })}
     </div>
   );
 }
 
-function CompletionView({ data }: { data: { series: Array<{ d: string; started: number; completed: number; rate: number }>; bySubject: Array<{ subject_id: string; subject_name: string; started: number; completed: number; rate: number }>; totals: { started: number; completed: number; abandoned: number; rate: number } } }) {
+function CompletionView({
+  data,
+}: {
+  data: {
+    series: Array<{ d: string; started: number; completed: number; rate: number }>;
+    bySubject: Array<{
+      subject_id: string;
+      subject_name: string;
+      started: number;
+      completed: number;
+      rate: number;
+    }>;
+    totals: { started: number; completed: number; abandoned: number; rate: number };
+  };
+}) {
   return (
     <div className="p-3 space-y-4">
       <div className="grid grid-cols-4 gap-2">
@@ -274,22 +491,36 @@ function CompletionView({ data }: { data: { series: Array<{ d: string; started: 
         <Tile label="Completion Rate" value={`${data.totals.rate}%`} accent="#a855f7" />
       </div>
       <div className="rounded-xl border border-border/40 p-3">
-        <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">Daily Started vs Completed (30d)</p>
+        <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+          Daily Started vs Completed (30d)
+        </p>
         <div className="grid grid-cols-2 gap-3">
-          <div><p className="text-[10px] text-muted-foreground mb-1">Started</p><MiniBars series={data.series} valueKey="started" color="#60a5fa" /></div>
-          <div><p className="text-[10px] text-muted-foreground mb-1">Completed</p><MiniBars series={data.series} valueKey="completed" color="#10b981" /></div>
+          <div>
+            <p className="text-[10px] text-muted-foreground mb-1">Started</p>
+            <MiniBars series={data.series} valueKey="started" color="#60a5fa" />
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground mb-1">Completed</p>
+            <MiniBars series={data.series} valueKey="completed" color="#10b981" />
+          </div>
         </div>
       </div>
       <div className="rounded-xl border border-border/40">
-        <p className="border-b border-border/40 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">Subject Breakdown</p>
+        <p className="border-b border-border/40 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+          Subject Breakdown
+        </p>
         {data.bySubject.length === 0 ? (
-          <p className="p-6 text-center text-xs text-muted-foreground">No subject-level data yet.</p>
+          <p className="p-6 text-center text-xs text-muted-foreground">
+            No subject-level data yet.
+          </p>
         ) : (
           <ul className="divide-y divide-border/30">
             {data.bySubject.map((s) => (
               <li key={s.subject_id} className="flex items-center gap-3 px-3 py-2 text-xs">
                 <span className="flex-1 font-medium truncate">{s.subject_name}</span>
-                <span className="text-muted-foreground tabular-nums">{s.completed}/{s.started}</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {s.completed}/{s.started}
+                </span>
                 <div className="h-1.5 w-32 rounded-full bg-muted overflow-hidden">
                   <div className="h-full bg-emerald-500" style={{ width: `${s.rate}%` }} />
                 </div>
@@ -303,7 +534,18 @@ function CompletionView({ data }: { data: { series: Array<{ d: string; started: 
   );
 }
 
-function ScoresView({ data }: { data: { distribution: Array<{ label: string; count: number }>; highest: number; lowest: number; average: number; byQuiz: Array<{ quiz_id: string; title: string; avg: number; attempts: number }>; bySubject: Array<{ subject_id: string; subject_name: string; avg: number; attempts: number }> } }) {
+function ScoresView({
+  data,
+}: {
+  data: {
+    distribution: Array<{ label: string; count: number }>;
+    highest: number;
+    lowest: number;
+    average: number;
+    byQuiz: Array<{ quiz_id: string; title: string; avg: number; attempts: number }>;
+    bySubject: Array<{ subject_id: string; subject_name: string; avg: number; attempts: number }>;
+  };
+}) {
   const max = Math.max(1, ...data.distribution.map((d) => d.count));
   return (
     <div className="p-3 space-y-4">
@@ -313,13 +555,18 @@ function ScoresView({ data }: { data: { distribution: Array<{ label: string; cou
         <Tile label="Lowest" value={`${data.lowest}%`} accent="#f43f5e" />
       </div>
       <div className="rounded-xl border border-border/40 p-3">
-        <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">Score Distribution</p>
+        <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+          Score Distribution
+        </p>
         <div className="space-y-1.5">
           {data.distribution.map((d) => (
             <div key={d.label} className="flex items-center gap-2 text-xs">
               <span className="w-16 text-muted-foreground">{d.label}</span>
               <div className="flex-1 h-3 rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-500" style={{ width: `${(d.count / max) * 100}%` }} />
+                <div
+                  className="h-full bg-gradient-to-r from-violet-500 to-indigo-500"
+                  style={{ width: `${(d.count / max) * 100}%` }}
+                />
               </div>
               <span className="w-10 text-right tabular-nums">{d.count}</span>
             </div>
@@ -327,22 +574,58 @@ function ScoresView({ data }: { data: { distribution: Array<{ label: string; cou
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
-        <RankList title="Top Quizzes by Avg Score" items={data.byQuiz.map((q) => ({ id: q.quiz_id, name: q.title, value: `${q.avg}%`, sub: `${q.attempts} attempts` }))} />
-        <RankList title="Subjects by Avg Score" items={data.bySubject.map((s) => ({ id: s.subject_id, name: s.subject_name, value: `${s.avg}%`, sub: `${s.attempts} attempts` }))} />
+        <RankList
+          title="Top Quizzes by Avg Score"
+          items={data.byQuiz.map((q) => ({
+            id: q.quiz_id,
+            name: q.title,
+            value: `${q.avg}%`,
+            sub: `${q.attempts} attempts`,
+          }))}
+        />
+        <RankList
+          title="Subjects by Avg Score"
+          items={data.bySubject.map((s) => ({
+            id: s.subject_id,
+            name: s.subject_name,
+            value: `${s.avg}%`,
+            sub: `${s.attempts} attempts`,
+          }))}
+        />
       </div>
     </div>
   );
 }
 
-function ActiveUsersView({ rows, total }: { rows: Array<{ user_id: string; name: string; email: string | null; last_seen: string; activity_count: number; last_quiz: string | null; device: string | null; browser: string | null }>; total: number }) {
+function ActiveUsersView({
+  rows,
+  total,
+}: {
+  rows: Array<{
+    user_id: string;
+    name: string;
+    email: string | null;
+    last_seen: string;
+    activity_count: number;
+    last_quiz: string | null;
+    device: string | null;
+    browser: string | null;
+  }>;
+  total: number;
+}) {
   return (
     <div className="p-3 space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <Tile label="Active Users (24h)" value={total.toLocaleString()} accent="#38bdf8" />
-        <Tile label="Total Activity Events" value={rows.reduce((a, r) => a + r.activity_count, 0).toLocaleString()} />
+        <Tile
+          label="Total Activity Events"
+          value={rows.reduce((a, r) => a + r.activity_count, 0).toLocaleString()}
+        />
       </div>
       {rows.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">No active users in the last 24 hours.</p>
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          No active users in the last 24 hours.
+        </p>
       ) : (
         <table className="w-full text-xs">
           <thead className="text-left text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -358,8 +641,12 @@ function ActiveUsersView({ rows, total }: { rows: Array<{ user_id: string; name:
             {rows.map((r) => (
               <tr key={r.user_id} className="border-b border-border/20 hover:bg-muted/30">
                 <td className="py-2 pl-3 pr-2 font-medium">{r.name}</td>
-                <td className="px-2 text-muted-foreground truncate max-w-[280px]">{r.last_quiz ?? "—"}</td>
-                <td className="px-2 text-muted-foreground">{[r.device, r.browser].filter(Boolean).join(" · ") || "—"}</td>
+                <td className="px-2 text-muted-foreground truncate max-w-[280px]">
+                  {r.last_quiz ?? "—"}
+                </td>
+                <td className="px-2 text-muted-foreground">
+                  {[r.device, r.browser].filter(Boolean).join(" · ") || "—"}
+                </td>
                 <td className="px-2 text-right tabular-nums">{r.activity_count}</td>
                 <td className="px-2 pr-3 text-muted-foreground">{fmtRelative(r.last_seen)}</td>
               </tr>
@@ -371,31 +658,92 @@ function ActiveUsersView({ rows, total }: { rows: Array<{ user_id: string; name:
   );
 }
 
-function PerformanceView({ data }: { data: { top: Array<{ user_id: string; name: string; avg: number; attempts: number }>; weak: Array<{ user_id: string; name: string; avg: number; attempts: number }>; bySubject: Array<{ subject_id: string; subject_name: string; avg: number; attempts: number }>; byChapter: Array<{ chapter_id: string; chapter_name: string; avg: number; attempts: number }> } }) {
+function PerformanceView({
+  data,
+}: {
+  data: {
+    top: Array<{ user_id: string; name: string; avg: number; attempts: number }>;
+    weak: Array<{ user_id: string; name: string; avg: number; attempts: number }>;
+    bySubject: Array<{ subject_id: string; subject_name: string; avg: number; attempts: number }>;
+    byChapter: Array<{ chapter_id: string; chapter_name: string; avg: number; attempts: number }>;
+  };
+}) {
   return (
     <div className="p-3 space-y-3">
       <div className="grid gap-3 md:grid-cols-2">
-        <RankList title="Top Performers" items={data.top.map((u) => ({ id: u.user_id, name: u.name, value: `${u.avg}%`, sub: `${u.attempts} attempts` }))} icon={TrendingUp} />
-        <RankList title="Needs Support" items={data.weak.map((u) => ({ id: u.user_id, name: u.name, value: `${u.avg}%`, sub: `${u.attempts} attempts` }))} icon={TrendingDown} />
+        <RankList
+          title="Top Performers"
+          items={data.top.map((u) => ({
+            id: u.user_id,
+            name: u.name,
+            value: `${u.avg}%`,
+            sub: `${u.attempts} attempts`,
+          }))}
+          icon={TrendingUp}
+        />
+        <RankList
+          title="Needs Support"
+          items={data.weak.map((u) => ({
+            id: u.user_id,
+            name: u.name,
+            value: `${u.avg}%`,
+            sub: `${u.attempts} attempts`,
+          }))}
+          icon={TrendingDown}
+        />
       </div>
       <div className="grid gap-3 md:grid-cols-2">
-        <RankList title="Subject Analysis" items={data.bySubject.map((s) => ({ id: s.subject_id, name: s.subject_name, value: `${s.avg}%`, sub: `${s.attempts} attempts` }))} />
-        <RankList title="Chapter Analysis" items={data.byChapter.map((c) => ({ id: c.chapter_id, name: c.chapter_name, value: `${c.avg}%`, sub: `${c.attempts} attempts` }))} />
+        <RankList
+          title="Subject Analysis"
+          items={data.bySubject.map((s) => ({
+            id: s.subject_id,
+            name: s.subject_name,
+            value: `${s.avg}%`,
+            sub: `${s.attempts} attempts`,
+          }))}
+        />
+        <RankList
+          title="Chapter Analysis"
+          items={data.byChapter.map((c) => ({
+            id: c.chapter_id,
+            name: c.chapter_name,
+            value: `${c.avg}%`,
+            sub: `${c.attempts} attempts`,
+          }))}
+        />
       </div>
     </div>
   );
 }
 
-function Tile({ label, value, accent = "var(--primary)" }: { label: string; value: string; accent?: string }) {
+function Tile({
+  label,
+  value,
+  accent = "var(--primary)",
+}: {
+  label: string;
+  value: string;
+  accent?: string;
+}) {
   return (
     <div className="rounded-xl border border-border/40 bg-card/40 p-3">
-      <p className="font-mono text-xl font-bold tabular-nums" style={{ color: accent }}>{value}</p>
+      <p className="font-mono text-xl font-bold tabular-nums" style={{ color: accent }}>
+        {value}
+      </p>
       <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
     </div>
   );
 }
 
-function RankList({ title, items, icon: Icon }: { title: string; items: Array<{ id: string; name: string; value: string; sub?: string }>; icon?: React.ComponentType<{ className?: string }> }) {
+function RankList({
+  title,
+  items,
+  icon: Icon,
+}: {
+  title: string;
+  items: Array<{ id: string; name: string; value: string; sub?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
+}) {
   return (
     <div className="rounded-xl border border-border/40">
       <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
@@ -408,7 +756,9 @@ function RankList({ title, items, icon: Icon }: { title: string; items: Array<{ 
         <ol className="divide-y divide-border/30">
           {items.map((it, i) => (
             <li key={it.id} className="flex items-center gap-3 px-3 py-2 text-xs">
-              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/15 font-mono text-[10px] font-bold text-primary">{i + 1}</span>
+              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/15 font-mono text-[10px] font-bold text-primary">
+                {i + 1}
+              </span>
               <span className="flex-1 truncate font-medium">{it.name}</span>
               {it.sub && <span className="text-[10px] text-muted-foreground">{it.sub}</span>}
               <span className="font-mono tabular-nums">{it.value}</span>

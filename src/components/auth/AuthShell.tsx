@@ -55,8 +55,7 @@ function GridBg() {
         backgroundImage:
           "linear-gradient(to right, color-mix(in oklab, var(--neon-purple) 40%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--neon-blue) 40%, transparent) 1px, transparent 1px)",
         backgroundSize: "44px 44px",
-        maskImage:
-          "radial-gradient(ellipse 80% 70% at 50% 50%, black 40%, transparent 100%)",
+        maskImage: "radial-gradient(ellipse 80% 70% at 50% 50%, black 40%, transparent 100%)",
       }}
     />
   );
@@ -115,10 +114,7 @@ function DashboardMock() {
           { l: "Streak", v: "21d" },
           { l: "XP", v: "9.8k" },
         ].map((c) => (
-          <div
-            key={c.l}
-            className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-center"
-          >
+          <div key={c.l} className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-center">
             <p className="text-[9px] uppercase tracking-wider text-white/50">{c.l}</p>
             <p className="font-display text-sm font-semibold text-white">{c.v}</p>
           </div>

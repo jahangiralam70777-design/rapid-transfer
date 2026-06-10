@@ -4,10 +4,29 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  Save, Sun, Moon, Sparkles, CircleDot, Settings as SettingsIcon,
-  Palette, ShieldCheck, Eye, Bell, User as UserIcon, Camera,
-  Lock, Loader2, Globe, Mail, Phone, Image as ImageIcon,
-  ExternalLink, KeyRound, Smartphone, Check, AlertTriangle,
+  Save,
+  Sun,
+  Moon,
+  Sparkles,
+  CircleDot,
+  Settings as SettingsIcon,
+  Palette,
+  ShieldCheck,
+  Eye,
+  Bell,
+  User as UserIcon,
+  Camera,
+  Lock,
+  Loader2,
+  Globe,
+  Mail,
+  Phone,
+  Image as ImageIcon,
+  ExternalLink,
+  KeyRound,
+  Smartphone,
+  Check,
+  AlertTriangle,
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,17 +48,34 @@ import { WhatsAppPopupSettingsPanel } from "@/components/admin/WhatsAppPopupSett
    Panel chrome
    ============================================================ */
 function Panel({
-  icon: Icon, color, title, subtitle, children, badge, action,
+  icon: Icon,
+  color,
+  title,
+  subtitle,
+  children,
+  badge,
+  action,
 }: {
-  icon: any; color: string; title: string; subtitle: string;
-  children: React.ReactNode; badge?: string; action?: React.ReactNode;
+  icon: any;
+  color: string;
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+  badge?: string;
+  action?: React.ReactNode;
 }) {
   return (
     <section className="glass shadow-card-soft relative overflow-hidden rounded-3xl p-5">
-      <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full blur-3xl" style={{ background: `${color}33` }} />
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full blur-3xl"
+        style={{ background: `${color}33` }}
+      />
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-background/40" style={{ boxShadow: `0 0 16px ${color}55` }}>
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-background/40"
+            style={{ boxShadow: `0 0 16px ${color}55` }}
+          >
             <Icon className="h-5 w-5" style={{ color }} />
           </div>
           <div>
@@ -48,7 +84,11 @@ function Panel({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {badge && <Badge variant="outline" className="border-white/15 text-[10px]">{badge}</Badge>}
+          {badge && (
+            <Badge variant="outline" className="border-white/15 text-[10px]">
+              {badge}
+            </Badge>
+          )}
           {action}
         </div>
       </div>
@@ -57,11 +97,21 @@ function Panel({
   );
 }
 
-function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
+function Field({
+  label,
+  children,
+  hint,
+}: {
+  label: string;
+  children: React.ReactNode;
+  hint?: string;
+}) {
   return (
     <label className="block space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
         {hint && <span className="text-[10px] text-muted-foreground/70">{hint}</span>}
       </div>
       {children}
@@ -77,14 +127,24 @@ function Topbar() {
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const initials = (user?.name ?? "A")
-    .split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
   return (
     <header className="glass shadow-card-soft flex items-center gap-3 rounded-2xl p-3">
       <div className="hidden items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-400 md:flex">
         <CircleDot className="h-3 w-3 animate-pulse" /> Platform · live
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <Button size="icon" variant="ghost" className="rounded-xl" onClick={toggleTheme} aria-label="Toggle theme">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="rounded-xl"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
         <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-background/40 p-1 pl-3">
@@ -92,7 +152,9 @@ function Topbar() {
             <p className="text-xs font-semibold">{user?.name ?? "Admin"}</p>
             <p className="text-[10px] text-muted-foreground capitalize">{user?.role ?? "admin"}</p>
           </div>
-          <div className="bg-cta-gradient flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white shadow-glow">{initials}</div>
+          <div className="bg-cta-gradient flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white shadow-glow">
+            {initials}
+          </div>
         </div>
       </div>
     </header>
@@ -105,12 +167,15 @@ function PageHeader() {
       <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-[var(--neon-purple)]/25 blur-3xl" />
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
-          <Badge className="bg-cta-gradient border-0 text-white shadow-glow"><Sparkles className="mr-1 h-3 w-3" /> Control Core</Badge>
+          <Badge className="bg-cta-gradient border-0 text-white shadow-glow">
+            <Sparkles className="mr-1 h-3 w-3" /> Control Core
+          </Badge>
           <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
             Platform <span className="text-gradient">Settings</span>
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Manage your admin profile, security, appearance, notifications and student-facing modules.
+            Manage your admin profile, security, appearance, notifications and student-facing
+            modules.
           </p>
         </div>
       </div>
@@ -169,7 +234,8 @@ function ProfilePanel() {
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars")
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
         .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
@@ -185,16 +251,30 @@ function ProfilePanel() {
 
   const avatarUrl = q.data?.avatar_url ?? undefined;
   const initials = (display || user?.name || "A")
-    .split(/\s+/).map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+    .split(/\s+/)
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <Panel
-      icon={UserIcon} color="var(--neon-purple)"
-      title="Admin Profile" subtitle="Your name, photo and bio shown across the panel"
+      icon={UserIcon}
+      color="var(--neon-purple)"
+      title="Admin Profile"
+      subtitle="Your name, photo and bio shown across the panel"
       action={
-        <Button size="sm" className="bg-cta-gradient text-white shadow-glow disabled:opacity-50"
-          disabled={!dirty || save.isPending} onClick={() => save.mutate()}>
-          {save.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
+        <Button
+          size="sm"
+          className="bg-cta-gradient text-white shadow-glow disabled:opacity-50"
+          disabled={!dirty || save.isPending}
+          onClick={() => save.mutate()}
+        >
+          {save.isPending ? (
+            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Save className="mr-1.5 h-3.5 w-3.5" />
+          )}
           Save
         </Button>
       }
@@ -209,14 +289,30 @@ function ProfilePanel() {
             <div className="relative">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)] opacity-70 blur-md" />
               <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-background/60 text-2xl font-bold">
-                {avatarUrl
-                  ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-                  : initials}
-                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-cta-gradient shadow-glow disabled:opacity-60">
-                  {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-white" /> : <Camera className="h-3.5 w-3.5 text-white" />}
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-cta-gradient shadow-glow disabled:opacity-60"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                  ) : (
+                    <Camera className="h-3.5 w-3.5 text-white" />
+                  )}
                 </button>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickAvatar} />
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={onPickAvatar}
+                />
               </div>
             </div>
             <p className="text-[10px] text-muted-foreground">PNG · JPG · max 4 MB</p>
@@ -224,20 +320,40 @@ function ProfilePanel() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Display name">
-              <Input value={display} onChange={(e) => { setDisplay(e.target.value); setDirty(true); }}
-                className="h-10 rounded-xl border-white/10 bg-background/60" />
+              <Input
+                value={display}
+                onChange={(e) => {
+                  setDisplay(e.target.value);
+                  setDirty(true);
+                }}
+                className="h-10 rounded-xl border-white/10 bg-background/60"
+              />
             </Field>
             <Field label="Email" hint="read-only">
-              <Input value={user?.email ?? ""} disabled className="h-10 rounded-xl border-white/10 bg-background/40" />
+              <Input
+                value={user?.email ?? ""}
+                disabled
+                className="h-10 rounded-xl border-white/10 bg-background/40"
+              />
             </Field>
             <Field label="Bio">
-              <Textarea value={bio} onChange={(e) => { setBio(e.target.value); setDirty(true); }}
-                rows={3} maxLength={500}
-                className="rounded-xl border-white/10 bg-background/60" />
+              <Textarea
+                value={bio}
+                onChange={(e) => {
+                  setBio(e.target.value);
+                  setDirty(true);
+                }}
+                rows={3}
+                maxLength={500}
+                className="rounded-xl border-white/10 bg-background/60"
+              />
             </Field>
             <Field label="Role" hint="managed by system">
-              <Input value={user?.role ?? "admin"} disabled
-                className="h-10 rounded-xl border-white/10 bg-background/40 capitalize" />
+              <Input
+                value={user?.role ?? "admin"}
+                disabled
+                className="h-10 rounded-xl border-white/10 bg-background/40 capitalize"
+              />
             </Field>
           </div>
         </div>
@@ -262,31 +378,60 @@ function SecurityPanel() {
     },
     onSuccess: () => {
       toast.success("Password updated");
-      setCurrent(""); setNext(""); setConfirm("");
+      setCurrent("");
+      setNext("");
+      setConfirm("");
     },
     onError: (e: any) => toast.error(e?.message ?? "Could not update password"),
   });
 
   return (
-    <Panel icon={ShieldCheck} color="#10b981" title="Security" subtitle="Change your account password">
+    <Panel
+      icon={ShieldCheck}
+      color="#10b981"
+      title="Security"
+      subtitle="Change your account password"
+    >
       <div className="grid gap-3 sm:grid-cols-3">
         <Field label="Current password" hint="optional">
-          <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)}
-            className="h-10 rounded-xl border-white/10 bg-background/60" autoComplete="current-password" />
+          <Input
+            type="password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            className="h-10 rounded-xl border-white/10 bg-background/60"
+            autoComplete="current-password"
+          />
         </Field>
         <Field label="New password" hint="min 8 chars">
-          <Input type="password" value={next} onChange={(e) => setNext(e.target.value)}
-            className="h-10 rounded-xl border-white/10 bg-background/60" autoComplete="new-password" />
+          <Input
+            type="password"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            className="h-10 rounded-xl border-white/10 bg-background/60"
+            autoComplete="new-password"
+          />
         </Field>
         <Field label="Confirm new password">
-          <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
-            className="h-10 rounded-xl border-white/10 bg-background/60" autoComplete="new-password" />
+          <Input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className="h-10 rounded-xl border-white/10 bg-background/60"
+            autoComplete="new-password"
+          />
         </Field>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button onClick={() => change.mutate()} disabled={change.isPending || !next || !confirm}
-          className="bg-cta-gradient text-white shadow-glow">
-          {change.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+        <Button
+          onClick={() => change.mutate()}
+          disabled={change.isPending || !next || !confirm}
+          className="bg-cta-gradient text-white shadow-glow"
+        >
+          {change.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <KeyRound className="mr-2 h-4 w-4" />
+          )}
           Update password
         </Button>
       </div>
@@ -301,42 +446,76 @@ function AppearancePanel() {
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const prefs = usePrefs();
-  const accents = ["#a855f7", "#7c3aed", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
+  const accents = [
+    "#a855f7",
+    "#7c3aed",
+    "#3b82f6",
+    "#06b6d4",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#ec4899",
+  ];
 
   return (
-    <Panel icon={Palette} color="var(--neon-blue)" title="Appearance" subtitle="Theme, accent color and reading size">
+    <Panel
+      icon={Palette}
+      color="var(--neon-blue)"
+      title="Appearance"
+      subtitle="Theme, accent color and reading size"
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Theme">
           <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-background/40 p-1 text-xs">
-            <button onClick={() => theme === "dark" && toggleTheme()}
-              className={`flex-1 rounded-lg px-3 py-1.5 transition-colors ${theme === "light" ? "bg-cta-gradient text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
+            <button
+              onClick={() => theme === "dark" && toggleTheme()}
+              className={`flex-1 rounded-lg px-3 py-1.5 transition-colors ${theme === "light" ? "bg-cta-gradient text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+            >
               <Sun className="mr-1 inline h-3.5 w-3.5" /> Light
             </button>
-            <button onClick={() => theme === "light" && toggleTheme()}
-              className={`flex-1 rounded-lg px-3 py-1.5 transition-colors ${theme === "dark" ? "bg-cta-gradient text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
+            <button
+              onClick={() => theme === "light" && toggleTheme()}
+              className={`flex-1 rounded-lg px-3 py-1.5 transition-colors ${theme === "dark" ? "bg-cta-gradient text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+            >
               <Moon className="mr-1 inline h-3.5 w-3.5" /> Dark
             </button>
           </div>
         </Field>
 
         <Field label="Reading size" hint={`${prefs.fontSize}px`}>
-          <input type="range" min={13} max={20} value={prefs.fontSize}
+          <input
+            type="range"
+            min={13}
+            max={20}
+            value={prefs.fontSize}
             onChange={(e) => setPrefs({ fontSize: Number(e.target.value) })}
-            className="w-full accent-[var(--neon-purple)]" />
+            className="w-full accent-[var(--neon-purple)]"
+          />
         </Field>
 
         <div className="md:col-span-2">
           <Field label="Accent color">
             <div className="flex flex-wrap items-center gap-2">
               {accents.map((c) => (
-                <button key={c} onClick={() => setPrefs({ accent: c })}
+                <button
+                  key={c}
+                  onClick={() => setPrefs({ accent: c })}
                   className={`h-8 w-8 rounded-xl border-2 transition-transform hover:scale-110 ${prefs.accent === c ? "border-white" : "border-white/10"}`}
-                  style={{ background: c, boxShadow: prefs.accent === c ? `0 0 14px ${c}` : undefined }}
+                  style={{
+                    background: c,
+                    boxShadow: prefs.accent === c ? `0 0 14px ${c}` : undefined,
+                  }}
                   aria-label={`Accent ${c}`}
                 />
               ))}
-              <Button size="sm" variant="ghost" className="ml-2 text-xs"
-                onClick={() => setPrefs({ accent: DEFAULT_PREFS.accent, fontSize: DEFAULT_PREFS.fontSize })}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="ml-2 text-xs"
+                onClick={() =>
+                  setPrefs({ accent: DEFAULT_PREFS.accent, fontSize: DEFAULT_PREFS.fontSize })
+                }
+              >
                 <RotateCcw className="mr-1 h-3 w-3" /> Reset
               </Button>
             </div>
@@ -360,19 +539,29 @@ function NotificationPrefsPanel() {
     { key: "class", label: "Class & content updates", hint: "New videos and notes" },
   ];
   return (
-    <Panel icon={Bell} color="#06b6d4" title="Notification Preferences" subtitle="Control what you receive">
+    <Panel
+      icon={Bell}
+      color="#06b6d4"
+      title="Notification Preferences"
+      subtitle="Control what you receive"
+    >
       <div className="grid gap-2 sm:grid-cols-2">
         {rows.map((r) => (
-          <div key={r.key} className="flex items-center justify-between rounded-xl border border-white/10 bg-background/30 px-3 py-2.5">
+          <div
+            key={r.key}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-background/30 px-3 py-2.5"
+          >
             <div>
               <p className="text-sm font-medium">{r.label}</p>
               <p className="text-[10px] text-muted-foreground">{r.hint}</p>
             </div>
-            <Switch checked={prefs.notif[r.key]}
+            <Switch
+              checked={prefs.notif[r.key]}
               onCheckedChange={(on) => {
                 setPrefs({ notif: { ...prefs.notif, [r.key]: on } });
                 toast.success(`${r.label} ${on ? "on" : "off"}`);
-              }} />
+              }}
+            />
           </div>
         ))}
       </div>
@@ -395,8 +584,10 @@ function ModulesPanel() {
       await qc.cancelQueries({ queryKey: ["module-visibility"] });
       const prev = qc.getQueryData<Row[]>(["module-visibility"]);
       if (prev) {
-        qc.setQueryData<Row[]>(["module-visibility"],
-          prev.map((r) => (r.key === v.key ? { ...r, hidden: v.hidden } : r)));
+        qc.setQueryData<Row[]>(
+          ["module-visibility"],
+          prev.map((r) => (r.key === v.key ? { ...r, hidden: v.hidden } : r)),
+        );
       }
       return { prev };
     },
@@ -411,18 +602,30 @@ function ModulesPanel() {
   });
   const liveCount = rows.filter((r) => !r.hidden).length;
   return (
-    <Panel icon={Eye} color="#a78bfa" title="Module Visibility"
+    <Panel
+      icon={Eye}
+      color="#a78bfa"
+      title="Module Visibility"
       subtitle="Show or hide student-facing modules globally"
-      badge={`${liveCount}/${rows.length} live`}>
+      badge={`${liveCount}/${rows.length} live`}
+    >
       <div className="grid gap-2 sm:grid-cols-2">
         {rows.map((m) => (
-          <div key={m.key} className="flex items-center justify-between rounded-xl border border-white/10 bg-background/30 px-3 py-2.5">
+          <div
+            key={m.key}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-background/30 px-3 py-2.5"
+          >
             <div className="flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full ${!m.hidden ? "animate-pulse bg-emerald-400 shadow-[0_0_8px_#10b981]" : "bg-zinc-500"}`} />
+              <span
+                className={`h-2 w-2 rounded-full ${!m.hidden ? "animate-pulse bg-emerald-400 shadow-[0_0_8px_#10b981]" : "bg-zinc-500"}`}
+              />
               <p className="text-sm font-medium">{m.label}</p>
             </div>
-            <Switch checked={!m.hidden} disabled={mut.isPending}
-              onCheckedChange={(on) => mut.mutate({ key: m.key, hidden: !on })} />
+            <Switch
+              checked={!m.hidden}
+              disabled={mut.isPending}
+              onCheckedChange={(on) => mut.mutate({ key: m.key, hidden: !on })}
+            />
           </div>
         ))}
       </div>
@@ -442,7 +645,10 @@ function BrandingSummaryPanel() {
   const phone = contact?.phone ?? "—";
 
   return (
-    <Panel icon={SettingsIcon} color="#f59e0b" title="Branding & Contact"
+    <Panel
+      icon={SettingsIcon}
+      color="#f59e0b"
+      title="Branding & Contact"
       subtitle="Logo, platform name, contact details and theme"
       action={
         <Button asChild size="sm" variant="outline" className="border-white/15">
@@ -480,7 +686,8 @@ function BrandingSummaryPanel() {
         </div>
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Public-facing branding (logo, colors, tagline, contact info) is managed visually in the Site Manager and applied across the homepage and student dashboard.
+        Public-facing branding (logo, colors, tagline, contact info) is managed visually in the Site
+        Manager and applied across the homepage and student dashboard.
       </p>
     </Panel>
   );
@@ -506,4 +713,7 @@ export function AdminSettingsFlow() {
 }
 
 // retained imports for tree-shaking safety
-void Smartphone; void Lock; void Check; void AlertTriangle;
+void Smartphone;
+void Lock;
+void Check;
+void AlertTriangle;

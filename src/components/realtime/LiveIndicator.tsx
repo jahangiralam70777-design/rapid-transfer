@@ -29,10 +29,14 @@ export function LiveIndicator({ className = "" }: { className?: string }) {
     <div
       role="status"
       aria-live="polite"
-      title={last ? `Last update: ${last.table} (${last.type.toLowerCase()})` : "Realtime sync active"}
+      title={
+        last ? `Last update: ${last.table} (${last.type.toLowerCase()})` : "Realtime sync active"
+      }
       className={[
         "glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all duration-300",
-        flash ? "ring-1 ring-emerald-400/60 shadow-[0_0_18px_rgba(16,185,129,0.35)] scale-[1.03]" : "",
+        flash
+          ? "ring-1 ring-emerald-400/60 shadow-[0_0_18px_rgba(16,185,129,0.35)] scale-[1.03]"
+          : "",
         className,
       ].join(" ")}
     >

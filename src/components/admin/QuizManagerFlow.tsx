@@ -4,20 +4,66 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import {
-  Search, Plus, Sparkles, Send, EyeOff, Eye, Trash2, Copy, Filter,
-  ListChecks, Timer, CheckCircle2, Activity, Trophy, Loader2, X, Save,
-  Clock, Shuffle, Edit3, ArrowUp, ArrowDown, Wand2, CheckSquare, ExternalLink, Upload,
-  TrendingUp, TrendingDown, Calendar, Target, ChevronLeft, ChevronRight, MoreHorizontal,
-  Database, Hand, FileText, Download, Users, Gauge, Bot, Archive, CalendarClock, PercentSquare,
+  Search,
+  Plus,
+  Sparkles,
+  Send,
+  EyeOff,
+  Eye,
+  Trash2,
+  Copy,
+  Filter,
+  ListChecks,
+  Timer,
+  CheckCircle2,
+  Activity,
+  Trophy,
+  Loader2,
+  X,
+  Save,
+  Clock,
+  Shuffle,
+  Edit3,
+  ArrowUp,
+  ArrowDown,
+  Wand2,
+  CheckSquare,
+  ExternalLink,
+  Upload,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Target,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Database,
+  Hand,
+  FileText,
+  Download,
+  Users,
+  Gauge,
+  Bot,
+  Archive,
+  CalendarClock,
+  PercentSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  adminListQuizzes, adminQuizStats, adminCreateQuiz, adminUpdateQuiz,
-  adminDeleteQuiz, adminSetQuizStatus, adminDuplicateQuiz,
-  adminGetQuizQuestions, adminSetQuizQuestions,
-  adminAutoGenerateQuizzes, adminRegenerateQuizQuestions,
-  adminBulkQuizAction, adminExportQuizzes,
+  adminListQuizzes,
+  adminQuizStats,
+  adminCreateQuiz,
+  adminUpdateQuiz,
+  adminDeleteQuiz,
+  adminSetQuizStatus,
+  adminDuplicateQuiz,
+  adminGetQuizQuestions,
+  adminSetQuizQuestions,
+  adminAutoGenerateQuizzes,
+  adminRegenerateQuizQuestions,
+  adminBulkQuizAction,
+  adminExportQuizzes,
 } from "@/lib/admin-quiz.functions";
 
 import { adminListLevels, adminListSubjects, adminListMcqs } from "@/lib/admin-mcq.functions";
@@ -29,23 +75,40 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { BulkUploadMcqsDialog } from "./BulkUploadMcqsDialog";
 import { QuizKpiDetailDialog, type KpiMetric } from "./QuizKpiDetailDialog";
 
 type Quiz = {
-  id: string; title: string; description: string | null;
-  level: string; subject_id: string | null; chapter_id: string | null;
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  subject_id: string | null;
+  chapter_id: string | null;
   kind: "quiz" | "mock";
   status: "draft" | "published" | "archived";
   difficulty: "easy" | "medium" | "hard";
-  total_questions: number; duration_seconds: number;
-  starts_at: string | null; ends_at: string | null;
-  is_public: boolean; created_at: string; updated_at: string;
+  total_questions: number;
+  duration_seconds: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 const STATUS_TONE: Record<string, string> = {
@@ -70,7 +133,9 @@ export function QuizManagerFlow() {
   const [level, setLevel] = useState<string>("all");
   const [subjectId, setSubjectId] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
-  const [statusTab, setStatusTab] = useState<"all" | "published" | "draft" | "scheduled" | "archived">("all");
+  const [statusTab, setStatusTab] = useState<
+    "all" | "published" | "draft" | "scheduled" | "archived"
+  >("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [editing, setEditing] = useState<Quiz | null>(null);
@@ -87,7 +152,6 @@ export function QuizManagerFlow() {
 
   const regenFn = useServerFn(adminRegenerateQuizQuestions);
 
-
   // realtime: invalidate on any quiz change
   useEffect(() => {
     const ch = supabase
@@ -97,7 +161,9 @@ export function QuizManagerFlow() {
         qc.invalidateQueries({ queryKey: ["admin-quiz-stats"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const stats = useQuery({ queryKey: ["admin-quiz-stats"], queryFn: () => statsFn() });
@@ -119,11 +185,14 @@ export function QuizManagerFlow() {
           subjectId: subjectId === "all" ? undefined : subjectId,
           status:
             statusTab === "scheduled" || statusTab === "all"
-              ? status === "all" ? undefined : (status as Quiz["status"])
+              ? status === "all"
+                ? undefined
+                : (status as Quiz["status"])
               : (statusTab as Quiz["status"]),
           scheduled: statusTab === "scheduled" ? true : undefined,
           kind: "quiz",
-          page, pageSize,
+          page,
+          pageSize,
         },
       }),
     placeholderData: (prev) => prev,
@@ -136,22 +205,34 @@ export function QuizManagerFlow() {
 
   const delM = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { toast.success("Quiz deleted"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Quiz deleted");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const statusM = useMutation({
     mutationFn: (v: { id: string; status: Quiz["status"] }) => statusFn({ data: v }),
-    onSuccess: (_d, v) => { toast.success(`Quiz ${v.status}`); invalidate(); },
+    onSuccess: (_d, v) => {
+      toast.success(`Quiz ${v.status}`);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const dupM = useMutation({
     mutationFn: (id: string) => dupFn({ data: { id } }),
-    onSuccess: () => { toast.success("Quiz duplicated"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Quiz duplicated");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const regenM = useMutation({
     mutationFn: (id: string) => regenFn({ data: { quizId: id } }),
-    onSuccess: (r: { picked: number }) => { toast.success(`Regenerated · ${r.picked} random MCQs`); invalidate(); },
+    onSuccess: (r: { picked: number }) => {
+      toast.success(`Regenerated · ${r.picked} random MCQs`);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -160,22 +241,104 @@ export function QuizManagerFlow() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const subjectName = (id: string | null) =>
-    (subjects.data as Array<{ id: string; name: string }> | undefined)?.find((s) => s.id === id)?.name ?? "—";
+    (subjects.data as Array<{ id: string; name: string }> | undefined)?.find((s) => s.id === id)
+      ?.name ?? "—";
 
   const kpis: Array<KpiProps & { metric: KpiMetric }> = [
-    { metric: "total", l: "Total Quizzes", v: stats.data?.total ?? 0, d: stats.data?.deltas.total ?? 0, i: ListChecks, c: "#a855f7" },
-    { metric: "published", l: "Published", v: stats.data?.published ?? 0, d: stats.data?.deltas.published ?? 0, i: Send, c: "#22d3ee" },
-    { metric: "draft", l: "Drafts", v: stats.data?.draft ?? 0, d: stats.data?.deltas.draft ?? 0, i: Edit3, c: "#fbbf24" },
-    { metric: "scheduled", l: "Scheduled", v: stats.data?.scheduled ?? 0, d: 0, i: CalendarClock, c: "#60a5fa" },
-    { metric: "archived", l: "Archived", v: stats.data?.archived ?? 0, d: 0, i: Archive, c: "#94a3b8" },
-    { metric: "attempts", l: "Total Attempts", v: stats.data?.attempts ?? 0, d: stats.data?.deltas.attempts ?? 0, i: Trophy, c: "#34d399", fmt: "k" as const },
+    {
+      metric: "total",
+      l: "Total Quizzes",
+      v: stats.data?.total ?? 0,
+      d: stats.data?.deltas.total ?? 0,
+      i: ListChecks,
+      c: "#a855f7",
+    },
+    {
+      metric: "published",
+      l: "Published",
+      v: stats.data?.published ?? 0,
+      d: stats.data?.deltas.published ?? 0,
+      i: Send,
+      c: "#22d3ee",
+    },
+    {
+      metric: "draft",
+      l: "Drafts",
+      v: stats.data?.draft ?? 0,
+      d: stats.data?.deltas.draft ?? 0,
+      i: Edit3,
+      c: "#fbbf24",
+    },
+    {
+      metric: "scheduled",
+      l: "Scheduled",
+      v: stats.data?.scheduled ?? 0,
+      d: 0,
+      i: CalendarClock,
+      c: "#60a5fa",
+    },
+    {
+      metric: "archived",
+      l: "Archived",
+      v: stats.data?.archived ?? 0,
+      d: 0,
+      i: Archive,
+      c: "#94a3b8",
+    },
+    {
+      metric: "attempts",
+      l: "Total Attempts",
+      v: stats.data?.attempts ?? 0,
+      d: stats.data?.deltas.attempts ?? 0,
+      i: Trophy,
+      c: "#34d399",
+      fmt: "k" as const,
+    },
   ];
   const kpis2: Array<KpiProps & { metric: KpiMetric }> = [
-    { metric: "completion_rate", l: "Completion Rate", v: stats.data?.completionRate ?? 0, d: 0, i: PercentSquare, c: "#10b981", fmt: "pct" as const },
-    { metric: "avg_score", l: "Avg. Score", v: stats.data?.avgScore ?? 0, d: 0, i: Target, c: "#f472b6", fmt: "pct" as const },
-    { metric: "active_users", l: "Active Users (24h)", v: stats.data?.activeUsers ?? 0, d: 0, i: Users, c: "#38bdf8" },
-    { metric: "performance_score", l: "Performance Score", v: stats.data?.performanceScore ?? 0, d: 0, i: Gauge, c: "#f59e0b", fmt: "pct" as const },
-    { metric: "ai_generated", l: "AI Generated", v: stats.data?.aiGenerated ?? 0, d: stats.data?.deltas.aiGenerated ?? 0, i: Bot, c: "#a78bfa" },
+    {
+      metric: "completion_rate",
+      l: "Completion Rate",
+      v: stats.data?.completionRate ?? 0,
+      d: 0,
+      i: PercentSquare,
+      c: "#10b981",
+      fmt: "pct" as const,
+    },
+    {
+      metric: "avg_score",
+      l: "Avg. Score",
+      v: stats.data?.avgScore ?? 0,
+      d: 0,
+      i: Target,
+      c: "#f472b6",
+      fmt: "pct" as const,
+    },
+    {
+      metric: "active_users",
+      l: "Active Users (24h)",
+      v: stats.data?.activeUsers ?? 0,
+      d: 0,
+      i: Users,
+      c: "#38bdf8",
+    },
+    {
+      metric: "performance_score",
+      l: "Performance Score",
+      v: stats.data?.performanceScore ?? 0,
+      d: 0,
+      i: Gauge,
+      c: "#f59e0b",
+      fmt: "pct" as const,
+    },
+    {
+      metric: "ai_generated",
+      l: "AI Generated",
+      v: stats.data?.aiGenerated ?? 0,
+      d: stats.data?.deltas.aiGenerated ?? 0,
+      i: Bot,
+      c: "#a78bfa",
+    },
   ];
 
   const tabCounts = {
@@ -188,7 +351,11 @@ export function QuizManagerFlow() {
 
   const allOnPageSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleSelect = (id: string) => {
-    setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setSelected((p) => {
+      const n = new Set(p);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
   };
   const togglePage = () => {
     setSelected((p) => {
@@ -213,12 +380,16 @@ export function QuizManagerFlow() {
 
   const exportM = useMutation({
     mutationFn: (scope: "selected" | "all") =>
-      exportFn({ data: { ids: scope === "selected" ? Array.from(selected) : undefined, format: "csv" } }),
+      exportFn({
+        data: { ids: scope === "selected" ? Array.from(selected) : undefined, format: "csv" },
+      }),
     onSuccess: (r: { content: string; filename: string; mime: string }) => {
       const blob = new Blob([r.content], { type: r.mime });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = r.filename; a.click();
+      a.href = url;
+      a.download = r.filename;
+      a.click();
       URL.revokeObjectURL(url);
       toast.success("Exported");
     },
@@ -238,13 +409,25 @@ export function QuizManagerFlow() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="h-10 rounded-xl border-border/60" onClick={() => exportM.mutate("all")} disabled={exportM.isPending}>
+          <Button
+            variant="outline"
+            className="h-10 rounded-xl border-border/60"
+            onClick={() => exportM.mutate("all")}
+            disabled={exportM.isPending}
+          >
             <Download className="mr-2 h-4 w-4" /> Export
           </Button>
-          <Button variant="outline" className="h-10 rounded-xl border-border/60" onClick={() => setBulkOpen(true)}>
+          <Button
+            variant="outline"
+            className="h-10 rounded-xl border-border/60"
+            onClick={() => setBulkOpen(true)}
+          >
             <Upload className="mr-2 h-4 w-4" /> Bulk Upload MCQs
           </Button>
-          <Button className="h-10 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white shadow-[0_10px_30px_-12px_rgba(139,92,246,0.7)] hover:from-violet-600 hover:to-indigo-600" onClick={() => setCreating(true)}>
+          <Button
+            className="h-10 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white shadow-[0_10px_30px_-12px_rgba(139,92,246,0.7)] hover:from-violet-600 hover:to-indigo-600"
+            onClick={() => setCreating(true)}
+          >
             <Plus className="mr-2 h-4 w-4" /> Create Quiz
           </Button>
         </div>
@@ -252,11 +435,15 @@ export function QuizManagerFlow() {
 
       {/* KPI cards — primary row */}
       <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        {kpis.map((k) => <KpiCard key={k.l} {...k} onClick={() => setKpiMetric(k.metric)} />)}
+        {kpis.map((k) => (
+          <KpiCard key={k.l} {...k} onClick={() => setKpiMetric(k.metric)} />
+        ))}
       </section>
       {/* KPI cards — secondary row */}
       <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        {kpis2.map((k) => <KpiCard key={k.l} {...k} onClick={() => setKpiMetric(k.metric)} />)}
+        {kpis2.map((k) => (
+          <KpiCard key={k.l} {...k} onClick={() => setKpiMetric(k.metric)} />
+        ))}
       </section>
 
       <QuizKpiDetailDialog
@@ -272,7 +459,6 @@ export function QuizManagerFlow() {
         }}
       />
 
-
       {/* Quiz Generator */}
       <section className="glass shadow-card-soft overflow-hidden rounded-2xl border border-border/60">
         <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
@@ -282,7 +468,9 @@ export function QuizManagerFlow() {
             </span>
             <div>
               <h3 className="font-display text-base font-bold tracking-tight">Quiz Generator</h3>
-              <p className="text-[11px] text-muted-foreground">Generate quiz automatically in minutes using AI or from MCQ Bank.</p>
+              <p className="text-[11px] text-muted-foreground">
+                Generate quiz automatically in minutes using AI or from MCQ Bank.
+              </p>
             </div>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-400/10 px-3 py-1 text-[11px] font-semibold text-violet-400">
@@ -291,11 +479,13 @@ export function QuizManagerFlow() {
         </div>
         {/* Mode tabs */}
         <div className="grid grid-cols-3 border-b border-border/40 text-sm">
-          {([
-            { k: "auto", l: "Auto Generate", icon: Wand2 },
-            { k: "bank", l: "From MCQ Bank", icon: Database },
-            { k: "manual", l: "Manual Select", icon: Hand },
-          ] as const).map((t) => {
+          {(
+            [
+              { k: "auto", l: "Auto Generate", icon: Wand2 },
+              { k: "bank", l: "From MCQ Bank", icon: Database },
+              { k: "manual", l: "Manual Select", icon: Hand },
+            ] as const
+          ).map((t) => {
             const active = genMode === t.k;
             return (
               <button
@@ -306,7 +496,9 @@ export function QuizManagerFlow() {
                 }`}
               >
                 <t.icon className="h-3.5 w-3.5" /> {t.l}
-                {active && <span className="absolute inset-x-6 -bottom-px h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" />}
+                {active && (
+                  <span className="absolute inset-x-6 -bottom-px h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" />
+                )}
               </button>
             );
           })}
@@ -332,13 +524,20 @@ export function QuizManagerFlow() {
           return (
             <button
               key={t}
-              onClick={() => { setStatusTab(t); setPage(1); }}
+              onClick={() => {
+                setStatusTab(t);
+                setPage(1);
+              }}
               className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition ${
-                active ? "bg-gradient-to-r from-violet-500/15 to-indigo-500/15 text-violet-500 shadow-sm" : "text-muted-foreground hover:text-foreground"
+                active
+                  ? "bg-gradient-to-r from-violet-500/15 to-indigo-500/15 text-violet-500 shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {label}
-              <span className={`rounded-full px-1.5 py-0 text-[10px] ${active ? "bg-violet-500/20 text-violet-500" : "bg-muted text-muted-foreground"}`}>
+              <span
+                className={`rounded-full px-1.5 py-0 text-[10px] ${active ? "bg-violet-500/20 text-violet-500" : "bg-muted text-muted-foreground"}`}
+              >
                 {tabCounts[t]}
               </span>
             </button>
@@ -352,29 +551,63 @@ export function QuizManagerFlow() {
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search quizzes…"
             className="h-10 rounded-xl border-border/60 bg-background/60 pl-9"
           />
         </div>
-        <Select value={level} onValueChange={(v) => { setLevel(v); setSubjectId("all"); setPage(1); }}>
-          <SelectTrigger className="h-10 w-36 rounded-xl border-border/60"><SelectValue placeholder="All Levels" /></SelectTrigger>
+        <Select
+          value={level}
+          onValueChange={(v) => {
+            setLevel(v);
+            setSubjectId("all");
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-10 w-36 rounded-xl border-border/60">
+            <SelectValue placeholder="All Levels" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Levels</SelectItem>
             {((levels.data as Array<{ code: string; name: string }> | undefined) ?? []).map((l) => (
-              <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+              <SelectItem key={l.code} value={l.code}>
+                {l.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={subjectId} onValueChange={(v) => { setSubjectId(v); setPage(1); }}>
-          <SelectTrigger className="h-10 w-40 rounded-xl border-border/60"><SelectValue placeholder="All Subjects" /></SelectTrigger>
+        <Select
+          value={subjectId}
+          onValueChange={(v) => {
+            setSubjectId(v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-10 w-40 rounded-xl border-border/60">
+            <SelectValue placeholder="All Subjects" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Subjects</SelectItem>
-            {filteredSubjects.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
+            {filteredSubjects.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-          <SelectTrigger className="h-10 w-36 rounded-xl border-border/60"><SelectValue placeholder="All Status" /></SelectTrigger>
+        <Select
+          value={status}
+          onValueChange={(v) => {
+            setStatus(v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="h-10 w-36 rounded-xl border-border/60">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -382,7 +615,11 @@ export function QuizManagerFlow() {
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" className="h-10 rounded-xl border-border/60" onClick={() => setShowFilters((v) => !v)}>
+        <Button
+          variant="outline"
+          className="h-10 rounded-xl border-border/60"
+          onClick={() => setShowFilters((v) => !v)}
+        >
           <Filter className="mr-2 h-4 w-4" /> Filters
         </Button>
       </section>
@@ -397,17 +634,81 @@ export function QuizManagerFlow() {
       {selected.size > 0 && (
         <section className="glass shadow-card-soft sticky top-2 z-20 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-violet-400/40 bg-gradient-to-r from-violet-500/10 to-indigo-500/10 px-4 py-2.5">
           <div className="flex items-center gap-3 text-xs">
-            <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-violet-500 px-2 text-[11px] font-bold text-white">{selected.size}</span>
+            <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-violet-500 px-2 text-[11px] font-bold text-white">
+              {selected.size}
+            </span>
             <span className="font-medium">selected</span>
-            <button onClick={clearSelection} className="text-muted-foreground hover:text-foreground">Clear</button>
+            <button
+              onClick={clearSelection}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Clear
+            </button>
           </div>
           <div className="flex flex-wrap items-center gap-1">
-            <Button size="sm" variant="ghost" className="h-8 rounded-lg text-xs" disabled={bulkM.isPending} onClick={() => bulkM.mutate("publish")}><Send className="mr-1.5 h-3.5 w-3.5" />Publish</Button>
-            <Button size="sm" variant="ghost" className="h-8 rounded-lg text-xs" disabled={bulkM.isPending} onClick={() => bulkM.mutate("unpublish")}><EyeOff className="mr-1.5 h-3.5 w-3.5" />Unpublish</Button>
-            <Button size="sm" variant="ghost" className="h-8 rounded-lg text-xs" disabled={bulkM.isPending} onClick={() => bulkM.mutate("archive")}><Archive className="mr-1.5 h-3.5 w-3.5" />Archive</Button>
-            <Button size="sm" variant="ghost" className="h-8 rounded-lg text-xs" disabled={bulkM.isPending} onClick={() => bulkM.mutate("duplicate")}><Copy className="mr-1.5 h-3.5 w-3.5" />Duplicate</Button>
-            <Button size="sm" variant="ghost" className="h-8 rounded-lg text-xs" disabled={exportM.isPending} onClick={() => exportM.mutate("selected")}><Download className="mr-1.5 h-3.5 w-3.5" />Export</Button>
-            <Button size="sm" variant="ghost" className="h-8 rounded-lg text-xs text-rose-500 hover:bg-rose-500/10 hover:text-rose-500" disabled={bulkM.isPending} onClick={() => { if (confirm(`Delete ${selected.size} quizzes? This cannot be undone.`)) bulkM.mutate("delete"); }}><Trash2 className="mr-1.5 h-3.5 w-3.5" />Delete</Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-lg text-xs"
+              disabled={bulkM.isPending}
+              onClick={() => bulkM.mutate("publish")}
+            >
+              <Send className="mr-1.5 h-3.5 w-3.5" />
+              Publish
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-lg text-xs"
+              disabled={bulkM.isPending}
+              onClick={() => bulkM.mutate("unpublish")}
+            >
+              <EyeOff className="mr-1.5 h-3.5 w-3.5" />
+              Unpublish
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-lg text-xs"
+              disabled={bulkM.isPending}
+              onClick={() => bulkM.mutate("archive")}
+            >
+              <Archive className="mr-1.5 h-3.5 w-3.5" />
+              Archive
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-lg text-xs"
+              disabled={bulkM.isPending}
+              onClick={() => bulkM.mutate("duplicate")}
+            >
+              <Copy className="mr-1.5 h-3.5 w-3.5" />
+              Duplicate
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-lg text-xs"
+              disabled={exportM.isPending}
+              onClick={() => exportM.mutate("selected")}
+            >
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              Export
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-lg text-xs text-rose-500 hover:bg-rose-500/10 hover:text-rose-500"
+              disabled={bulkM.isPending}
+              onClick={() => {
+                if (confirm(`Delete ${selected.size} quizzes? This cannot be undone.`))
+                  bulkM.mutate("delete");
+              }}
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              Delete
+            </Button>
           </div>
         </section>
       )}
@@ -436,14 +737,27 @@ export function QuizManagerFlow() {
                       className="h-3.5 w-3.5 cursor-pointer rounded border-border/60 accent-violet-500"
                     />
                   </th>
-                  {["Quiz Title", "Level", "Subject", "Questions", "Duration", "Status", "Actions"].map((h) => (
-                    <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">{h}</th>
+                  {[
+                    "Quiz Title",
+                    "Level",
+                    "Subject",
+                    "Questions",
+                    "Duration",
+                    "Status",
+                    "Actions",
+                  ].map((h) => (
+                    <th key={h} className="whitespace-nowrap px-4 py-3 font-semibold">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className={`border-t border-border/30 transition hover:bg-violet-500/5 ${selected.has(r.id) ? "bg-violet-500/5" : ""}`}>
+                  <tr
+                    key={r.id}
+                    className={`border-t border-border/30 transition hover:bg-violet-500/5 ${selected.has(r.id) ? "bg-violet-500/5" : ""}`}
+                  >
                     <td className="px-4 py-3.5">
                       <input
                         type="checkbox"
@@ -455,26 +769,59 @@ export function QuizManagerFlow() {
                     </td>
                     <td className="px-4 py-3.5">
                       <p className="font-semibold text-foreground">{r.title}</p>
-                      {r.description && <p className="line-clamp-1 text-[10px] text-muted-foreground">{r.description}</p>}
+                      {r.description && (
+                        <p className="line-clamp-1 text-[10px] text-muted-foreground">
+                          {r.description}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 capitalize text-muted-foreground">{r.level}</td>
-                    <td className="px-4 py-3.5 text-muted-foreground">{subjectName(r.subject_id)}</td>
+                    <td className="px-4 py-3.5 text-muted-foreground">
+                      {subjectName(r.subject_id)}
+                    </td>
                     <td className="px-4 py-3.5 font-mono text-foreground">{r.total_questions}</td>
-                    <td className="px-4 py-3.5 text-muted-foreground">{Math.round(r.duration_seconds / 60)} min</td>
+                    <td className="px-4 py-3.5 text-muted-foreground">
+                      {Math.round(r.duration_seconds / 60)} min
+                    </td>
                     <td className="px-4 py-3.5">
                       <StatusBadge status={r.status} starts_at={r.starts_at} />
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1">
-                        <IconBtn title="Preview" onClick={() => setPreviewFor(r)}><Eye className="h-3.5 w-3.5" /></IconBtn>
-                        <IconBtn title="Edit" onClick={() => setEditing(r)}><Edit3 className="h-3.5 w-3.5" /></IconBtn>
-                        <IconBtn title="Manage MCQs" onClick={() => setBuilderFor(r)}><ListChecks className="h-3.5 w-3.5" /></IconBtn>
+                        <IconBtn title="Preview" onClick={() => setPreviewFor(r)}>
+                          <Eye className="h-3.5 w-3.5" />
+                        </IconBtn>
+                        <IconBtn title="Edit" onClick={() => setEditing(r)}>
+                          <Edit3 className="h-3.5 w-3.5" />
+                        </IconBtn>
+                        <IconBtn title="Manage MCQs" onClick={() => setBuilderFor(r)}>
+                          <ListChecks className="h-3.5 w-3.5" />
+                        </IconBtn>
                         <RowMenu
                           onDuplicate={() => dupM.mutate(r.id)}
-                          onRegenerate={() => { if (confirm("Replace this quiz's questions with a fresh random pick from its chapter?")) regenM.mutate(r.id); }}
-                          onToggle={() => statusM.mutate({ id: r.id, status: r.status === "published" ? "draft" : "published" })}
-                          onArchive={() => statusM.mutate({ id: r.id, status: r.status === "archived" ? "draft" : "archived" })}
-                          onDelete={() => { if (confirm("Delete this quiz?")) delM.mutate(r.id); }}
+                          onRegenerate={() => {
+                            if (
+                              confirm(
+                                "Replace this quiz's questions with a fresh random pick from its chapter?",
+                              )
+                            )
+                              regenM.mutate(r.id);
+                          }}
+                          onToggle={() =>
+                            statusM.mutate({
+                              id: r.id,
+                              status: r.status === "published" ? "draft" : "published",
+                            })
+                          }
+                          onArchive={() =>
+                            statusM.mutate({
+                              id: r.id,
+                              status: r.status === "archived" ? "draft" : "archived",
+                            })
+                          }
+                          onDelete={() => {
+                            if (confirm("Delete this quiz?")) delM.mutate(r.id);
+                          }}
                           status={r.status}
                         />
                       </div>
@@ -489,7 +836,8 @@ export function QuizManagerFlow() {
         {total > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 px-4 py-3 text-xs text-muted-foreground">
             <span>
-              Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, total)} of {total} entries
+              Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, total)} of {total}{" "}
+              entries
             </span>
             <Pagination page={page} totalPages={totalPages} onChange={setPage} />
           </div>
@@ -518,7 +866,10 @@ export function QuizManagerFlow() {
       {(creating || editing) && (
         <QuizEditorDialog
           quiz={editing}
-          onClose={() => { setCreating(false); setEditing(null); }}
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
           onSaved={invalidate}
           levels={(levels.data as Array<{ code: string; name: string }>) ?? []}
           subjects={(subjects.data as Array<{ id: string; name: string; level: string }>) ?? []}
@@ -533,9 +884,7 @@ export function QuizManagerFlow() {
         />
       )}
 
-      {previewFor && (
-        <QuizPreviewDialog quiz={previewFor} onClose={() => setPreviewFor(null)} />
-      )}
+      {previewFor && <QuizPreviewDialog quiz={previewFor} onClose={() => setPreviewFor(null)} />}
 
       {bulkOpen && (
         <BulkUploadMcqsDialog onClose={() => setBulkOpen(false)} onImported={invalidate} />
@@ -553,7 +902,11 @@ export function QuizManagerFlow() {
       {pickerOpen && (
         <PickFromBankDialog
           onClose={() => setPickerOpen(false)}
-          onDone={(quiz) => { setPickerOpen(false); setBuilderFor(quiz); invalidate(); }}
+          onDone={(quiz) => {
+            setPickerOpen(false);
+            setBuilderFor(quiz);
+            invalidate();
+          }}
           levels={(levels.data as Array<{ code: string; name: string }>) ?? []}
           subjects={(subjects.data as Array<{ id: string; name: string; level: string }>) ?? []}
         />
@@ -563,13 +916,22 @@ export function QuizManagerFlow() {
 }
 
 // =========== KPI card ===========
-type KpiProps = { l: string; v: number; d: number; i: React.ComponentType<{ className?: string }>; c: string; fmt?: "k" | "pct" };
+type KpiProps = {
+  l: string;
+  v: number;
+  d: number;
+  i: React.ComponentType<{ className?: string }>;
+  c: string;
+  fmt?: "k" | "pct";
+};
 function KpiCard({ l, v, d, i: Icon, c, fmt, onClick }: KpiProps & { onClick?: () => void }) {
   const up = d >= 0;
   const fmtVal =
-    fmt === "k" && v >= 1000 ? `${(v / 1000).toFixed(1)}K`
-      : fmt === "pct" ? `${v}%`
-      : v.toLocaleString();
+    fmt === "k" && v >= 1000
+      ? `${(v / 1000).toFixed(1)}K`
+      : fmt === "pct"
+        ? `${v}%`
+        : v.toLocaleString();
   return (
     <button
       type="button"
@@ -577,17 +939,25 @@ function KpiCard({ l, v, d, i: Icon, c, fmt, onClick }: KpiProps & { onClick?: (
       className="group glass shadow-card-soft rounded-2xl border border-border/60 p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
     >
       <div className="flex items-start justify-between">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: `${c}1f`, color: c }}>
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-xl"
+          style={{ background: `${c}1f`, color: c }}
+        >
           <Icon className="h-4 w-4" />
         </div>
         {d !== 0 && (
-          <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${up ? "bg-emerald-500/15 text-emerald-500" : "bg-rose-500/15 text-rose-500"}`}>
+          <span
+            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${up ? "bg-emerald-500/15 text-emerald-500" : "bg-rose-500/15 text-rose-500"}`}
+          >
             {up ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
-            {up ? "+" : ""}{d}%
+            {up ? "+" : ""}
+            {d}%
           </span>
         )}
       </div>
-      <p className="mt-3 font-display text-[26px] font-bold tracking-tight leading-none">{fmtVal}</p>
+      <p className="mt-3 font-display text-[26px] font-bold tracking-tight leading-none">
+        {fmtVal}
+      </p>
       <p className="mt-1 text-xs font-medium text-muted-foreground">{l}</p>
       <p className="mt-0.5 text-[10px] text-muted-foreground/70">vs last month</p>
     </button>
@@ -597,7 +967,8 @@ function KpiCard({ l, v, d, i: Icon, c, fmt, onClick }: KpiProps & { onClick?: (
 // =========== Status badge ===========
 
 function StatusBadge({ status, starts_at }: { status: string; starts_at: string | null }) {
-  const isScheduled = status === "published" && starts_at && new Date(starts_at).getTime() > Date.now();
+  const isScheduled =
+    status === "published" && starts_at && new Date(starts_at).getTime() > Date.now();
   const effective = isScheduled ? "scheduled" : status;
   const map: Record<string, string> = {
     published: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
@@ -606,7 +977,9 @@ function StatusBadge({ status, starts_at }: { status: string; starts_at: string 
     archived: "bg-rose-500/15 text-rose-500 border-rose-500/30",
   };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize ${map[effective] ?? "bg-muted"}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize ${map[effective] ?? "bg-muted"}`}
+    >
       {effective}
     </span>
   );
@@ -614,7 +987,12 @@ function StatusBadge({ status, starts_at }: { status: string; starts_at: string 
 
 // =========== Row dropdown menu (more) ===========
 function RowMenu({
-  onDuplicate, onRegenerate, onToggle, onArchive, onDelete, status,
+  onDuplicate,
+  onRegenerate,
+  onToggle,
+  onArchive,
+  onDelete,
+  status,
 }: {
   onDuplicate: () => void;
   onRegenerate: () => void;
@@ -626,23 +1004,71 @@ function RowMenu({
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
-      <IconBtn title="More" onClick={() => setOpen((v) => !v)}><MoreHorizontal className="h-3.5 w-3.5" /></IconBtn>
+      <IconBtn title="More" onClick={() => setOpen((v) => !v)}>
+        <MoreHorizontal className="h-3.5 w-3.5" />
+      </IconBtn>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-xl border border-border/60 bg-popover shadow-xl">
-            <MenuItem onClick={() => { setOpen(false); onDuplicate(); }} icon={Copy} label="Duplicate" />
-            <MenuItem onClick={() => { setOpen(false); onRegenerate(); }} icon={Shuffle} label="Regenerate MCQs" />
-            <MenuItem onClick={() => { setOpen(false); onToggle(); }} icon={status === "published" ? EyeOff : Send} label={status === "published" ? "Unpublish" : "Publish"} />
-            <MenuItem onClick={() => { setOpen(false); onArchive(); }} icon={EyeOff} label={status === "archived" ? "Unarchive" : "Archive"} />
-            <MenuItem onClick={() => { setOpen(false); onDelete(); }} icon={Trash2} label="Delete" danger />
+            <MenuItem
+              onClick={() => {
+                setOpen(false);
+                onDuplicate();
+              }}
+              icon={Copy}
+              label="Duplicate"
+            />
+            <MenuItem
+              onClick={() => {
+                setOpen(false);
+                onRegenerate();
+              }}
+              icon={Shuffle}
+              label="Regenerate MCQs"
+            />
+            <MenuItem
+              onClick={() => {
+                setOpen(false);
+                onToggle();
+              }}
+              icon={status === "published" ? EyeOff : Send}
+              label={status === "published" ? "Unpublish" : "Publish"}
+            />
+            <MenuItem
+              onClick={() => {
+                setOpen(false);
+                onArchive();
+              }}
+              icon={EyeOff}
+              label={status === "archived" ? "Unarchive" : "Archive"}
+            />
+            <MenuItem
+              onClick={() => {
+                setOpen(false);
+                onDelete();
+              }}
+              icon={Trash2}
+              label="Delete"
+              danger
+            />
           </div>
         </>
       )}
     </div>
   );
 }
-function MenuItem({ onClick, icon: Icon, label, danger }: { onClick: () => void; icon: React.ComponentType<{ className?: string }>; label: string; danger?: boolean }) {
+function MenuItem({
+  onClick,
+  icon: Icon,
+  label,
+  danger,
+}: {
+  onClick: () => void;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  danger?: boolean;
+}) {
   return (
     <button
       type="button"
@@ -655,11 +1081,22 @@ function MenuItem({ onClick, icon: Icon, label, danger }: { onClick: () => void;
 }
 
 // =========== Pagination ===========
-function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+function Pagination({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  onChange: (p: number) => void;
+}) {
   const nums = useMemo(() => {
     const out: (number | "…")[] = [];
     const push = (n: number | "…") => out.push(n);
-    if (totalPages <= 7) { for (let i = 1; i <= totalPages; i++) push(i); return out; }
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) push(i);
+      return out;
+    }
     push(1);
     if (page > 3) push("…");
     for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) push(i);
@@ -678,7 +1115,9 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
       </button>
       {nums.map((n, i) =>
         n === "…" ? (
-          <span key={`e-${i}`} className="px-2 text-muted-foreground">…</span>
+          <span key={`e-${i}`} className="px-2 text-muted-foreground">
+            …
+          </span>
         ) : (
           <button
             key={n}
@@ -691,7 +1130,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
           >
             {n}
           </button>
-        )
+        ),
       )}
       <button
         onClick={() => onChange(Math.min(totalPages, page + 1))}
@@ -705,21 +1144,34 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 }
 
 // =========== Analytics cards ===========
-function AnalyticsBarCard({ title, subtitle, data }: { title: string; subtitle: string; data: Array<{ d: string; c: number }> }) {
+function AnalyticsBarCard({
+  title,
+  subtitle,
+  data,
+}: {
+  title: string;
+  subtitle: string;
+  data: Array<{ d: string; c: number }>;
+}) {
   const max = Math.max(1, ...data.map((d) => d.c));
   return (
     <div className="glass relative overflow-hidden rounded-2xl border border-border/60 p-5 shadow-card-soft">
       <h3 className="font-display text-sm font-bold tracking-tight">{title}</h3>
       <p className="mt-1 text-[11px] text-muted-foreground">{subtitle}</p>
       {data.length === 0 || max <= 1 ? (
-        <div className="mt-4 flex h-24 items-center justify-center text-[11px] text-muted-foreground">No attempts in the last 7 days.</div>
+        <div className="mt-4 flex h-24 items-center justify-center text-[11px] text-muted-foreground">
+          No attempts in the last 7 days.
+        </div>
       ) : (
         <div className="mt-4 flex h-24 items-end gap-2">
           {data.map((d, i) => (
             <div key={d.d} className="flex flex-1 flex-col items-center gap-1">
               <div
                 className="w-full rounded-t-md bg-gradient-to-t from-violet-500 to-indigo-400"
-                style={{ height: `${Math.max(8, (d.c / max) * 88)}%`, opacity: 0.5 + (i / data.length) * 0.5 }}
+                style={{
+                  height: `${Math.max(8, (d.c / max) * 88)}%`,
+                  opacity: 0.5 + (i / data.length) * 0.5,
+                }}
               />
             </div>
           ))}
@@ -728,7 +1180,15 @@ function AnalyticsBarCard({ title, subtitle, data }: { title: string; subtitle: 
     </div>
   );
 }
-function AnalyticsDonutCard({ title, subtitle, value }: { title: string; subtitle: string; value: number }) {
+function AnalyticsDonutCard({
+  title,
+  subtitle,
+  value,
+}: {
+  title: string;
+  subtitle: string;
+  value: number;
+}) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
   const r = 30;
   const c = 2 * Math.PI * r;
@@ -745,29 +1205,65 @@ function AnalyticsDonutCard({ title, subtitle, value }: { title: string; subtitl
               <stop offset="100%" stopColor="#6366f1" />
             </linearGradient>
           </defs>
-          <circle cx="40" cy="40" r={r} stroke="currentColor" strokeOpacity="0.12" strokeWidth="8" fill="none" />
           <circle
-            cx="40" cy="40" r={r}
-            stroke="url(#dg)" strokeWidth="8" fill="none" strokeLinecap="round"
-            strokeDasharray={c} strokeDashoffset={off}
+            cx="40"
+            cy="40"
+            r={r}
+            stroke="currentColor"
+            strokeOpacity="0.12"
+            strokeWidth="8"
+            fill="none"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r={r}
+            stroke="url(#dg)"
+            strokeWidth="8"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={c}
+            strokeDashoffset={off}
             transform="rotate(-90 40 40)"
           />
-          <text x="40" y="44" textAnchor="middle" fontSize="14" fontWeight="700" fill="currentColor">{pct}%</text>
+          <text
+            x="40"
+            y="44"
+            textAnchor="middle"
+            fontSize="14"
+            fontWeight="700"
+            fill="currentColor"
+          >
+            {pct}%
+          </text>
         </svg>
       </div>
     </div>
   );
 }
-function AnalyticsLineCard({ title, subtitle, data }: { title: string; subtitle: string; data: Array<{ d: string; c: number }> }) {
+function AnalyticsLineCard({
+  title,
+  subtitle,
+  data,
+}: {
+  title: string;
+  subtitle: string;
+  data: Array<{ d: string; c: number }>;
+}) {
   const max = Math.max(1, ...data.map((d) => d.c));
-  const w = 260; const h = 80;
-  const pts = data.map((d, i) => `${(i / Math.max(1, data.length - 1)) * w},${h - (d.c / max) * (h - 8) - 4}`).join(" ");
+  const w = 260;
+  const h = 80;
+  const pts = data
+    .map((d, i) => `${(i / Math.max(1, data.length - 1)) * w},${h - (d.c / max) * (h - 8) - 4}`)
+    .join(" ");
   return (
     <div className="glass relative overflow-hidden rounded-2xl border border-border/60 p-5 shadow-card-soft">
       <h3 className="font-display text-sm font-bold tracking-tight">{title}</h3>
       <p className="mt-1 text-[11px] text-muted-foreground">{subtitle}</p>
       {data.length === 0 ? (
-        <div className="mt-4 flex h-20 items-center justify-center text-[11px] text-muted-foreground">No activity yet.</div>
+        <div className="mt-4 flex h-20 items-center justify-center text-[11px] text-muted-foreground">
+          No activity yet.
+        </div>
       ) : (
         <svg viewBox={`0 0 ${w} ${h}`} className="mt-3 h-20 w-full">
           <defs>
@@ -776,7 +1272,14 @@ function AnalyticsLineCard({ title, subtitle, data }: { title: string; subtitle:
               <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <polyline points={pts} fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <polyline
+            points={pts}
+            fill="none"
+            stroke="#8b5cf6"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
           <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#lg)" />
         </svg>
       )}
@@ -786,7 +1289,13 @@ function AnalyticsLineCard({ title, subtitle, data }: { title: string; subtitle:
 
 // =========== Quiz Generator Panel (matches reference) ===========
 function QuickQuizGeneratorPanel({
-  mode, levels, subjects, onAuto, onBank, onManual, onDone,
+  mode,
+  levels,
+  subjects,
+  onAuto,
+  onBank,
+  onManual,
+  onDone,
 }: {
   mode: "auto" | "bank" | "manual";
   levels: Array<{ code: string; name: string }>;
@@ -805,25 +1314,33 @@ function QuickQuizGeneratorPanel({
   const [dist, setDist] = useState<"random" | "smart">("random");
   const [adv, setAdv] = useState(false);
 
-  useEffect(() => { if (!level && levels[0]) setLevel(levels[0].code); }, [levels, level]);
+  useEffect(() => {
+    if (!level && levels[0]) setLevel(levels[0].code);
+  }, [levels, level]);
 
-  const filtered = useMemo(() => subjects.filter((s) => !level || s.level === level), [subjects, level]);
+  const filtered = useMemo(
+    () => subjects.filter((s) => !level || s.level === level),
+    [subjects, level],
+  );
 
   const run = useMutation({
-    mutationFn: () => autoGenFn({
-      data: {
-        level: subj === "all" ? level : null,
-        subjectId: subj !== "all" ? subj : null,
-        chapterId: null,
-        questionCount: Number(count) || 10,
-        durationMinutes: Number(time) || 10,
-        overwrite: true,
-        publish: true,
-        randomizeOptions: dist === "random",
-      },
-    }),
+    mutationFn: () =>
+      autoGenFn({
+        data: {
+          level: subj === "all" ? level : null,
+          subjectId: subj !== "all" ? subj : null,
+          chapterId: null,
+          questionCount: Number(count) || 10,
+          durationMinutes: Number(time) || 10,
+          overwrite: true,
+          publish: true,
+          randomizeOptions: dist === "random",
+        },
+      }),
     onSuccess: (r: { created: number; updated: number; skipped: number }) => {
-      toast.success(`Generated · ${r.created} created · ${r.updated} updated · ${r.skipped} skipped`);
+      toast.success(
+        `Generated · ${r.created} created · ${r.updated} updated · ${r.skipped} skipped`,
+      );
       onDone();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -838,10 +1355,15 @@ function QuickQuizGeneratorPanel({
           </div>
           <div>
             <p className="text-sm font-semibold">Pull questions from MCQ Bank</p>
-            <p className="text-xs text-muted-foreground">Pick directly from your existing MCQ Manager and Practice question bank.</p>
+            <p className="text-xs text-muted-foreground">
+              Pick directly from your existing MCQ Manager and Practice question bank.
+            </p>
           </div>
         </div>
-        <Button className="h-10 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white" onClick={onBank}>
+        <Button
+          className="h-10 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white"
+          onClick={onBank}
+        >
           <ListChecks className="mr-2 h-4 w-4" /> Open MCQ Bank Picker
         </Button>
       </div>
@@ -856,10 +1378,15 @@ function QuickQuizGeneratorPanel({
           </div>
           <div>
             <p className="text-sm font-semibold">Manually build a quiz</p>
-            <p className="text-xs text-muted-foreground">Create a quiz, then hand-select MCQs with full ordering control.</p>
+            <p className="text-xs text-muted-foreground">
+              Create a quiz, then hand-select MCQs with full ordering control.
+            </p>
           </div>
         </div>
-        <Button className="h-10 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white" onClick={onManual}>
+        <Button
+          className="h-10 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 text-white"
+          onClick={onManual}
+        >
           <Plus className="mr-2 h-4 w-4" /> Create Quiz Manually
         </Button>
       </div>
@@ -871,31 +1398,51 @@ function QuickQuizGeneratorPanel({
       <div className="grid gap-4 md:grid-cols-4">
         <Field label="Select Level">
           <Select value={level} onValueChange={setLevel}>
-            <SelectTrigger className="h-10 rounded-xl border-border/60"><SelectValue placeholder="Level" /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-border/60">
+              <SelectValue placeholder="Level" />
+            </SelectTrigger>
             <SelectContent>
-              {levels.map((l) => (<SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>))}
+              {levels.map((l) => (
+                <SelectItem key={l.code} value={l.code}>
+                  {l.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
         <Field label="Time">
           <Select value={time} onValueChange={setTime}>
-            <SelectTrigger className="h-10 rounded-xl border-border/60"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-border/60">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {[5, 10, 15, 20, 30, 45, 60].map((n) => (<SelectItem key={n} value={String(n)}>{n} Minutes</SelectItem>))}
+              {[5, 10, 15, 20, 30, 45, 60].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n} Minutes
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
         <Field label="Questions">
           <Select value={count} onValueChange={setCount}>
-            <SelectTrigger className="h-10 rounded-xl border-border/60"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-border/60">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {[5, 10, 15, 20, 30, 50, 100].map((n) => (<SelectItem key={n} value={String(n)}>{n} MCQs</SelectItem>))}
+              {[5, 10, 15, 20, 30, 50, 100].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n} MCQs
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
         <Field label="Select Source">
           <Select value={scope} onValueChange={setScope}>
-            <SelectTrigger className="h-10 rounded-xl border-border/60"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-border/60">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Chapters</SelectItem>
               <SelectItem value="recent">Recently Updated</SelectItem>
@@ -904,30 +1451,55 @@ function QuickQuizGeneratorPanel({
         </Field>
         <Field label="Subjects">
           <Select value={subj} onValueChange={setSubj}>
-            <SelectTrigger className="h-10 rounded-xl border-border/60"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-border/60">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Subjects</SelectItem>
-              {filtered.map((s) => (<SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>))}
+              {filtered.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
         <div className="md:col-span-3">
-          <Label className="mb-1.5 block text-xs text-muted-foreground">Question Distribution</Label>
+          <Label className="mb-1.5 block text-xs text-muted-foreground">
+            Question Distribution
+          </Label>
           <div className="flex items-center gap-6 pt-2">
             <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input type="radio" name="dist" checked={dist === "random"} onChange={() => setDist("random")} className="h-4 w-4 accent-violet-500" />
+              <input
+                type="radio"
+                name="dist"
+                checked={dist === "random"}
+                onChange={() => setDist("random")}
+                className="h-4 w-4 accent-violet-500"
+              />
               Random (AI)
             </label>
             <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input type="radio" name="dist" checked={dist === "smart"} onChange={() => setDist("smart")} className="h-4 w-4 accent-violet-500" />
+              <input
+                type="radio"
+                name="dist"
+                checked={dist === "smart"}
+                onChange={() => setDist("smart")}
+                className="h-4 w-4 accent-violet-500"
+              />
               Smart (By Weightage)
             </label>
           </div>
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-3">
-        <button type="button" onClick={() => setAdv((v) => !v)} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-          <ChevronRight className={`h-3.5 w-3.5 transition ${adv ? "rotate-90" : ""}`} /> Advanced Options
+        <button
+          type="button"
+          onClick={() => setAdv((v) => !v)}
+          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          <ChevronRight className={`h-3.5 w-3.5 transition ${adv ? "rotate-90" : ""}`} /> Advanced
+          Options
         </button>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="h-10 rounded-xl border-border/60" onClick={onAuto}>
@@ -938,7 +1510,11 @@ function QuickQuizGeneratorPanel({
             disabled={run.isPending || !level}
             onClick={() => run.mutate()}
           >
-            {run.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {run.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
             Generate Quiz
           </Button>
         </div>
@@ -946,7 +1522,10 @@ function QuickQuizGeneratorPanel({
       {adv && (
         <div className="rounded-xl border border-border/50 bg-background/40 p-3 text-xs text-muted-foreground">
           For finer control (overwrite, publish, randomise options, per-chapter scope) use the
-          <button onClick={onAuto} className="mx-1 font-semibold text-violet-500 underline">Auto-Generate dialog</button>.
+          <button onClick={onAuto} className="mx-1 font-semibold text-violet-500 underline">
+            Auto-Generate dialog
+          </button>
+          .
         </div>
       )}
     </div>
@@ -964,7 +1543,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 // =========== Pick From MCQ Bank Dialog (creates draft quiz, opens picker) ===========
 function PickFromBankDialog({
-  onClose, onDone, levels, subjects,
+  onClose,
+  onDone,
+  levels,
+  subjects,
 }: {
   onClose: () => void;
   onDone: (q: Quiz) => void;
@@ -991,24 +1573,43 @@ function PickFromBankDialog({
     mutationFn: async () => {
       const r = await createFn({
         data: {
-          title, description: null, level,
-          subject_id: subjectId || null, chapter_id: chapterId || null,
-          kind: "quiz", status: "draft", difficulty: "medium",
-          total_questions: 10, duration_seconds: duration * 60,
-          is_public: true, randomize_questions: true, randomize_options: false,
-          passing_marks: 0, negative_marking: 0,
+          title,
+          description: null,
+          level,
+          subject_id: subjectId || null,
+          chapter_id: chapterId || null,
+          kind: "quiz",
+          status: "draft",
+          difficulty: "medium",
+          total_questions: 10,
+          duration_seconds: duration * 60,
+          is_public: true,
+          randomize_questions: true,
+          randomize_options: false,
+          passing_marks: 0,
+          negative_marking: 0,
         },
       });
       return { id: (r as { id: string }).id };
     },
     onSuccess: (r) => {
       const q: Quiz = {
-        id: r.id, title, description: null, level,
-        subject_id: subjectId || null, chapter_id: chapterId || null,
-        kind: "quiz", status: "draft", difficulty: "medium",
-        total_questions: 10, duration_seconds: duration * 60,
-        starts_at: null, ends_at: null, is_public: true,
-        created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        id: r.id,
+        title,
+        description: null,
+        level,
+        subject_id: subjectId || null,
+        chapter_id: chapterId || null,
+        kind: "quiz",
+        status: "draft",
+        difficulty: "medium",
+        total_questions: 10,
+        duration_seconds: duration * 60,
+        starts_at: null,
+        ends_at: null,
+        is_public: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       toast.success("Draft quiz created — pick MCQs from bank");
       onDone(q);
@@ -1021,7 +1622,9 @@ function PickFromBankDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Pick Questions From MCQ Bank</DialogTitle>
-          <DialogDescription>Scope the quiz, then choose MCQs from the existing MCQ bank.</DialogDescription>
+          <DialogDescription>
+            Scope the quiz, then choose MCQs from the existing MCQ bank.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div>
@@ -1030,37 +1633,85 @@ function PickFromBankDialog({
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             <Field label="Level">
-              <Select value={level} onValueChange={(v) => { setLevel(v); setSubjectId(""); setChapterId(""); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+              <Select
+                value={level}
+                onValueChange={(v) => {
+                  setLevel(v);
+                  setSubjectId("");
+                  setChapterId("");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {levels.map((l) => (
+                    <SelectItem key={l.code} value={l.code}>
+                      {l.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </Field>
             <Field label="Subject">
-              <Select value={subjectId} onValueChange={(v) => { setSubjectId(v); setChapterId(""); }}>
-                <SelectTrigger><SelectValue placeholder="Pick" /></SelectTrigger>
-                <SelectContent>{filtered.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+              <Select
+                value={subjectId}
+                onValueChange={(v) => {
+                  setSubjectId(v);
+                  setChapterId("");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pick" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filtered.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </Field>
             <Field label="Chapter">
               <Select value={chapterId} onValueChange={setChapterId} disabled={!subjectId}>
-                <SelectTrigger><SelectValue placeholder="Pick" /></SelectTrigger>
-                <SelectContent>{chapters.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pick" />
+                </SelectTrigger>
+                <SelectContent>
+                  {chapters.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </Field>
           </div>
           <div>
             <Label>Duration (min)</Label>
-            <Input type="number" value={duration} onChange={(e) => setDuration(Math.max(1, Number(e.target.value) || 0))} />
+            <Input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(Math.max(1, Number(e.target.value) || 0))}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Cancel
+          </Button>
           <Button
             className="bg-gradient-to-r from-violet-500 to-indigo-500 text-white"
             disabled={!title.trim() || !level || create.isPending}
             onClick={() => create.mutate()}
           >
-            {create.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <ListChecks className="mr-1 h-4 w-4" />}
+            {create.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <ListChecks className="mr-1 h-4 w-4" />
+            )}
             Continue to MCQ Picker
           </Button>
         </DialogFooter>
@@ -1069,7 +1720,15 @@ function PickFromBankDialog({
   );
 }
 
-function IconBtn({ children, title, onClick }: { children: React.ReactNode; title: string; onClick: () => void }) {
+function IconBtn({
+  children,
+  title,
+  onClick,
+}: {
+  children: React.ReactNode;
+  title: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -1086,7 +1745,11 @@ function IconBtn({ children, title, onClick }: { children: React.ReactNode; titl
 // Editor dialog
 // ============================================================
 function QuizEditorDialog({
-  quiz, onClose, onSaved, levels, subjects,
+  quiz,
+  onClose,
+  onSaved,
+  levels,
+  subjects,
 }: {
   quiz: Quiz | null;
   onClose: () => void;
@@ -1103,7 +1766,7 @@ function QuizEditorDialog({
   const [form, setForm] = useState({
     title: quiz?.title ?? "",
     description: quiz?.description ?? "",
-    level: quiz?.level ?? (levels[0]?.code ?? "professional"),
+    level: quiz?.level ?? levels[0]?.code ?? "professional",
     subject_id: quiz?.subject_id ?? "",
     chapter_id: quiz?.chapter_id ?? "",
     difficulty: quiz?.difficulty ?? "medium",
@@ -1130,7 +1793,10 @@ function QuizEditorDialog({
   // Live preview count of available MCQs in the selected chapter
   const poolPreview = useQuery({
     queryKey: ["editor-pool-count", form.chapter_id],
-    queryFn: () => mcqListFn({ data: { chapterId: form.chapter_id, status: "published", page: 1, pageSize: 1 } }),
+    queryFn: () =>
+      mcqListFn({
+        data: { chapterId: form.chapter_id, status: "published", page: 1, pageSize: 1 },
+      }),
     enabled: !!form.chapter_id,
   });
   const availableCount = poolPreview.data?.count ?? 0;
@@ -1181,9 +1847,11 @@ function QuizEditorDialog({
     },
     onSuccess: (r) => {
       toast.success(
-        quiz ? "Quiz updated"
-          : r.attached ? "Quiz created · MCQs auto-attached from chapter"
-          : "Quiz created",
+        quiz
+          ? "Quiz updated"
+          : r.attached
+            ? "Quiz created · MCQs auto-attached from chapter"
+            : "Quiz created",
       );
       onSaved();
       onClose();
@@ -1201,45 +1869,83 @@ function QuizEditorDialog({
         <div className="grid gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label>Title *</Label>
-            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <Input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
           </div>
           <div className="md:col-span-2">
             <Label>Description</Label>
-            <Textarea rows={2} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <Textarea
+              rows={2}
+              value={form.description ?? ""}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
           </div>
           <div>
             <Label>Level</Label>
-            <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v, subject_id: "", chapter_id: "" })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.level}
+              onValueChange={(v) => setForm({ ...form, level: v, subject_id: "", chapter_id: "" })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                {levels.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Subject</Label>
-            <Select value={form.subject_id} onValueChange={(v) => setForm({ ...form, subject_id: v, chapter_id: "" })}>
-              <SelectTrigger><SelectValue placeholder="Choose subject" /></SelectTrigger>
+            <Select
+              value={form.subject_id}
+              onValueChange={(v) => setForm({ ...form, subject_id: v, chapter_id: "" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose subject" />
+              </SelectTrigger>
               <SelectContent>
-                {filteredSubjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                {filteredSubjects.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Chapter</Label>
-            <Select value={form.chapter_id} onValueChange={(v) => setForm({ ...form, chapter_id: v })} disabled={!form.subject_id}>
-              <SelectTrigger><SelectValue placeholder="Choose chapter" /></SelectTrigger>
+            <Select
+              value={form.chapter_id}
+              onValueChange={(v) => setForm({ ...form, chapter_id: v })}
+              disabled={!form.subject_id}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose chapter" />
+              </SelectTrigger>
               <SelectContent>
                 {(chaptersQ.data ?? []).map((c: { id: string; name: string }) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Difficulty</Label>
-            <Select value={form.difficulty} onValueChange={(v) => setForm({ ...form, difficulty: v as typeof form.difficulty })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.difficulty}
+              onValueChange={(v) => setForm({ ...form, difficulty: v as typeof form.difficulty })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="easy">Easy</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
@@ -1248,21 +1954,53 @@ function QuizEditorDialog({
             </Select>
           </div>
           <div>
-            <Label><Timer className="mr-1 inline h-3 w-3" />Total questions</Label>
-            <Input type="number" value={form.total_questions} onChange={(e) => setForm({ ...form, total_questions: Math.max(1, Number(e.target.value) || 0) })} />
+            <Label>
+              <Timer className="mr-1 inline h-3 w-3" />
+              Total questions
+            </Label>
+            <Input
+              type="number"
+              value={form.total_questions}
+              onChange={(e) =>
+                setForm({ ...form, total_questions: Math.max(1, Number(e.target.value) || 0) })
+              }
+            />
           </div>
           <div>
-            <Label><Clock className="mr-1 inline h-3 w-3" />Duration (minutes)</Label>
-            <Input type="number" value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: Math.max(1, Number(e.target.value) || 0) })} />
+            <Label>
+              <Clock className="mr-1 inline h-3 w-3" />
+              Duration (minutes)
+            </Label>
+            <Input
+              type="number"
+              value={form.duration_minutes}
+              onChange={(e) =>
+                setForm({ ...form, duration_minutes: Math.max(1, Number(e.target.value) || 0) })
+              }
+            />
           </div>
           <div>
-            <Label><Trophy className="mr-1 inline h-3 w-3" />Passing marks</Label>
-            <Input type="number" value={form.passing_marks} onChange={(e) => setForm({ ...form, passing_marks: Math.max(0, Number(e.target.value) || 0) })} />
+            <Label>
+              <Trophy className="mr-1 inline h-3 w-3" />
+              Passing marks
+            </Label>
+            <Input
+              type="number"
+              value={form.passing_marks}
+              onChange={(e) =>
+                setForm({ ...form, passing_marks: Math.max(0, Number(e.target.value) || 0) })
+              }
+            />
           </div>
           <div>
             <Label>Status</Label>
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as Quiz["status"] })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.status}
+              onValueChange={(v) => setForm({ ...form, status: v as Quiz["status"] })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
@@ -1271,12 +2009,22 @@ function QuizEditorDialog({
             </Select>
           </div>
           <div className="flex items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs"><Shuffle className="h-3.5 w-3.5" /> Randomize question order</div>
-            <Switch checked={form.randomize_questions} onCheckedChange={(v) => setForm({ ...form, randomize_questions: v })} />
+            <div className="flex items-center gap-2 text-xs">
+              <Shuffle className="h-3.5 w-3.5" /> Randomize question order
+            </div>
+            <Switch
+              checked={form.randomize_questions}
+              onCheckedChange={(v) => setForm({ ...form, randomize_questions: v })}
+            />
           </div>
           <div className="flex items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs"><CheckCircle2 className="h-3.5 w-3.5" /> Public to students</div>
-            <Switch checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Public to students
+            </div>
+            <Switch
+              checked={form.is_public}
+              onCheckedChange={(v) => setForm({ ...form, is_public: v })}
+            />
           </div>
           {!quiz && (
             <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-[var(--neon-purple)]/30 bg-[var(--neon-purple)]/10 px-3 py-2">
@@ -1286,27 +2034,45 @@ function QuizEditorDialog({
                   Auto-attach MCQs from this chapter on create
                   {form.chapter_id && (
                     <span className="ml-2 text-muted-foreground">
-                      · {availableCount} available · will pick {Math.min(form.total_questions, availableCount)}
+                      · {availableCount} available · will pick{" "}
+                      {Math.min(form.total_questions, availableCount)}
                     </span>
                   )}
                 </span>
               </div>
-              <Switch checked={form.auto_attach} onCheckedChange={(v) => setForm({ ...form, auto_attach: v })} />
+              <Switch
+                checked={form.auto_attach}
+                onCheckedChange={(v) => setForm({ ...form, auto_attach: v })}
+              />
             </div>
           )}
           {!quiz && form.chapter_id && availableCount === 0 && (
             <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs">
               <span>No MCQs available in this chapter yet.</span>
-              <Link to="/admin/mcq" className="inline-flex items-center gap-1 font-semibold text-amber-300 hover:underline">
+              <Link
+                to="/admin/mcq"
+                className="inline-flex items-center gap-1 font-semibold text-amber-300 hover:underline"
+              >
                 Go to MCQ Manager <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
           )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Cancel</Button>
-          <Button className="bg-cta-gradient text-white" disabled={!form.title.trim() || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Cancel
+          </Button>
+          <Button
+            className="bg-cta-gradient text-white"
+            disabled={!form.title.trim() || save.isPending}
+            onClick={() => save.mutate()}
+          >
+            {save.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-1 h-4 w-4" />
+            )}
             {quiz ? "Save changes" : "Create quiz"}
           </Button>
         </DialogFooter>
@@ -1321,9 +2087,17 @@ function QuizEditorDialog({
 type PoolRow = { id: string; question: string; difficulty: string; correct_option: string };
 
 const PickerRow = ({
-  m, selected, onToggle,
-}: { m: PoolRow; selected: boolean; onToggle: (id: string) => void }) => (
-  <label className={`flex cursor-pointer items-start gap-3 border-b border-border/40 p-3 text-xs ${selected ? "bg-[var(--neon-purple)]/10" : "hover:bg-background/40"}`}>
+  m,
+  selected,
+  onToggle,
+}: {
+  m: PoolRow;
+  selected: boolean;
+  onToggle: (id: string) => void;
+}) => (
+  <label
+    className={`flex cursor-pointer items-start gap-3 border-b border-border/40 p-3 text-xs ${selected ? "bg-[var(--neon-purple)]/10" : "hover:bg-background/40"}`}
+  >
     <input
       type="checkbox"
       checked={selected}
@@ -1334,7 +2108,9 @@ const PickerRow = ({
       <p className="font-medium">{m.question}</p>
       <div className="mt-1 flex gap-2 text-[10px] text-muted-foreground">
         <span className="rounded-full bg-muted px-2 py-0.5 capitalize">{m.difficulty}</span>
-        <span>Answer: <b className="text-primary">{m.correct_option}</b></span>
+        <span>
+          Answer: <b className="text-primary">{m.correct_option}</b>
+        </span>
       </div>
     </div>
   </label>
@@ -1342,8 +2118,14 @@ const PickerRow = ({
 const MemoPickerRow = memo(PickerRow);
 
 function QuestionPickerDialog({
-  quiz, onClose, onSaved,
-}: { quiz: Quiz; onClose: () => void; onSaved: () => void }) {
+  quiz,
+  onClose,
+  onSaved,
+}: {
+  quiz: Quiz;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const qc = useQueryClient();
   const getQ = useServerFn(adminGetQuizQuestions);
   const setQ = useServerFn(adminSetQuizQuestions);
@@ -1366,8 +2148,16 @@ function QuestionPickerDialog({
   const lastSaved = useRef<string>("");
 
   // ---- Academic tree (admin view) ----
-  const levelsQ = useQuery({ queryKey: ["admin-levels"], queryFn: () => levelsFn(), staleTime: 60_000 });
-  const subjectsQ = useQuery({ queryKey: ["admin-subjects"], queryFn: () => subjectsFn(), staleTime: 60_000 });
+  const levelsQ = useQuery({
+    queryKey: ["admin-levels"],
+    queryFn: () => levelsFn(),
+    staleTime: 60_000,
+  });
+  const subjectsQ = useQuery({
+    queryKey: ["admin-subjects"],
+    queryFn: () => subjectsFn(),
+    staleTime: 60_000,
+  });
   const chaptersQ = useQuery({
     queryKey: ["admin-chapters", subjectId],
     queryFn: () => chaptersFn({ data: { subjectId } }),
@@ -1377,8 +2167,10 @@ function QuestionPickerDialog({
 
   const levels = (levelsQ.data ?? []) as Array<{ code: string; name: string }>;
   const subjects = useMemo(
-    () => ((subjectsQ.data ?? []) as Array<{ id: string; name: string; level: string }>)
-      .filter((s) => !level || s.level === level),
+    () =>
+      ((subjectsQ.data ?? []) as Array<{ id: string; name: string; level: string }>).filter(
+        (s) => !level || s.level === level,
+      ),
     [subjectsQ.data, level],
   );
   const chapters = (chaptersQ.data ?? []) as Array<{ id: string; name: string }>;
@@ -1399,16 +2191,18 @@ function QuestionPickerDialog({
   // ---- Pool query: scoped to chapter (preferred) or subject ----
   const pool = useQuery({
     queryKey: ["quiz-mcq-pool", chapterId || null, subjectId || null, search, difficulty],
-    queryFn: () => mcqList({
-      data: {
-        chapterId: chapterId || undefined,
-        subjectId: !chapterId && subjectId ? subjectId : undefined,
-        search: search || undefined,
-        difficulty: difficulty === "all" ? undefined : (difficulty as "easy" | "medium" | "hard"),
-        status: "published",
-        page: 1, pageSize: 300,
-      },
-    }),
+    queryFn: () =>
+      mcqList({
+        data: {
+          chapterId: chapterId || undefined,
+          subjectId: !chapterId && subjectId ? subjectId : undefined,
+          search: search || undefined,
+          difficulty: difficulty === "all" ? undefined : (difficulty as "easy" | "medium" | "hard"),
+          status: "published",
+          page: 1,
+          pageSize: 300,
+        },
+      }),
     enabled: !!(chapterId || subjectId),
     staleTime: 10_000,
     placeholderData: (prev) => prev,
@@ -1422,7 +2216,9 @@ function QuestionPickerDialog({
         qc.invalidateQueries({ queryKey: ["quiz-mcq-pool"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc, quiz.id]);
 
   // ---- Auto-save (debounced) when selection changes ----
@@ -1443,8 +2239,11 @@ function QuestionPickerDialog({
     return () => window.clearTimeout(t);
   }, [selected, autoSave]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toggle = useMemo(() => (id: string) =>
-    setSelected((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]), []);
+  const toggle = useMemo(
+    () => (id: string) =>
+      setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id])),
+    [],
+  );
 
   const move = (idx: number, dir: -1 | 1) => {
     setSelected((s) => {
@@ -1456,10 +2255,7 @@ function QuestionPickerDialog({
     });
   };
 
-  const rows = useMemo(
-    () => ((pool.data?.rows ?? []) as PoolRow[]),
-    [pool.data],
-  );
+  const rows = useMemo(() => (pool.data?.rows ?? []) as PoolRow[], [pool.data]);
   const byId = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
 
   const shuffle = (arr: string[]) => {
@@ -1473,7 +2269,10 @@ function QuestionPickerDialog({
 
   const autoPick = (count: number, random: boolean) => {
     const ids = rows.map((r) => r.id);
-    if (ids.length === 0) { toast.error("No MCQs available in this chapter"); return; }
+    if (ids.length === 0) {
+      toast.error("No MCQs available in this chapter");
+      return;
+    }
     const source = random ? shuffle(ids) : ids;
     setSelected(source.slice(0, Math.min(count, source.length)));
     toast.success(`Picked ${Math.min(count, source.length)} MCQs`);
@@ -1481,7 +2280,9 @@ function QuestionPickerDialog({
 
   const pickDifficultyMix = () => {
     const buckets: Record<string, string[]> = { easy: [], medium: [], hard: [] };
-    rows.forEach((r) => { (buckets[r.difficulty] ?? buckets.medium).push(r.id); });
+    rows.forEach((r) => {
+      (buckets[r.difficulty] ?? buckets.medium).push(r.id);
+    });
     const target = quiz.total_questions || 10;
     const per = Math.ceil(target / 3);
     const mix = [
@@ -1489,13 +2290,17 @@ function QuestionPickerDialog({
       ...shuffle(buckets.medium).slice(0, per),
       ...shuffle(buckets.hard).slice(0, per),
     ].slice(0, target);
-    if (mix.length === 0) { toast.error("No MCQs available in this chapter"); return; }
+    if (mix.length === 0) {
+      toast.error("No MCQs available in this chapter");
+      return;
+    }
     setSelected(mix);
     toast.success(`Picked ${mix.length} MCQs across difficulties`);
   };
 
   const noScope = !chapterId && !subjectId;
-  const isEmptyPool = !pool.isLoading && !noScope && rows.length === 0 && !search && difficulty === "all";
+  const isEmptyPool =
+    !pool.isLoading && !noScope && rows.length === 0 && !search && difficulty === "all";
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -1510,22 +2315,54 @@ function QuestionPickerDialog({
 
         {/* Level → Subject → Chapter selectors */}
         <div className="grid gap-2 rounded-xl border border-border/60 bg-background/40 p-3 sm:grid-cols-3">
-          <Select value={level} onValueChange={(v) => { setLevel(v); setSubjectId(""); setChapterId(""); }}>
-            <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
+          <Select
+            value={level}
+            onValueChange={(v) => {
+              setLevel(v);
+              setSubjectId("");
+              setChapterId("");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Level" />
+            </SelectTrigger>
             <SelectContent>
-              {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+              {levels.map((l) => (
+                <SelectItem key={l.code} value={l.code}>
+                  {l.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select value={subjectId} onValueChange={(v) => { setSubjectId(v); setChapterId(""); }} disabled={!level}>
-            <SelectTrigger><SelectValue placeholder={level ? "Subject" : "Pick a level first"} /></SelectTrigger>
+          <Select
+            value={subjectId}
+            onValueChange={(v) => {
+              setSubjectId(v);
+              setChapterId("");
+            }}
+            disabled={!level}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={level ? "Subject" : "Pick a level first"} />
+            </SelectTrigger>
             <SelectContent>
-              {subjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+              {subjects.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={chapterId} onValueChange={setChapterId} disabled={!subjectId}>
-            <SelectTrigger><SelectValue placeholder={subjectId ? "Chapter" : "Pick a subject first"} /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder={subjectId ? "Chapter" : "Pick a subject first"} />
+            </SelectTrigger>
             <SelectContent>
-              {chapters.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {chapters.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -1535,19 +2372,44 @@ function QuestionPickerDialog({
           <span className="ml-1 inline-flex items-center gap-1 text-xs font-semibold text-[var(--neon-purple)]">
             <Wand2 className="h-3.5 w-3.5" /> Smart pick
           </span>
-          <Button size="sm" variant="outline" disabled={rows.length === 0} onClick={() => autoPick(10, false)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={rows.length === 0}
+            onClick={() => autoPick(10, false)}
+          >
             Pick 10
           </Button>
-          <Button size="sm" variant="outline" disabled={rows.length === 0} onClick={() => autoPick(quiz.total_questions || 10, true)}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={rows.length === 0}
+            onClick={() => autoPick(quiz.total_questions || 10, true)}
+          >
             <Shuffle className="mr-1 h-3 w-3" /> Random {quiz.total_questions || 10}
           </Button>
-          <Button size="sm" variant="outline" disabled={rows.length === 0} onClick={pickDifficultyMix}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={rows.length === 0}
+            onClick={pickDifficultyMix}
+          >
             Difficulty mix
           </Button>
-          <Button size="sm" variant="outline" disabled={rows.length === 0} onClick={() => setSelected(rows.map((r) => r.id))}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={rows.length === 0}
+            onClick={() => setSelected(rows.map((r) => r.id))}
+          >
             <CheckSquare className="mr-1 h-3 w-3" /> Select all ({rows.length})
           </Button>
-          <Button size="sm" variant="ghost" disabled={selected.length === 0} onClick={() => setSelected([])}>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={selected.length === 0}
+            onClick={() => setSelected([])}
+          >
             Clear
           </Button>
           <label className="ml-auto flex items-center gap-2 px-2 text-xs">
@@ -1561,10 +2423,17 @@ function QuestionPickerDialog({
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search chapter MCQs…" className="pl-9" />
+                <Input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search chapter MCQs…"
+                  className="pl-9"
+                />
               </div>
               <Select value={difficulty} onValueChange={setDifficulty}>
-                <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All levels</SelectItem>
                   <SelectItem value="easy">Easy</SelectItem>
@@ -1582,28 +2451,50 @@ function QuestionPickerDialog({
                   Pick a Level, Subject and Chapter to load MCQs.
                 </div>
               ) : pool.isLoading && rows.length === 0 ? (
-                <div className="flex h-32 items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…</div>
+                <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…
+                </div>
               ) : isEmptyPool ? (
                 <div className="flex h-40 flex-col items-center justify-center gap-3 p-4 text-center text-xs text-muted-foreground">
                   <p>No MCQs available in this chapter.</p>
-                  <Link to="/admin/mcq" className="inline-flex items-center gap-1 rounded-lg border border-[var(--neon-purple)]/40 bg-[var(--neon-purple)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--neon-purple)] hover:border-[var(--neon-purple)]">
+                  <Link
+                    to="/admin/mcq"
+                    className="inline-flex items-center gap-1 rounded-lg border border-[var(--neon-purple)]/40 bg-[var(--neon-purple)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--neon-purple)] hover:border-[var(--neon-purple)]"
+                  >
                     Go to MCQ Manager <ExternalLink className="h-3 w-3" />
                   </Link>
                 </div>
               ) : rows.length === 0 ? (
-                <div className="flex h-32 items-center justify-center p-4 text-center text-xs text-muted-foreground">No MCQs match these filters.</div>
-              ) : rows.map((m) => (
-                <MemoPickerRow key={m.id} m={m} selected={selectedSet.has(m.id)} onToggle={toggle} />
-              ))}
+                <div className="flex h-32 items-center justify-center p-4 text-center text-xs text-muted-foreground">
+                  No MCQs match these filters.
+                </div>
+              ) : (
+                rows.map((m) => (
+                  <MemoPickerRow
+                    key={m.id}
+                    m={m}
+                    selected={selectedSet.has(m.id)}
+                    onToggle={toggle}
+                  />
+                ))
+              )}
             </div>
           </div>
 
           {/* Selected with reorder */}
           <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
-              <p className="text-xs font-semibold text-muted-foreground">Selected order ({selected.length})</p>
+              <p className="text-xs font-semibold text-muted-foreground">
+                Selected order ({selected.length})
+              </p>
               {selected.length > 0 && (
-                <button type="button" onClick={() => setSelected([])} className="text-[10px] text-rose-400 hover:underline">Clear all</button>
+                <button
+                  type="button"
+                  onClick={() => setSelected([])}
+                  className="text-[10px] text-rose-400 hover:underline"
+                >
+                  Clear all
+                </button>
               )}
             </div>
             <div
@@ -1611,37 +2502,90 @@ function QuestionPickerDialog({
               style={{ contentVisibility: "auto" } as React.CSSProperties}
             >
               {selected.length === 0 ? (
-                <div className="flex h-32 items-center justify-center text-xs text-muted-foreground">No questions selected yet.</div>
-              ) : selected.map((id, i) => {
-                const m = byId.get(id);
-                return (
-                  <div key={id} className="flex items-start gap-2 border-b border-border/40 p-2 text-xs">
-                    <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted font-mono text-[10px]">{i + 1}</span>
-                    <p className="flex-1 line-clamp-2">{m?.question ?? <span className="text-muted-foreground italic">Not in current filter</span>}</p>
-                    <div className="flex flex-col gap-1">
-                      <button type="button" title="Move up" disabled={i === 0} onClick={() => move(i, -1)} className="rounded border border-border/50 p-0.5 disabled:opacity-30 hover:border-[var(--neon-purple)]/60"><ArrowUp className="h-3 w-3" /></button>
-                      <button type="button" title="Move down" disabled={i === selected.length - 1} onClick={() => move(i, 1)} className="rounded border border-border/50 p-0.5 disabled:opacity-30 hover:border-[var(--neon-purple)]/60"><ArrowDown className="h-3 w-3" /></button>
+                <div className="flex h-32 items-center justify-center text-xs text-muted-foreground">
+                  No questions selected yet.
+                </div>
+              ) : (
+                selected.map((id, i) => {
+                  const m = byId.get(id);
+                  return (
+                    <div
+                      key={id}
+                      className="flex items-start gap-2 border-b border-border/40 p-2 text-xs"
+                    >
+                      <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted font-mono text-[10px]">
+                        {i + 1}
+                      </span>
+                      <p className="flex-1 line-clamp-2">
+                        {m?.question ?? (
+                          <span className="text-muted-foreground italic">
+                            Not in current filter
+                          </span>
+                        )}
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          type="button"
+                          title="Move up"
+                          disabled={i === 0}
+                          onClick={() => move(i, -1)}
+                          className="rounded border border-border/50 p-0.5 disabled:opacity-30 hover:border-[var(--neon-purple)]/60"
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          title="Move down"
+                          disabled={i === selected.length - 1}
+                          onClick={() => move(i, 1)}
+                          className="rounded border border-border/50 p-0.5 disabled:opacity-30 hover:border-[var(--neon-purple)]/60"
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        title="Remove"
+                        onClick={() => toggle(id)}
+                        className="rounded border border-border/50 p-0.5 text-rose-400 hover:border-rose-400/60"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
-                    <button type="button" title="Remove" onClick={() => toggle(id)} className="rounded border border-border/50 p-0.5 text-rose-400 hover:border-rose-400/60"><X className="h-3 w-3" /></button>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
         <DialogFooter>
           <div className="mr-auto flex items-center gap-2 text-[11px] text-muted-foreground">
             {save.isPending ? (
-              <><Loader2 className="h-3 w-3 animate-spin" /> Saving…</>
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+              </>
             ) : selected.join(",") === lastSaved.current ? (
-              <><CheckCircle2 className="h-3 w-3 text-emerald-400" /> All changes saved</>
+              <>
+                <CheckCircle2 className="h-3 w-3 text-emerald-400" /> All changes saved
+              </>
             ) : (
               <>Unsaved changes</>
             )}
           </div>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Close</Button>
-          <Button className="bg-cta-gradient text-white" disabled={save.isPending || selected.join(",") === lastSaved.current} onClick={() => save.mutate(selected)}>
-            {save.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Close
+          </Button>
+          <Button
+            className="bg-cta-gradient text-white"
+            disabled={save.isPending || selected.join(",") === lastSaved.current}
+            onClick={() => save.mutate(selected)}
+          >
+            {save.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-1 h-4 w-4" />
+            )}
             Save now
           </Button>
         </DialogFooter>
@@ -1649,8 +2593,6 @@ function QuestionPickerDialog({
     </Dialog>
   );
 }
-
-
 
 // ============================================================
 // Preview dialog
@@ -1668,21 +2610,42 @@ function QuizPreviewDialog({ quiz, onClose }: { quiz: Quiz; onClose: () => void 
 
   const pool = useQuery({
     queryKey: ["preview-quiz-mcqs", quiz.chapter_id, quiz.subject_id],
-    queryFn: () => mcqList({
-      data: {
-        chapterId: quiz.chapter_id ?? undefined,
-        subjectId: !quiz.chapter_id ? (quiz.subject_id ?? undefined) : undefined,
-        page: 1, pageSize: 200,
-      },
-    }),
+    queryFn: () =>
+      mcqList({
+        data: {
+          chapterId: quiz.chapter_id ?? undefined,
+          subjectId: !quiz.chapter_id ? (quiz.subject_id ?? undefined) : undefined,
+          page: 1,
+          pageSize: 200,
+        },
+      }),
     enabled: ids.length > 0,
   });
 
   const byId = new Map(
-    ((pool.data?.rows ?? []) as Array<{ id: string; question: string; option_a: string; option_b: string; option_c: string; option_d: string; correct_option: string; difficulty: string }>)
-      .map((m) => [m.id, m]),
+    (
+      (pool.data?.rows ?? []) as Array<{
+        id: string;
+        question: string;
+        option_a: string;
+        option_b: string;
+        option_c: string;
+        option_d: string;
+        correct_option: string;
+        difficulty: string;
+      }>
+    ).map((m) => [m.id, m]),
   );
-  const ordered = ids.map((id) => byId.get(id)).filter(Boolean) as Array<{ id: string; question: string; option_a: string; option_b: string; option_c: string; option_d: string; correct_option: string; difficulty: string }>;
+  const ordered = ids.map((id) => byId.get(id)).filter(Boolean) as Array<{
+    id: string;
+    question: string;
+    option_a: string;
+    option_b: string;
+    option_c: string;
+    option_d: string;
+    correct_option: string;
+    difficulty: string;
+  }>;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -1690,42 +2653,70 @@ function QuizPreviewDialog({ quiz, onClose }: { quiz: Quiz; onClose: () => void 
         <DialogHeader>
           <DialogTitle>Preview · {quiz.title}</DialogTitle>
           <DialogDescription>
-            {quiz.total_questions} questions · {Math.round(quiz.duration_seconds / 60)} min · <span className="capitalize">{quiz.difficulty}</span> · <span className="capitalize">{quiz.status}</span>
+            {quiz.total_questions} questions · {Math.round(quiz.duration_seconds / 60)} min ·{" "}
+            <span className="capitalize">{quiz.difficulty}</span> ·{" "}
+            <span className="capitalize">{quiz.status}</span>
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[60vh] space-y-3 overflow-auto pr-1">
           {qq.isLoading || (ids.length > 0 && pool.isLoading) ? (
-            <div className="flex h-32 items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…</div>
+            <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading…
+            </div>
           ) : ordered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-              <p>No questions assigned yet. Use <b>Manage MCQs</b> to auto-pick from the chapter pool.</p>
-              <Link to="/admin/mcq" className="inline-flex items-center gap-1 rounded-lg border border-[var(--neon-purple)]/40 bg-[var(--neon-purple)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--neon-purple)]">
+              <p>
+                No questions assigned yet. Use <b>Manage MCQs</b> to auto-pick from the chapter
+                pool.
+              </p>
+              <Link
+                to="/admin/mcq"
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--neon-purple)]/40 bg-[var(--neon-purple)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--neon-purple)]"
+              >
                 Open MCQ Manager <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
-          ) : ordered.map((m, i) => (
-            <div key={m.id} className="glass rounded-2xl p-4">
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-semibold"><span className="text-muted-foreground">Q{i + 1}.</span> {m.question}</p>
-                <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] capitalize">{m.difficulty}</span>
+          ) : (
+            ordered.map((m, i) => (
+              <div key={m.id} className="glass rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-semibold">
+                    <span className="text-muted-foreground">Q{i + 1}.</span> {m.question}
+                  </p>
+                  <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] capitalize">
+                    {m.difficulty}
+                  </span>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {(["A", "B", "C", "D"] as const).map((k) => {
+                    const text = (m as unknown as Record<string, string>)[
+                      `option_${k.toLowerCase()}`
+                    ];
+                    const ok = m.correct_option === k;
+                    return (
+                      <div
+                        key={k}
+                        className={`flex items-start gap-2 rounded-lg border p-2 text-xs ${ok ? "border-emerald-400/40 bg-emerald-400/10" : "border-border/50"}`}
+                      >
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${ok ? "bg-emerald-400/30 text-emerald-300" : "bg-muted"}`}
+                        >
+                          {k}
+                        </span>
+                        <span>{text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {(["A", "B", "C", "D"] as const).map((k) => {
-                  const text = (m as unknown as Record<string, string>)[`option_${k.toLowerCase()}`];
-                  const ok = m.correct_option === k;
-                  return (
-                    <div key={k} className={`flex items-start gap-2 rounded-lg border p-2 text-xs ${ok ? "border-emerald-400/40 bg-emerald-400/10" : "border-border/50"}`}>
-                      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${ok ? "bg-emerald-400/30 text-emerald-300" : "bg-muted"}`}>{k}</span>
-                      <span>{text}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Close</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1736,7 +2727,10 @@ function QuizPreviewDialog({ quiz, onClose }: { quiz: Quiz; onClose: () => void 
 // Auto-Generate dialog
 // ============================================================
 function AutoGenerateDialog({
-  onClose, onDone, levels, subjects,
+  onClose,
+  onDone,
+  levels,
+  subjects,
 }: {
   onClose: () => void;
   onDone: () => void;
@@ -1782,7 +2776,9 @@ function AutoGenerateDialog({
         },
       }),
     onSuccess: (r: { created: number; updated: number; skipped: number }) => {
-      toast.success(`Auto-generation done · ${r.created} created · ${r.updated} updated · ${r.skipped} skipped`);
+      toast.success(
+        `Auto-generation done · ${r.created} created · ${r.updated} updated · ${r.skipped} skipped`,
+      );
       onDone();
       onClose();
     },
@@ -1801,64 +2797,136 @@ function AutoGenerateDialog({
         <div className="grid gap-3 md:grid-cols-2">
           <div>
             <Label>Level</Label>
-            <Select value={level} onValueChange={(v) => { setLevel(v); setSubjectId(""); setChapterId(""); }}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={level}
+              onValueChange={(v) => {
+                setLevel(v);
+                setSubjectId("");
+                setChapterId("");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                {levels.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Subject (optional)</Label>
-            <Select value={subjectId || "__all"} onValueChange={(v) => { setSubjectId(v === "__all" ? "" : v); setChapterId(""); }}>
-              <SelectTrigger><SelectValue placeholder="All subjects in level" /></SelectTrigger>
+            <Select
+              value={subjectId || "__all"}
+              onValueChange={(v) => {
+                setSubjectId(v === "__all" ? "" : v);
+                setChapterId("");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All subjects in level" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all">All subjects in level</SelectItem>
-                {filteredSubjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                {filteredSubjects.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div className="md:col-span-2">
             <Label>Chapter (optional)</Label>
-            <Select value={chapterId || "__all"} onValueChange={(v) => setChapterId(v === "__all" ? "" : v)} disabled={!subjectId}>
-              <SelectTrigger><SelectValue placeholder={subjectId ? "All chapters in subject" : "Pick a subject first"} /></SelectTrigger>
+            <Select
+              value={chapterId || "__all"}
+              onValueChange={(v) => setChapterId(v === "__all" ? "" : v)}
+              disabled={!subjectId}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={subjectId ? "All chapters in subject" : "Pick a subject first"}
+                />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all">All chapters in subject</SelectItem>
-                {chapters.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                {chapters.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label><Timer className="mr-1 inline h-3 w-3" />Questions per quiz</Label>
-            <Input type="number" min={1} max={200} value={questionCount} onChange={(e) => setQuestionCount(Math.max(1, Number(e.target.value) || 0))} />
+            <Label>
+              <Timer className="mr-1 inline h-3 w-3" />
+              Questions per quiz
+            </Label>
+            <Input
+              type="number"
+              min={1}
+              max={200}
+              value={questionCount}
+              onChange={(e) => setQuestionCount(Math.max(1, Number(e.target.value) || 0))}
+            />
           </div>
           <div>
-            <Label><Clock className="mr-1 inline h-3 w-3" />Duration (minutes)</Label>
-            <Input type="number" min={1} max={360} value={durationMinutes} onChange={(e) => setDurationMinutes(Math.max(1, Number(e.target.value) || 0))} />
+            <Label>
+              <Clock className="mr-1 inline h-3 w-3" />
+              Duration (minutes)
+            </Label>
+            <Input
+              type="number"
+              min={1}
+              max={360}
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(Math.max(1, Number(e.target.value) || 0))}
+            />
           </div>
           <div className="flex items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs"><Shuffle className="h-3.5 w-3.5" /> Shuffle answer options</div>
+            <div className="flex items-center gap-2 text-xs">
+              <Shuffle className="h-3.5 w-3.5" /> Shuffle answer options
+            </div>
             <Switch checked={randomizeOptions} onCheckedChange={setRandomizeOptions} />
           </div>
           <div className="flex items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs"><Send className="h-3.5 w-3.5" /> Publish immediately</div>
+            <div className="flex items-center gap-2 text-xs">
+              <Send className="h-3.5 w-3.5" /> Publish immediately
+            </div>
             <Switch checked={publish} onCheckedChange={setPublish} />
           </div>
           <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2">
             <div className="flex items-center gap-2 text-xs">
               <Wand2 className="h-3.5 w-3.5 text-amber-300" />
-              Overwrite existing <code className="rounded bg-background/40 px-1">[Auto]</code> quizzes for these chapters
+              Overwrite existing <code className="rounded bg-background/40 px-1">[Auto]</code>{" "}
+              quizzes for these chapters
             </div>
             <Switch checked={overwrite} onCheckedChange={setOverwrite} />
           </div>
           <div className="md:col-span-2 rounded-xl border border-border/40 bg-background/30 px-3 py-2 text-[11px] text-muted-foreground">
-            Tip: chapters with no published MCQs are skipped. Existing auto-quizzes are detected by title prefix <code>[Auto]</code>.
+            Tip: chapters with no published MCQs are skipped. Existing auto-quizzes are detected by
+            title prefix <code>[Auto]</code>.
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Cancel</Button>
-          <Button className="bg-cta-gradient text-white" disabled={run.isPending} onClick={() => run.mutate()}>
-            {run.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Wand2 className="mr-1 h-4 w-4" />}
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Cancel
+          </Button>
+          <Button
+            className="bg-cta-gradient text-white"
+            disabled={run.isPending}
+            onClick={() => run.mutate()}
+          >
+            {run.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Wand2 className="mr-1 h-4 w-4" />
+            )}
             Generate
           </Button>
         </DialogFooter>

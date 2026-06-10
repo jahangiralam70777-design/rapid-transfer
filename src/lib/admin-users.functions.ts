@@ -8,7 +8,6 @@ const statusEnum = z.enum(["active", "suspended", "pending"]);
 const statusFilterEnum = z.enum(["active", "suspended", "pending", "deleted"]);
 const dateRangeEnum = z.enum(["24h", "7d", "30d", "lifetime"]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const listInput = z.object({
   search: z.string().trim().max(200).optional(),
   role: roleEnum.optional(),
@@ -42,11 +41,16 @@ export const adminListUsers = createServerFn({ method: "POST" })
       if (isEmail || isUuidPrefix) {
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: users } = await (supabaseAdmin.auth.admin as any).listUsers({ page: 1, perPage: 200 });
+          const { data: users } = await (supabaseAdmin.auth.admin as any).listUsers({
+            page: 1,
+            perPage: 200,
+          });
           const lower = searchTerm.toLowerCase();
           const matches = (users?.users ?? [])
-            .filter((u: { id: string; email?: string | null }) =>
-              (u.email ?? "").toLowerCase().includes(lower) || u.id.toLowerCase().startsWith(lower),
+            .filter(
+              (u: { id: string; email?: string | null }) =>
+                (u.email ?? "").toLowerCase().includes(lower) ||
+                u.id.toLowerCase().startsWith(lower),
             )
             .map((u: { id: string }) => u.id);
           idFilter = matches;
@@ -140,16 +144,18 @@ export const adminReferralStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertPermission(context.supabase, context.userId, "manage_users");
-    const { data, error } = await (context.supabase as unknown as {
-      from: (t: string) => {
-        select: (s: string) => {
-          limit: (n: number) => Promise<{
-            data: Array<{ referral_source: string | null }> | null;
-            error: unknown;
-          }>;
+    const { data, error } = await (
+      context.supabase as unknown as {
+        from: (t: string) => {
+          select: (s: string) => {
+            limit: (n: number) => Promise<{
+              data: Array<{ referral_source: string | null }> | null;
+              error: unknown;
+            }>;
+          };
         };
-      };
-    })
+      }
+    )
       .from("profiles")
       .select("referral_source")
       .limit(5000);
@@ -187,8 +193,13 @@ export const adminUserStats = createServerFn({ method: "GET" })
     let verified = 0;
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: u } = await (supabaseAdmin.auth.admin as any).listUsers({ page: 1, perPage: 1000 });
-      verified = (u?.users ?? []).filter((x: { email_confirmed_at?: string | null }) => !!x.email_confirmed_at).length;
+      const { data: u } = await (supabaseAdmin.auth.admin as any).listUsers({
+        page: 1,
+        perPage: 1000,
+      });
+      verified = (u?.users ?? []).filter(
+        (x: { email_confirmed_at?: string | null }) => !!x.email_confirmed_at,
+      ).length;
     } catch {
       verified = active.count ?? 0;
     }
@@ -213,7 +224,10 @@ export const adminCreateStudent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof createStudentInput>) => createStudentInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.create", { email: data.email, level: data.level });
+    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.create", {
+      email: data.email,
+      level: data.level,
+    });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -240,9 +254,17 @@ export const adminVerifyUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.verify_email", { target_id: data.id });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_users",
+      "admin.user.verify_email",
+      { target_id: data.id },
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, { email_confirm: true });
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, {
+      email_confirm: true,
+    });
     if (error) throw error;
     return { ok: true };
   });
@@ -253,8 +275,17 @@ export const adminSetUserStatus = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), status: statusEnum }).parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", `admin.user.set_status:${data.status}`, { target_id: data.id, status: data.status });
-    const { error } = await context.supabase.from("profiles").update({ status: data.status }).eq("id", data.id);
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_users",
+      `admin.user.set_status:${data.status}`,
+      { target_id: data.id, status: data.status },
+    );
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ status: data.status })
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -265,7 +296,13 @@ export const adminSetUserRole = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), role: roleEnum, grant: z.boolean() }).parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", data.grant ? "admin.user.role_grant" : "admin.user.role_revoke", { target_id: data.id, role: data.role });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_users",
+      data.grant ? "admin.user.role_grant" : "admin.user.role_revoke",
+      { target_id: data.id, role: data.role },
+    );
     const sb = context.supabase;
     if (data.grant) {
       const { error } = await sb
@@ -286,15 +323,23 @@ export const adminSetUserRole = createServerFn({ method: "POST" })
 export const adminUpdateUserProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string; display_name?: string; level?: string; bio?: string | null }) =>
-    z.object({
-      id: z.string().uuid(),
-      display_name: z.string().trim().min(1).max(120).optional(),
-      level: z.string().trim().max(40).optional(),
-      bio: z.string().trim().max(1000).nullable().optional(),
-    }).parse(i),
+    z
+      .object({
+        id: z.string().uuid(),
+        display_name: z.string().trim().min(1).max(120).optional(),
+        level: z.string().trim().max(40).optional(),
+        bio: z.string().trim().max(1000).nullable().optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.update_profile", { target_id: data.id, fields: Object.keys(data).filter((k) => k !== "id") });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_users",
+      "admin.user.update_profile",
+      { target_id: data.id, fields: Object.keys(data).filter((k) => k !== "id") },
+    );
     const { id, ...patch } = data;
     const { error } = await context.supabase.from("profiles").update(patch).eq("id", id);
     if (error) throw error;
@@ -312,31 +357,43 @@ export const adminUserAnalytics = createServerFn({ method: "GET" })
     const { data, error } = await (context.supabase as any).rpc("admin_user_analytics");
     if (error) throw error;
     return data as {
-      total_users: number; deleted_users: number;
-      active_24h: number; active_7d: number; active_30d: number;
-      lifetime_active: number; total_logins: number;
+      total_users: number;
+      deleted_users: number;
+      active_24h: number;
+      active_7d: number;
+      active_30d: number;
+      lifetime_active: number;
+      total_logins: number;
       avg_session_seconds: number;
-      usage_24h: number; usage_7d: number; usage_30d: number;
+      usage_24h: number;
+      usage_7d: number;
+      usage_30d: number;
     };
   });
 
 export const adminTopUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { order?: "most" | "least"; limit?: number }) =>
-    z.object({
-      order: z.enum(["most", "least"]).default("most"),
-      limit: z.number().int().min(1).max(50).default(10),
-    }).parse(i ?? {}),
+    z
+      .object({
+        order: z.enum(["most", "least"]).default("most"),
+        limit: z.number().int().min(1).max(50).default(10),
+      })
+      .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_users");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: rows, error } = await (context.supabase as any)
-      .rpc("admin_top_users", { _order: data.order, _limit: data.limit });
+    const { data: rows, error } = await (context.supabase as any).rpc("admin_top_users", {
+      _order: data.order,
+      _limit: data.limit,
+    });
     if (error) throw error;
     return (rows ?? []) as Array<{
-      user_id: string; display_name: string;
-      total_login_count: number; total_usage_seconds: number;
+      user_id: string;
+      display_name: string;
+      total_login_count: number;
+      total_usage_seconds: number;
       last_login_at: string | null;
     }>;
   });
@@ -344,7 +401,9 @@ export const adminTopUsers = createServerFn({ method: "POST" })
 export const adminUserSessions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { userId: string; limit?: number }) =>
-    z.object({ userId: z.string().uuid(), limit: z.number().int().min(1).max(100).default(20) }).parse(i),
+    z
+      .object({ userId: z.string().uuid(), limit: z.number().int().min(1).max(100).default(20) })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_users");
@@ -362,9 +421,17 @@ export const adminSoftDeleteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.soft_delete", { target_id: data.id });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_users",
+      "admin.user.soft_delete",
+      { target_id: data.id },
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (context.supabase as any).rpc("admin_soft_delete_user", { _id: data.id });
+    const { error } = await (context.supabase as any).rpc("admin_soft_delete_user", {
+      _id: data.id,
+    });
     if (error) throw error;
     return { ok: true };
   });
@@ -373,7 +440,9 @@ export const adminRestoreUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.restore", { target_id: data.id });
+    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.restore", {
+      target_id: data.id,
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (context.supabase as any).rpc("admin_restore_user", { _id: data.id });
     if (error) throw error;
@@ -386,7 +455,13 @@ export const adminHardDeleteUser = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid(), confirmName: z.string().min(1) }).parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_users", "admin.user.hard_delete", { target_id: data.id });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_users",
+      "admin.user.hard_delete",
+      { target_id: data.id },
+    );
     const { data: prof } = await context.supabase
       .from("profiles")
       .select("display_name")
@@ -397,7 +472,9 @@ export const adminHardDeleteUser = createServerFn({ method: "POST" })
       throw new Error("Confirmation name does not match");
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (context.supabase as any).rpc("admin_hard_delete_user", { _id: data.id });
+    const { error } = await (context.supabase as any).rpc("admin_hard_delete_user", {
+      _id: data.id,
+    });
     if (error) throw error;
     return { ok: true };
   });

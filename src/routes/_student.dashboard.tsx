@@ -6,7 +6,11 @@ export const Route = createFileRoute("/_student/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard · CA Aspire BD" },
-      { name: "description", content: "Your personalized learning dashboard — MCQs, quizzes, mock tests, analytics and more." },
+      {
+        name: "description",
+        content:
+          "Your personalized learning dashboard — MCQs, quizzes, mock tests, analytics and more.",
+      },
     ],
   }),
 });
