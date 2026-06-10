@@ -9,12 +9,19 @@ return 200; unknown URLs return a proper 404 page).
 
 ## Commands
 
-| Setting        | Value                                 |
-| -------------- | ------------------------------------- |
-| Build command  | `npm install && npm run build:node`   |
+| Setting        | Value                                              |
+| -------------- | -------------------------------------------------- |
+| Build command  | `npm install --include=dev && npm run build:node`  |
 | Start command  | `npm run start` (`node dist/server/index.mjs`) |
 | Health check   | `/`                                   |
 | Node version   | 22.x                                  |
+
+> **Why `--include=dev`?** Render sets `NODE_ENV=production` during builds,
+> which makes a plain `npm install` skip `devDependencies`. The build toolchain
+> (`vite`, `nitro`, `@lovable.dev/vite-tanstack-config`) lives in
+> `devDependencies`, so without this flag the build fails with
+> `sh: 1: vite: not found`. Runtime needs none of these — `npm run start` only
+> runs `node dist/server/index.mjs`.
 
 `npm run build:node` sets `NITRO_PRESET=node-server`, which makes the build
 target a standalone Node server (`dist/server/index.mjs` + static assets in
