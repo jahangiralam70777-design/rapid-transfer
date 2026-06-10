@@ -181,6 +181,7 @@ export function UserManagementFlow() {
   const hardDeleteFn = useServerFn(adminHardDeleteUser);
   const verifyFn = useServerFn(adminVerifyUser);
   const resetPwFn = useServerFn(adminSendPasswordReset);
+  const userSessionsFn = useServerFn(adminUserSessions);
   const [showCreate, setShowCreate] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -1511,7 +1512,7 @@ export function UserManagementFlow() {
         <UserDetailsDialog
           user={viewing}
           onClose={() => setViewing(null)}
-          sessionsFn={useServerFn(adminUserSessions)}
+          sessionsFn={userSessionsFn}
         />
       )}
 

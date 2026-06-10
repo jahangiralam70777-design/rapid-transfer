@@ -123,6 +123,31 @@ export function ShortNotesFlow() {
     };
   }, [qc]);
 
+  const levels = tree.data?.levels ?? [];
+  const subjectsForLevel = useMemo(
+    () => (tree.data?.subjects ?? []).filter((s) => !level || s.level === level.code),
+    [tree.data, level],
+  );
+  const chaptersForSubject = useMemo(
+    () => (tree.data?.chapters ?? []).filter((c) => !subject || c.subject_id === subject.id),
+    [tree.data, subject],
+  );
+
+  const allNotes = useMemo(
+    () => (notesQuery.data && "rows" in notesQuery.data ? notesQuery.data.rows : []) as Note[],
+    [notesQuery.data],
+  );
+  const filteredNotes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return allNotes;
+    return allNotes.filter((n) =>
+      [n.title, n.summary ?? "", n.body ?? "", ...(n.tags ?? [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [allNotes, search]);
+
   if (visQuery.data?.hidden) {
     return (
       <div className="glass shadow-card-soft flex flex-col items-center justify-center gap-3 rounded-3xl p-12 text-center">
@@ -134,30 +159,6 @@ export function ShortNotesFlow() {
       </div>
     );
   }
-
-  const levels = tree.data?.levels ?? [];
-  const subjectsForLevel = useMemo(
-    () => (tree.data?.subjects ?? []).filter((s) => !level || s.level === level.code),
-    [tree.data, level],
-  );
-  const chaptersForSubject = useMemo(
-    () => (tree.data?.chapters ?? []).filter((c) => !subject || c.subject_id === subject.id),
-    [tree.data, subject],
-  );
-
-  const allNotes = (
-    notesQuery.data && "rows" in notesQuery.data ? notesQuery.data.rows : []
-  ) as Note[];
-  const filteredNotes = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return allNotes;
-    return allNotes.filter((n) =>
-      [n.title, n.summary ?? "", n.body ?? "", ...(n.tags ?? [])]
-        .join(" ")
-        .toLowerCase()
-        .includes(q),
-    );
-  }, [allNotes, search]);
 
   const goto = (s: Step) => {
     setStep(s);
