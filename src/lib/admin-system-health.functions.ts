@@ -67,11 +67,21 @@ export const adminSystemHealthSummary = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
     const [allOpen, crit24, top] = await Promise.all([
-      sb.from("system_error_logs").select("id", { count: "exact", head: true }).eq("resolved", false),
-      sb.from("system_error_logs").select("id", { count: "exact", head: true })
-        .eq("severity", "critical").gte("last_seen_at", since24),
-      sb.from("system_error_logs").select("route, occurrence_count")
-        .eq("resolved", false).order("occurrence_count", { ascending: false }).limit(50),
+      sb
+        .from("system_error_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("resolved", false),
+      sb
+        .from("system_error_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("severity", "critical")
+        .gte("last_seen_at", since24),
+      sb
+        .from("system_error_logs")
+        .select("route, occurrence_count")
+        .eq("resolved", false)
+        .order("occurrence_count", { ascending: false })
+        .limit(50),
     ]);
     const byRoute = new Map<string, number>();
     for (const r of (top.data ?? []) as Array<{ route: string | null; occurrence_count: number }>) {
@@ -80,24 +90,42 @@ export const adminSystemHealthSummary = createServerFn({ method: "POST" })
     }
     const topRoutes = Array.from(byRoute.entries())
       .map(([route, count]) => ({ route, count }))
-      .sort((a, b) => b.count - a.count).slice(0, 8);
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
     return {
       openErrors: allOpen.count ?? 0,
       critical24h: crit24.count ?? 0,
-      status: (crit24.count ?? 0) > 5 ? "degraded" : (allOpen.count ?? 0) > 0 ? "warning" : "healthy",
+      status:
+        (crit24.count ?? 0) > 5 ? "degraded" : (allOpen.count ?? 0) > 0 ? "warning" : "healthy",
       topRoutes,
-    } as { openErrors: number; critical24h: number; status: "healthy" | "warning" | "degraded"; topRoutes: { route: string; count: number }[] };
+    } as {
+      openErrors: number;
+      critical24h: number;
+      status: "healthy" | "warning" | "degraded";
+      topRoutes: { route: string; count: number }[];
+    };
   });
 
 export const adminResolveSystemError = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ id: z.string().uuid(), resolved: z.boolean() }).parse(input))
+  .inputValidator((input) =>
+    z.object({ id: z.string().uuid(), resolved: z.boolean() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_system", "system_health.resolve", { id: data.id, resolved: data.resolved });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_system",
+      "system_health.resolve",
+      { id: data.id, resolved: data.resolved },
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (context.supabase as any)
       .from("system_error_logs")
-      .update({ resolved: data.resolved, resolved_at: data.resolved ? new Date().toISOString() : null })
+      .update({
+        resolved: data.resolved,
+        resolved_at: data.resolved ? new Date().toISOString() : null,
+      })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

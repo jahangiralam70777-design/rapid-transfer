@@ -13,12 +13,27 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Activity, AlertTriangle, CheckCircle2, Download, RefreshCw, ShieldAlert } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+  RefreshCw,
+  ShieldAlert,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/system-health")({
@@ -34,12 +49,26 @@ const SEVERITY_STYLES: Record<SystemErrorRow["severity"], string> = {
 };
 
 function toCsv(rows: SystemErrorRow[]): string {
-  const cols = ["id","severity","source","message","route","occurrence_count","last_seen_at","resolved"] as const;
+  const cols = [
+    "id",
+    "severity",
+    "source",
+    "message",
+    "route",
+    "occurrence_count",
+    "last_seen_at",
+    "resolved",
+  ] as const;
   const esc = (v: unknown) => {
     const s = v === null || v === undefined ? "" : String(v);
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  return [cols.join(","), ...rows.map((r) => cols.map((c) => esc((r as unknown as Record<string, unknown>)[c])).join(","))].join("\n");
+  return [
+    cols.join(","),
+    ...rows.map((r) =>
+      cols.map((c) => esc((r as unknown as Record<string, unknown>)[c])).join(","),
+    ),
+  ].join("\n");
 }
 
 function SystemHealthPage() {
@@ -58,7 +87,8 @@ function SystemHealthPage() {
 
   const filters = useMemo(
     () => ({
-      page, pageSize,
+      page,
+      pageSize,
       severity: (severity || undefined) as SystemErrorRow["severity"] | undefined,
       source: (source || undefined) as SystemErrorRow["source"] | undefined,
       resolved: resolved === "open" ? false : resolved === "resolved" ? true : undefined,
@@ -89,28 +119,47 @@ function SystemHealthPage() {
     const blob = new Blob([toCsv(listQ.data.rows)], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `system-errors-${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    a.href = url;
+    a.download = `system-errors-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
   const s = summaryQ.data;
-  const StatusIcon = s?.status === "healthy" ? CheckCircle2 : s?.status === "degraded" ? AlertTriangle : ShieldAlert;
+  const StatusIcon =
+    s?.status === "healthy" ? CheckCircle2 : s?.status === "degraded" ? AlertTriangle : ShieldAlert;
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 px-4 py-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs text-muted-foreground">
-            <Link to="/admin" className="hover:underline">Admin</Link> / System Health
+            <Link to="/admin" className="hover:underline">
+              Admin
+            </Link>{" "}
+            / System Health
           </p>
           <h1 className="font-display text-2xl font-bold">System Health & Error Logs</h1>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => { listQ.refetch(); summaryQ.refetch(); }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              listQ.refetch();
+              summaryQ.refetch();
+            }}
+          >
             <RefreshCw className="mr-2 h-4 w-4" /> Refresh
           </Button>
-          <Button variant="outline" size="sm" onClick={exportCsv} disabled={!listQ.data?.rows.length}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCsv}
+            disabled={!listQ.data?.rows.length}
+          >
             <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
         </div>
@@ -119,23 +168,33 @@ function SystemHealthPage() {
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="glass-card rounded-2xl p-5">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Status</p>
-          {summaryQ.isLoading ? <Skeleton className="mt-2 h-7 w-24" /> : (
+          {summaryQ.isLoading ? (
+            <Skeleton className="mt-2 h-7 w-24" />
+          ) : (
             <div className="mt-2 flex items-center gap-2">
-              <StatusIcon className={`h-5 w-5 ${s?.status === "healthy" ? "text-emerald-400" : s?.status === "degraded" ? "text-rose-400" : "text-amber-400"}`} />
+              <StatusIcon
+                className={`h-5 w-5 ${s?.status === "healthy" ? "text-emerald-400" : s?.status === "degraded" ? "text-rose-400" : "text-amber-400"}`}
+              />
               <span className="font-display text-xl font-bold capitalize">{s?.status ?? "—"}</span>
             </div>
           )}
         </div>
         <div className="glass-card rounded-2xl p-5">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Open errors</p>
-          {summaryQ.isLoading ? <Skeleton className="mt-2 h-7 w-16" /> : (
+          {summaryQ.isLoading ? (
+            <Skeleton className="mt-2 h-7 w-16" />
+          ) : (
             <p className="mt-2 font-display text-2xl font-bold">{s?.openErrors ?? 0}</p>
           )}
         </div>
         <div className="glass-card rounded-2xl p-5">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Critical (24h)</p>
-          {summaryQ.isLoading ? <Skeleton className="mt-2 h-7 w-16" /> : (
-            <p className="mt-2 font-display text-2xl font-bold text-rose-400">{s?.critical24h ?? 0}</p>
+          {summaryQ.isLoading ? (
+            <Skeleton className="mt-2 h-7 w-16" />
+          ) : (
+            <p className="mt-2 font-display text-2xl font-bold text-rose-400">
+              {s?.critical24h ?? 0}
+            </p>
           )}
         </div>
       </section>
@@ -144,12 +203,23 @@ function SystemHealthPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Input
             value={q}
-            onChange={(e) => { setPage(0); setQ(e.target.value); }}
+            onChange={(e) => {
+              setPage(0);
+              setQ(e.target.value);
+            }}
             placeholder="Search message…"
             className="h-9 w-full max-w-xs"
           />
-          <Select value={severity} onValueChange={(v) => { setPage(0); setSeverity(v === "all" ? "" : v); }}>
-            <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Severity" /></SelectTrigger>
+          <Select
+            value={severity}
+            onValueChange={(v) => {
+              setPage(0);
+              setSeverity(v === "all" ? "" : v);
+            }}
+          >
+            <SelectTrigger className="h-9 w-40">
+              <SelectValue placeholder="Severity" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All severities</SelectItem>
               <SelectItem value="critical">Critical</SelectItem>
@@ -158,8 +228,16 @@ function SystemHealthPage() {
               <SelectItem value="low">Low</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={source} onValueChange={(v) => { setPage(0); setSource(v === "all" ? "" : v); }}>
-            <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Source" /></SelectTrigger>
+          <Select
+            value={source}
+            onValueChange={(v) => {
+              setPage(0);
+              setSource(v === "all" ? "" : v);
+            }}
+          >
+            <SelectTrigger className="h-9 w-40">
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All sources</SelectItem>
               <SelectItem value="frontend">Frontend</SelectItem>
@@ -169,8 +247,16 @@ function SystemHealthPage() {
               <SelectItem value="unknown">Unknown</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={resolved} onValueChange={(v) => { setPage(0); setResolved(v); }}>
-            <SelectTrigger className="h-9 w-36"><SelectValue /></SelectTrigger>
+          <Select
+            value={resolved}
+            onValueChange={(v) => {
+              setPage(0);
+              setResolved(v);
+            }}
+          >
+            <SelectTrigger className="h-9 w-36">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="open">Open</SelectItem>
               <SelectItem value="resolved">Resolved</SelectItem>
@@ -195,13 +281,19 @@ function SystemHealthPage() {
             <tbody>
               {listQ.isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i}><td colSpan={7} className="px-3 py-2"><Skeleton className="h-6 w-full" /></td></tr>
+                  <tr key={i}>
+                    <td colSpan={7} className="px-3 py-2">
+                      <Skeleton className="h-6 w-full" />
+                    </td>
+                  </tr>
                 ))
               ) : listQ.data?.rows.length === 0 ? (
-                <tr><td colSpan={7} className="px-3 py-10 text-center text-muted-foreground">
-                  <Activity className="mx-auto mb-2 h-6 w-6 opacity-50" />
-                  No errors match these filters. The system is quiet.
-                </td></tr>
+                <tr>
+                  <td colSpan={7} className="px-3 py-10 text-center text-muted-foreground">
+                    <Activity className="mx-auto mb-2 h-6 w-6 opacity-50" />
+                    No errors match these filters. The system is quiet.
+                  </td>
+                </tr>
               ) : (
                 listQ.data?.rows.map((r) => (
                   <tr
@@ -210,16 +302,25 @@ function SystemHealthPage() {
                     onClick={() => setSelected(r)}
                   >
                     <td className="px-3 py-2">
-                      <Badge variant="outline" className={SEVERITY_STYLES[r.severity]}>{r.severity}</Badge>
+                      <Badge variant="outline" className={SEVERITY_STYLES[r.severity]}>
+                        {r.severity}
+                      </Badge>
                     </td>
                     <td className="px-3 py-2 capitalize text-muted-foreground">{r.source}</td>
                     <td className="max-w-xl truncate px-3 py-2">{r.message}</td>
                     <td className="px-3 py-2 text-muted-foreground">{r.route ?? "—"}</td>
                     <td className="px-3 py-2 text-right font-mono">{r.occurrence_count}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{new Date(r.last_seen_at).toLocaleString()}</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {new Date(r.last_seen_at).toLocaleString()}
+                    </td>
                     <td className="px-3 py-2 text-right">
                       {r.resolved ? (
-                        <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">Resolved</Badge>
+                        <Badge
+                          variant="outline"
+                          className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                        >
+                          Resolved
+                        </Badge>
                       ) : null}
                     </td>
                   </tr>
@@ -232,10 +333,22 @@ function SystemHealthPage() {
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <span>{listQ.data?.total ?? 0} total</span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>Prev</Button>
-            <Button size="sm" variant="outline"
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              Prev
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
               disabled={!listQ.data || (page + 1) * pageSize >= (listQ.data.total ?? 0)}
-              onClick={() => setPage((p) => p + 1)}>Next</Button>
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
           </div>
         </div>
       </section>
@@ -244,25 +357,36 @@ function SystemHealthPage() {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {selected ? <Badge variant="outline" className={SEVERITY_STYLES[selected.severity]}>{selected.severity}</Badge> : null}
+              {selected ? (
+                <Badge variant="outline" className={SEVERITY_STYLES[selected.severity]}>
+                  {selected.severity}
+                </Badge>
+              ) : null}
               <span className="truncate">{selected?.message}</span>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              {selected?.source} · {selected?.route ?? "no route"} · seen {selected?.occurrence_count}× ·
-              last {selected ? new Date(selected.last_seen_at).toLocaleString() : ""}
+              {selected?.source} · {selected?.route ?? "no route"} · seen{" "}
+              {selected?.occurrence_count}× · last{" "}
+              {selected ? new Date(selected.last_seen_at).toLocaleString() : ""}
             </DialogDescription>
           </DialogHeader>
           {selected ? (
             <div className="space-y-4 text-sm">
               {selected.stack ? (
                 <div>
-                  <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">Stack</p>
-                  <pre className="max-h-64 overflow-auto rounded-lg bg-muted/40 p-3 text-xs">{selected.stack}</pre>
+                  <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+                    Stack
+                  </p>
+                  <pre className="max-h-64 overflow-auto rounded-lg bg-muted/40 p-3 text-xs">
+                    {selected.stack}
+                  </pre>
                 </div>
               ) : null}
               {selected.payload ? (
                 <div>
-                  <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">Payload</p>
+                  <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+                    Payload
+                  </p>
                   <pre className="max-h-48 overflow-auto rounded-lg bg-muted/40 p-3 text-xs">
                     {JSON.stringify(selected.payload, null, 2)}
                   </pre>

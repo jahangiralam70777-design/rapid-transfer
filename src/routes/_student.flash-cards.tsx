@@ -14,7 +14,8 @@ export const Route = createFileRoute("/_student/flash-cards")({
       { property: "og:title", content: "Smart Flash Cards · CA Aspire BD" },
       {
         property: "og:description",
-        content: "Interactive 3D flash cards with bookmarks, streaks and personalized AI revision picks.",
+        content:
+          "Interactive 3D flash cards with bookmarks, streaks and personalized AI revision picks.",
       },
     ],
   }),

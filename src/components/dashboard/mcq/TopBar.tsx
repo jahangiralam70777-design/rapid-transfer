@@ -2,7 +2,18 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
-  Bell, Bot, Check, Flame, LogOut, Moon, Search, Settings, Sun, Trophy, User, Zap,
+  Bell,
+  Bot,
+  Check,
+  Flame,
+  LogOut,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+  Trophy,
+  User,
+  Zap,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -21,8 +32,16 @@ type TopBarProps = {
 };
 
 function IconShell({
-  label, children, onClick, badge,
-}: { label: string; children: React.ReactNode; onClick?: () => void; badge?: number }) {
+  label,
+  children,
+  onClick,
+  badge,
+}: {
+  label: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+  badge?: number;
+}) {
   return (
     <TooltipProvider delayDuration={200}>
       <Tooltip>
@@ -47,7 +66,15 @@ function IconShell({
   );
 }
 
-export function McqTopBar({ theme, onToggleTheme, query, onQuery, streak, xp, onAiAssistant }: TopBarProps) {
+export function McqTopBar({
+  theme,
+  onToggleTheme,
+  query,
+  onQuery,
+  streak,
+  xp,
+  onAiAssistant,
+}: TopBarProps) {
   const { items, unread, markAll } = useMyNotifications();
   const user = useAppStore((s) => s.user);
   const logout = useAppStore((s) => s.logout);
@@ -64,7 +91,9 @@ export function McqTopBar({ theme, onToggleTheme, query, onQuery, streak, xp, on
         </div>
         <div className="hidden sm:block">
           <p className="font-display text-sm font-bold leading-tight">MCQ Practice</p>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">CA Aspire BD</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            CA Aspire BD
+          </p>
         </div>
       </div>
 
@@ -79,7 +108,10 @@ export function McqTopBar({ theme, onToggleTheme, query, onQuery, streak, xp, on
             className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           {query && (
-            <button onClick={() => onQuery("")} className="text-[10px] font-semibold text-muted-foreground hover:text-foreground">
+            <button
+              onClick={() => onQuery("")}
+              className="text-[10px] font-semibold text-muted-foreground hover:text-foreground"
+            >
               clear
             </button>
           )}
@@ -130,32 +162,51 @@ export function McqTopBar({ theme, onToggleTheme, query, onQuery, streak, xp, on
             <div className="flex items-center justify-between border-b border-border p-3">
               <p className="text-sm font-bold">Notifications</p>
               {unread > 0 && (
-                <button onClick={() => markAll.mutate()} className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline">
+                <button
+                  onClick={() => markAll.mutate()}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                >
                   <Check className="h-3 w-3" /> Mark all read
                 </button>
               )}
             </div>
             <div className="max-h-72 overflow-y-auto p-2">
               {recent.length === 0 ? (
-                <p className="px-3 py-6 text-center text-xs text-muted-foreground">You're all caught up 🎉</p>
+                <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+                  You're all caught up 🎉
+                </p>
               ) : (
                 recent.map((n) => (
-                  <div key={n.id} className={`rounded-xl p-2.5 ${n.read ? "opacity-60" : "bg-muted/40"}`}>
+                  <div
+                    key={n.id}
+                    className={`rounded-xl p-2.5 ${n.read ? "opacity-60" : "bg-muted/40"}`}
+                  >
                     <p className="text-xs font-semibold">{n.title}</p>
                     <p className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</p>
                   </div>
                 ))
               )}
             </div>
-            <Link to="/notifications" className="block border-t border-border p-2.5 text-center text-[11px] font-semibold text-primary hover:underline">
+            <Link
+              to="/notifications"
+              className="block border-t border-border p-2.5 text-center text-[11px] font-semibold text-primary hover:underline"
+            >
               View all
             </Link>
           </PopoverContent>
         </Popover>
 
         {/* Theme toggle */}
-        <IconShell label={theme === "dark" ? "Switch to light" : "Switch to dark"} onClick={onToggleTheme}>
-          <motion.span key={theme} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ duration: 0.3 }}>
+        <IconShell
+          label={theme === "dark" ? "Switch to light" : "Switch to dark"}
+          onClick={onToggleTheme}
+        >
+          <motion.span
+            key={theme}
+            initial={{ rotate: -90, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </motion.span>
         </IconShell>
@@ -173,13 +224,22 @@ export function McqTopBar({ theme, onToggleTheme, query, onQuery, streak, xp, on
               <p className="truncate text-[11px] text-muted-foreground">{user?.email ?? ""}</p>
             </div>
             <div className="mt-1 flex flex-col">
-              <Link to="/profile" className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-muted/50">
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-muted/50"
+              >
                 <User className="h-4 w-4" /> Profile
               </Link>
-              <Link to="/daily-progress" className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-muted/50">
+              <Link
+                to="/daily-progress"
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-muted/50"
+              >
                 <Settings className="h-4 w-4" /> Daily progress
               </Link>
-              <button onClick={() => logout()} className="flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-destructive/10">
+              <button
+                onClick={() => logout()}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-destructive/10"
+              >
                 <LogOut className="h-4 w-4" /> Sign out
               </button>
             </div>

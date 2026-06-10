@@ -1,8 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Search, Plus, Send, EyeOff, Filter, ArrowUpDown, CheckCircle2, Eye, Flame,
-  Edit3, Trash2, Copy, CircleDot, CloudUpload, Sparkles, FileText, FileType,
-  Database, Upload, Star, Archive, FileCheck2, NotebookPen,
+  Search,
+  Plus,
+  Send,
+  EyeOff,
+  Filter,
+  ArrowUpDown,
+  CheckCircle2,
+  Eye,
+  Flame,
+  Edit3,
+  Trash2,
+  Copy,
+  CircleDot,
+  CloudUpload,
+  Sparkles,
+  FileText,
+  FileType,
+  Database,
+  Upload,
+  Star,
+  Archive,
+  FileCheck2,
+  NotebookPen,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -15,13 +35,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
@@ -70,10 +104,14 @@ type EditState = { open: boolean; row?: QB | null };
 function statusTone(s: string, hidden: boolean) {
   if (hidden) return "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
   switch (s) {
-    case "published": return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-    case "draft": return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-    case "archived": return "bg-rose-500/15 text-rose-400 border-rose-500/30";
-    default: return "bg-muted text-foreground";
+    case "published":
+      return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+    case "draft":
+      return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    case "archived":
+      return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+    default:
+      return "bg-muted text-foreground";
   }
 }
 
@@ -103,8 +141,7 @@ export function QuestionBankManagerFlow() {
   const [chapterId, setChapterId] = useState("all");
   const [kindFilter, setKindFilter] = useState<"all" | Kind>("all");
   const [typeFilter, setTypeFilter] = useState<"all" | ResourceType>("all");
-  const [statusFilter, setStatusFilter] =
-    useState<"all" | Status | "hidden">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | Status | "hidden">("all");
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
@@ -118,22 +155,37 @@ export function QuestionBankManagerFlow() {
 
   const levels = (tree.data?.levels ?? []) as { code: string; name: string }[];
   const allSubjects = (tree.data?.subjects ?? []) as { id: string; name: string; level: string }[];
-  const allChapters = (tree.data?.chapters ?? []) as { id: string; name: string; subject_id: string }[];
+  const allChapters = (tree.data?.chapters ?? []) as {
+    id: string;
+    name: string;
+    subject_id: string;
+  }[];
 
   const subjects = useMemo(
     () => (level === "all" ? allSubjects : allSubjects.filter((s) => s.level === level)),
     [allSubjects, level],
   );
   const chapters = useMemo(
-    () => (subjectId === "all" ? allChapters : allChapters.filter((c) => c.subject_id === subjectId)),
+    () =>
+      subjectId === "all" ? allChapters : allChapters.filter((c) => c.subject_id === subjectId),
     [allChapters, subjectId],
   );
 
-  useEffect(() => { setSubjectId("all"); setChapterId("all"); setPage(1); }, [level]);
-  useEffect(() => { setChapterId("all"); setPage(1); }, [subjectId]);
+  useEffect(() => {
+    setSubjectId("all");
+    setChapterId("all");
+    setPage(1);
+  }, [level]);
+  useEffect(() => {
+    setChapterId("all");
+    setPage(1);
+  }, [subjectId]);
 
   const listQuery = useQuery({
-    queryKey: ["qbank-admin", { search, level, subjectId, chapterId, kindFilter, typeFilter, statusFilter, page }],
+    queryKey: [
+      "qbank-admin",
+      { search, level, subjectId, chapterId, kindFilter, typeFilter, statusFilter, page },
+    ],
     queryFn: () =>
       listFn({
         data: {
@@ -158,9 +210,15 @@ export function QuestionBankManagerFlow() {
   useEffect(() => {
     const ch = supabase
       .channel(`qbank-live-${Math.random().toString(36).slice(2, 8)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "question_bank_resources" }, invalidate)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "question_bank_resources" },
+        invalidate,
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,22 +229,34 @@ export function QuestionBankManagerFlow() {
 
   const remove = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { toast.success("Deleted"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Deleted");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const duplicate = useMutation({
     mutationFn: (id: string) => dupFn({ data: { id } }),
-    onSuccess: () => { toast.success("Duplicated"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Duplicated");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const setStatus = useMutation({
     mutationFn: (p: { id: string; status: Status }) => statusFn({ data: p }),
-    onSuccess: (_d, p) => { toast.success(`Marked ${p.status}`); invalidate(); },
+    onSuccess: (_d, p) => {
+      toast.success(`Marked ${p.status}`);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const setHidden = useMutation({
     mutationFn: (p: { id: string; is_hidden: boolean }) => hideFn({ data: p }),
-    onSuccess: (_d, p) => { toast.success(p.is_hidden ? "Hidden from students" : "Visible again"); invalidate(); },
+    onSuccess: (_d, p) => {
+      toast.success(p.is_hidden ? "Hidden from students" : "Visible again");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -220,7 +290,8 @@ export function QuestionBankManagerFlow() {
               Question Bank <span className="text-gradient">Management Center</span>
             </h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Upload, organise and publish chapter-wise important questions, previous year papers and study resources — text, PDF or DOC.
+              Upload, organise and publish chapter-wise important questions, previous year papers
+              and study resources — text, PDF or DOC.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -242,19 +313,52 @@ export function QuestionBankManagerFlow() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="Search resources by title or summary…"
               className="h-9 rounded-xl border-white/10 bg-background/60 pl-9"
             />
           </div>
-          <SelectFilter icon={<Filter className="h-3 w-3" />} label="Level" value={level} onValueChange={setLevel}
-            options={[{ value: "all", label: "All levels" }, ...levels.map((l) => ({ value: l.code, label: l.name }))]} />
-          <SelectFilter icon={<Filter className="h-3 w-3" />} label="Subject" value={subjectId} onValueChange={setSubjectId}
-            options={[{ value: "all", label: "All subjects" }, ...subjects.map((s) => ({ value: s.id, label: s.name }))]} />
-          <SelectFilter icon={<Filter className="h-3 w-3" />} label="Chapter" value={chapterId} onValueChange={setChapterId}
-            options={[{ value: "all", label: "All chapters" }, ...chapters.map((c) => ({ value: c.id, label: c.name }))]} />
-          <SelectFilter icon={<Filter className="h-3 w-3" />} label="Type" value={typeFilter}
-            onValueChange={(v) => { setTypeFilter(v as typeof typeFilter); setPage(1); }}
+          <SelectFilter
+            icon={<Filter className="h-3 w-3" />}
+            label="Level"
+            value={level}
+            onValueChange={setLevel}
+            options={[
+              { value: "all", label: "All levels" },
+              ...levels.map((l) => ({ value: l.code, label: l.name })),
+            ]}
+          />
+          <SelectFilter
+            icon={<Filter className="h-3 w-3" />}
+            label="Subject"
+            value={subjectId}
+            onValueChange={setSubjectId}
+            options={[
+              { value: "all", label: "All subjects" },
+              ...subjects.map((s) => ({ value: s.id, label: s.name })),
+            ]}
+          />
+          <SelectFilter
+            icon={<Filter className="h-3 w-3" />}
+            label="Chapter"
+            value={chapterId}
+            onValueChange={setChapterId}
+            options={[
+              { value: "all", label: "All chapters" },
+              ...chapters.map((c) => ({ value: c.id, label: c.name })),
+            ]}
+          />
+          <SelectFilter
+            icon={<Filter className="h-3 w-3" />}
+            label="Type"
+            value={typeFilter}
+            onValueChange={(v) => {
+              setTypeFilter(v as typeof typeFilter);
+              setPage(1);
+            }}
             options={[
               { value: "all", label: "All types" },
               { value: "important", label: "Important Qns" },
@@ -262,36 +366,57 @@ export function QuestionBankManagerFlow() {
               { value: "model", label: "Model Test" },
               { value: "notes", label: "PDF Notes" },
               { value: "text", label: "Text Doc" },
-            ]} />
-          <SelectFilter icon={<Filter className="h-3 w-3" />} label="Format" value={kindFilter}
-            onValueChange={(v) => { setKindFilter(v as typeof kindFilter); setPage(1); }}
+            ]}
+          />
+          <SelectFilter
+            icon={<Filter className="h-3 w-3" />}
+            label="Format"
+            value={kindFilter}
+            onValueChange={(v) => {
+              setKindFilter(v as typeof kindFilter);
+              setPage(1);
+            }}
             options={[
               { value: "all", label: "All formats" },
               { value: "text", label: "Text" },
               { value: "pdf", label: "PDF" },
               { value: "doc", label: "DOC/DOCX" },
-            ]} />
-          <SelectFilter icon={<ArrowUpDown className="h-3 w-3" />} label="Status" value={statusFilter}
-            onValueChange={(v) => { setStatusFilter(v as typeof statusFilter); setPage(1); }}
+            ]}
+          />
+          <SelectFilter
+            icon={<ArrowUpDown className="h-3 w-3" />}
+            label="Status"
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v as typeof statusFilter);
+              setPage(1);
+            }}
             options={[
               { value: "all", label: "All" },
               { value: "published", label: "Published" },
               { value: "draft", label: "Draft" },
               { value: "archived", label: "Archived" },
               { value: "hidden", label: "Hidden" },
-            ]} />
+            ]}
+          />
         </div>
       </div>
 
-      <VisibilityPanel
-        levels={levels}
-        subjects={allSubjects}
-        chapters={allChapters}
-      />
+      <VisibilityPanel levels={levels} subjects={allSubjects} chapters={allChapters} />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <StatTile label="Total Resources" value={stats.total} icon={Database} color="var(--neon-purple)" />
-        <StatTile label="Published & Visible" value={stats.published} icon={FileCheck2} color="#22c55e" />
+        <StatTile
+          label="Total Resources"
+          value={stats.total}
+          icon={Database}
+          color="var(--neon-purple)"
+        />
+        <StatTile
+          label="Published & Visible"
+          value={stats.published}
+          icon={FileCheck2}
+          color="#22c55e"
+        />
         <StatTile label="Hidden on this page" value={stats.hidden} icon={EyeOff} color="#f59e0b" />
       </div>
 
@@ -301,7 +426,8 @@ export function QuestionBankManagerFlow() {
           <div>
             <h3 className="font-display text-lg font-bold">Resource Library</h3>
             <p className="text-xs text-muted-foreground">
-              {listQuery.isLoading ? "Loading…" : `Showing ${rows.length} of ${total}`} — live sync enabled
+              {listQuery.isLoading ? "Loading…" : `Showing ${rows.length} of ${total}`} — live sync
+              enabled
             </p>
           </div>
           <Badge variant="outline" className="border-white/10 bg-background/40">
@@ -328,9 +454,15 @@ export function QuestionBankManagerFlow() {
                 const I = kindIcon(r.kind);
                 return (
                   <TableRow key={r.id} className="border-white/5 hover:bg-white/[0.03]">
-                    <TableCell className="max-w-[280px] truncate pl-4 font-medium">{r.title}</TableCell>
-                    <TableCell className="text-muted-foreground">{subjectName(r.subject_id)}</TableCell>
-                    <TableCell className="text-muted-foreground">{chapterName(r.chapter_id)}</TableCell>
+                    <TableCell className="max-w-[280px] truncate pl-4 font-medium">
+                      {r.title}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {subjectName(r.subject_id)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {chapterName(r.chapter_id)}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="border-white/15 text-[10px]">
                         {TYPE_LABEL[r.resource_type] ?? r.resource_type}
@@ -344,7 +476,10 @@ export function QuestionBankManagerFlow() {
                     <TableCell className="text-xs">{r.question_count}</TableCell>
                     <TableCell className="text-xs">{r.download_count.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`${statusTone(r.status, r.is_hidden)} border text-[10px]`}>
+                      <Badge
+                        variant="outline"
+                        className={`${statusTone(r.status, r.is_hidden)} border text-[10px]`}
+                      >
                         {r.is_hidden ? "Hidden" : r.status}
                       </Badge>
                     </TableCell>
@@ -354,7 +489,10 @@ export function QuestionBankManagerFlow() {
                           <Edit3 className="h-3.5 w-3.5" />
                         </RowBtn>
                         {r.file_url && (
-                          <RowBtn title="Open file" onClick={() => window.open(r.file_url!, "_blank")}>
+                          <RowBtn
+                            title="Open file"
+                            onClick={() => window.open(r.file_url!, "_blank")}
+                          >
                             <Eye className="h-3.5 w-3.5" />
                           </RowBtn>
                         )}
@@ -363,15 +501,26 @@ export function QuestionBankManagerFlow() {
                         </RowBtn>
                         <RowBtn
                           title={r.status === "published" ? "Unpublish" : "Publish"}
-                          onClick={() => setStatus.mutate({ id: r.id, status: r.status === "published" ? "draft" : "published" })}
+                          onClick={() =>
+                            setStatus.mutate({
+                              id: r.id,
+                              status: r.status === "published" ? "draft" : "published",
+                            })
+                          }
                         >
-                          <Send className={`h-3.5 w-3.5 ${r.status === "published" ? "text-emerald-400" : ""}`} />
+                          <Send
+                            className={`h-3.5 w-3.5 ${r.status === "published" ? "text-emerald-400" : ""}`}
+                          />
                         </RowBtn>
                         <RowBtn
                           title={r.is_hidden ? "Unhide" : "Hide from students"}
                           onClick={() => setHidden.mutate({ id: r.id, is_hidden: !r.is_hidden })}
                         >
-                          {r.is_hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                          {r.is_hidden ? (
+                            <Eye className="h-3.5 w-3.5" />
+                          ) : (
+                            <EyeOff className="h-3.5 w-3.5" />
+                          )}
                         </RowBtn>
                         <RowBtn
                           title="Delete"
@@ -388,7 +537,10 @@ export function QuestionBankManagerFlow() {
               })}
               {!listQuery.isLoading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={9}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     <Sparkles className="mx-auto mb-2 h-5 w-5" />
                     No resources match your filters. Upload your first resource.
                   </TableCell>
@@ -398,12 +550,28 @@ export function QuestionBankManagerFlow() {
           </Table>
         </div>
         <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-xs text-muted-foreground">
-          <span>Page {page} of {totalPages}</span>
+          <span>
+            Page {page} of {totalPages}
+          </span>
           <div className="flex gap-1">
-            <Button size="sm" variant="outline" className="h-7 rounded-lg border-white/10"
-              disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
-            <Button size="sm" variant="outline" className="h-7 rounded-lg border-white/10"
-              disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 rounded-lg border-white/10"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Prev
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 rounded-lg border-white/10"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </Button>
           </div>
         </div>
       </div>
@@ -421,12 +589,28 @@ export function QuestionBankManagerFlow() {
 }
 
 // ===============================================
-function StatTile({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; color: string }) {
+function StatTile({
+  label,
+  value,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+}) {
   return (
     <div className="glass relative overflow-hidden rounded-2xl p-4">
-      <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-30 blur-2xl" style={{ background: color }} />
+      <div
+        className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-30 blur-2xl"
+        style={{ background: color }}
+      />
       <div className="flex items-center justify-between">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10" style={{ background: `color-mix(in oklab, ${color} 15%, transparent)` }}>
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10"
+          style={{ background: `color-mix(in oklab, ${color} 15%, transparent)` }}
+        >
           <Icon className="h-4 w-4" />
         </div>
         <Flame className="h-3.5 w-3.5 text-muted-foreground" />
@@ -437,17 +621,33 @@ function StatTile({ label, value, icon: Icon, color }: { label: string; value: n
   );
 }
 
-function RowBtn({ title, onClick, children }: { title: string; onClick: () => void; children: React.ReactNode }) {
+function RowBtn({
+  title,
+  onClick,
+  children,
+}: {
+  title: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <button type="button" title={title} onClick={onClick}
-      className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground">
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      className="rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground"
+    >
       {children}
     </button>
   );
 }
 
 function SelectFilter({
-  icon, label, value, onValueChange, options,
+  icon,
+  label,
+  value,
+  onValueChange,
+  options,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -464,7 +664,11 @@ function SelectFilter({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
@@ -475,7 +679,12 @@ function SelectFilter({
 // Editor
 // ===============================================
 function EditorDialog({
-  state, onClose, onSaved, levels, allSubjects, allChapters,
+  state,
+  onClose,
+  onSaved,
+  levels,
+  allSubjects,
+  allChapters,
 }: {
   state: EditState;
   onClose: () => void;
@@ -560,8 +769,10 @@ function EditorDialog({
   const save = useMutation({
     mutationFn: async () => {
       if (!form.title?.trim()) throw new Error("Title is required");
-      if (form.kind !== "text" && !form.file_url) throw new Error("Upload a file for PDF/DOC resources");
-      if (form.kind === "text" && !form.body?.trim()) throw new Error("Body is required for text resources");
+      if (form.kind !== "text" && !form.file_url)
+        throw new Error("Upload a file for PDF/DOC resources");
+      if (form.kind === "text" && !form.body?.trim())
+        throw new Error("Body is required for text resources");
       const payload = {
         title: form.title!,
         summary: form.summary || null,
@@ -583,7 +794,11 @@ function EditorDialog({
       if (isEdit && state.row) return updateFn({ data: { id: state.row.id, ...payload } });
       return createFn({ data: payload });
     },
-    onSuccess: () => { toast.success(isEdit ? "Resource updated" : "Resource created"); onSaved(); onClose(); },
+    onSuccess: () => {
+      toast.success(isEdit ? "Resource updated" : "Resource created");
+      onSaved();
+      onClose();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -592,57 +807,123 @@ function EditorDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Resource" : "Upload Resource"}</DialogTitle>
-          <DialogDescription>Resources sync to all students instantly once published.</DialogDescription>
+          <DialogDescription>
+            Resources sync to all students instantly once published.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3 md:grid-cols-2">
           <Field label="Level">
-            <Select value={form.level ?? "professional"} onValueChange={(v) => { set("level", v); set("subject_id", null); set("chapter_id", null); }}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+            <Select
+              value={form.level ?? "professional"}
+              onValueChange={(v) => {
+                set("level", v);
+                set("subject_id", null);
+                set("chapter_id", null);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {levels.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </Field>
           <Field label="Resource Type">
-            <Select value={form.resource_type ?? "important"} onValueChange={(v) => set("resource_type", v as ResourceType)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.resource_type ?? "important"}
+              onValueChange={(v) => set("resource_type", v as ResourceType)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="important"><Star className="mr-2 inline h-3 w-3" /> Important Questions</SelectItem>
-                <SelectItem value="pyq"><Archive className="mr-2 inline h-3 w-3" /> Previous Year</SelectItem>
-                <SelectItem value="model"><FileCheck2 className="mr-2 inline h-3 w-3" /> Model Test</SelectItem>
-                <SelectItem value="notes"><FileText className="mr-2 inline h-3 w-3" /> PDF Notes</SelectItem>
-                <SelectItem value="text"><NotebookPen className="mr-2 inline h-3 w-3" /> Text Doc</SelectItem>
+                <SelectItem value="important">
+                  <Star className="mr-2 inline h-3 w-3" /> Important Questions
+                </SelectItem>
+                <SelectItem value="pyq">
+                  <Archive className="mr-2 inline h-3 w-3" /> Previous Year
+                </SelectItem>
+                <SelectItem value="model">
+                  <FileCheck2 className="mr-2 inline h-3 w-3" /> Model Test
+                </SelectItem>
+                <SelectItem value="notes">
+                  <FileText className="mr-2 inline h-3 w-3" /> PDF Notes
+                </SelectItem>
+                <SelectItem value="text">
+                  <NotebookPen className="mr-2 inline h-3 w-3" /> Text Doc
+                </SelectItem>
               </SelectContent>
             </Select>
           </Field>
           <Field label="Subject">
-            <Select value={form.subject_id ?? ""} onValueChange={(v) => { set("subject_id", v); set("chapter_id", null); }}>
-              <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
+            <Select
+              value={form.subject_id ?? ""}
+              onValueChange={(v) => {
+                set("subject_id", v);
+                set("chapter_id", null);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select subject" />
+              </SelectTrigger>
               <SelectContent>
-                {subjectsForLevel.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                {subjectsForLevel.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Chapter">
-            <Select value={form.chapter_id ?? ""} onValueChange={(v) => set("chapter_id", v)} disabled={!form.subject_id}>
-              <SelectTrigger><SelectValue placeholder={form.subject_id ? "Select chapter" : "Pick subject first"} /></SelectTrigger>
+            <Select
+              value={form.chapter_id ?? ""}
+              onValueChange={(v) => set("chapter_id", v)}
+              disabled={!form.subject_id}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={form.subject_id ? "Select chapter" : "Pick subject first"}
+                />
+              </SelectTrigger>
               <SelectContent>
-                {chaptersForSubject.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                {chaptersForSubject.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
         </div>
 
         <Field label="Title *">
-          <Input value={form.title ?? ""} onChange={(e) => set("title", e.target.value)} placeholder="ICAB Professional — Taxation Important Qns 2025" />
+          <Input
+            value={form.title ?? ""}
+            onChange={(e) => set("title", e.target.value)}
+            placeholder="ICAB Professional — Taxation Important Qns 2025"
+          />
         </Field>
         <Field label="Summary">
-          <Input value={form.summary ?? ""} onChange={(e) => set("summary", e.target.value)} placeholder="One-line summary shown to students" />
+          <Input
+            value={form.summary ?? ""}
+            onChange={(e) => set("summary", e.target.value)}
+            placeholder="One-line summary shown to students"
+          />
         </Field>
 
         <div className="grid gap-3 md:grid-cols-2">
           <Field label="Format">
             <Select value={form.kind ?? "text"} onValueChange={(v) => set("kind", v as Kind)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="text">Text MCQs / Rich Content</SelectItem>
                 <SelectItem value="pdf">PDF Upload</SelectItem>
@@ -655,7 +936,9 @@ function EditorDialog({
               type="number"
               min={0}
               value={form.question_count ?? 0}
-              onChange={(e) => set("question_count", Math.max(0, parseInt(e.target.value || "0")) as never)}
+              onChange={(e) =>
+                set("question_count", Math.max(0, parseInt(e.target.value || "0")) as never)
+              }
             />
           </Field>
         </div>
@@ -676,7 +959,11 @@ function EditorDialog({
               <input
                 ref={fileRef}
                 type="file"
-                accept={form.kind === "pdf" ? "application/pdf,.pdf" : ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+                accept={
+                  form.kind === "pdf"
+                    ? "application/pdf,.pdf"
+                    : ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                }
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -692,12 +979,21 @@ function EditorDialog({
                     </p>
                   </div>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="outline" className="rounded-lg"
-                      onClick={() => window.open(form.file_url!, "_blank")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg"
+                      onClick={() => window.open(form.file_url!, "_blank")}
+                    >
                       <Eye className="h-3 w-3" /> Preview
                     </Button>
-                    <Button size="sm" variant="outline" className="rounded-lg"
-                      onClick={() => fileRef.current?.click()} disabled={uploading}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                    >
                       <Upload className="h-3 w-3" /> Replace
                     </Button>
                   </div>
@@ -710,7 +1006,9 @@ function EditorDialog({
                   className="flex w-full flex-col items-center gap-2 py-6 text-xs text-muted-foreground hover:text-foreground"
                 >
                   <CloudUpload className="h-6 w-6 text-[var(--neon-purple)]" />
-                  {uploading ? "Uploading…" : `Click to upload ${form.kind === "pdf" ? "PDF" : "DOC/DOCX"}`}
+                  {uploading
+                    ? "Uploading…"
+                    : `Click to upload ${form.kind === "pdf" ? "PDF" : "DOC/DOCX"}`}
                 </button>
               )}
             </div>
@@ -719,8 +1017,13 @@ function EditorDialog({
 
         <div className="grid gap-3 md:grid-cols-3">
           <Field label="Status">
-            <Select value={form.status ?? "draft"} onValueChange={(v) => set("status", v as Status)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.status ?? "draft"}
+              onValueChange={(v) => set("status", v as Status)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
@@ -735,14 +1038,24 @@ function EditorDialog({
           <Field label="Tags (comma-separated)">
             <Input
               value={(form.tags ?? []).join(", ")}
-              onChange={(e) => set("tags", e.target.value.split(",").map((t) => t.trim()).filter(Boolean) as never)}
+              onChange={(e) =>
+                set(
+                  "tags",
+                  e.target.value
+                    .split(",")
+                    .map((t) => t.trim())
+                    .filter(Boolean) as never,
+                )
+              }
               placeholder="hsc, mechanics, 2025"
             />
           </Field>
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending || uploading}>
             {save.isPending ? "Saving…" : isEdit ? "Save changes" : "Create"}
           </Button>
@@ -765,7 +1078,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 // Visibility
 // ===============================================
 function VisibilityPanel({
-  levels, subjects, chapters,
+  levels,
+  subjects,
+  chapters,
 }: {
   levels: { code: string; name: string }[];
   subjects: { id: string; name: string; level: string }[];
@@ -784,12 +1099,18 @@ function VisibilityPanel({
   useEffect(() => {
     const ch = supabase
       .channel(`qbv-live-${Math.random().toString(36).slice(2, 8)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "question_bank_visibility" }, () => {
-        qc.invalidateQueries({ queryKey: ["qbank-visibility"] });
-        qc.invalidateQueries({ queryKey: ["qbank-public"] });
-      })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "question_bank_visibility" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["qbank-visibility"] });
+          qc.invalidateQueries({ queryKey: ["qbank-public"] });
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const [section, setSection] = useState(false);
@@ -834,7 +1155,8 @@ function VisibilityPanel({
             <EyeOff className="h-4 w-4" /> Section Visibility
           </h3>
           <p className="text-xs text-muted-foreground">
-            Hide the entire Question Bank, or hide by level / subject / chapter — applies live to all students, homepage, dashboard and recommendations.
+            Hide the entire Question Bank, or hide by level / subject / chapter — applies live to
+            all students, homepage, dashboard and recommendations.
           </p>
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-background/40 px-3 py-2 text-xs">
@@ -844,19 +1166,35 @@ function VisibilityPanel({
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <VisGroup title="Hidden levels" empty="No levels"
+        <VisGroup
+          title="Hidden levels"
+          empty="No levels"
           items={levels.map((l) => ({ id: l.code, name: l.name }))}
-          selected={hLevels} onToggle={(v) => toggle(hLevels, v, setHLevels)} />
-        <VisGroup title="Hidden subjects" empty="No subjects"
+          selected={hLevels}
+          onToggle={(v) => toggle(hLevels, v, setHLevels)}
+        />
+        <VisGroup
+          title="Hidden subjects"
+          empty="No subjects"
           items={subjects.map((s) => ({ id: s.id, name: s.name }))}
-          selected={hSubjects} onToggle={(v) => toggle(hSubjects, v, setHSubjects)} />
-        <VisGroup title="Hidden chapters" empty="No chapters"
+          selected={hSubjects}
+          onToggle={(v) => toggle(hSubjects, v, setHSubjects)}
+        />
+        <VisGroup
+          title="Hidden chapters"
+          empty="No chapters"
           items={chapters.map((c) => ({ id: c.id, name: c.name }))}
-          selected={hChapters} onToggle={(v) => toggle(hChapters, v, setHChapters)} />
+          selected={hChapters}
+          onToggle={(v) => toggle(hChapters, v, setHChapters)}
+        />
       </div>
 
       <div className="mt-3 flex justify-end">
-        <Button onClick={() => save.mutate()} disabled={save.isPending} className="bg-cta-gradient text-white shadow-glow">
+        <Button
+          onClick={() => save.mutate()}
+          disabled={save.isPending}
+          className="bg-cta-gradient text-white shadow-glow"
+        >
           <CheckCircle2 className="mr-2 h-4 w-4" />
           {save.isPending ? "Saving…" : "Save visibility"}
         </Button>
@@ -866,7 +1204,11 @@ function VisibilityPanel({
 }
 
 function VisGroup({
-  title, empty, items, selected, onToggle,
+  title,
+  empty,
+  items,
+  selected,
+  onToggle,
 }: {
   title: string;
   empty: string;
@@ -887,11 +1229,16 @@ function VisGroup({
         {items.map((it) => {
           const on = selected.includes(it.id);
           return (
-            <button key={it.id} type="button" onClick={() => onToggle(it.id)}
+            <button
+              key={it.id}
+              type="button"
+              onClick={() => onToggle(it.id)}
               className={`flex w-full items-center justify-between rounded-lg border px-2 py-1.5 text-left text-xs transition ${
-                on ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-                   : "border-white/10 bg-background/40 hover:bg-white/5"
-              }`}>
+                on
+                  ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                  : "border-white/10 bg-background/40 hover:bg-white/5"
+              }`}
+            >
               <span className="truncate">{it.name}</span>
               {on ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3 opacity-50" />}
             </button>

@@ -6,7 +6,10 @@ export const Route = createFileRoute("/security")({
   head: () => ({
     meta: [
       { title: "Security · CA Aspire BD" },
-      { name: "description", content: "How CA Aspire BD protects your data, accounts, and platform integrity." },
+      {
+        name: "description",
+        content: "How CA Aspire BD protects your data, accounts, and platform integrity.",
+      },
     ],
   }),
 });
@@ -20,24 +23,45 @@ function SecurityPage() {
       sections={[
         {
           heading: "Data Protection",
-          body: <p>All traffic between your device and our servers is encrypted using TLS 1.2+. Stored data is protected with encryption at rest on managed cloud infrastructure.</p>,
+          body: (
+            <p>
+              All traffic between your device and our servers is encrypted using TLS 1.2+. Stored
+              data is protected with encryption at rest on managed cloud infrastructure.
+            </p>
+          ),
         },
         {
           heading: "Account Security",
           body: (
             <>
-              <p>Passwords are hashed with industry-standard algorithms and never stored in plain text.</p>
-              <p>We recommend using a strong, unique password and enabling any additional sign-in protections offered in your account settings.</p>
+              <p>
+                Passwords are hashed with industry-standard algorithms and never stored in plain
+                text.
+              </p>
+              <p>
+                We recommend using a strong, unique password and enabling any additional sign-in
+                protections offered in your account settings.
+              </p>
             </>
           ),
         },
         {
           heading: "Access Controls",
-          body: <p>Production access is restricted to a small number of authorized engineers, audited, and protected by multi-factor authentication.</p>,
+          body: (
+            <p>
+              Production access is restricted to a small number of authorized engineers, audited,
+              and protected by multi-factor authentication.
+            </p>
+          ),
         },
         {
           heading: "Backups & Reliability",
-          body: <p>Databases are continuously backed up and we monitor uptime around the clock so your study sessions are always available.</p>,
+          body: (
+            <p>
+              Databases are continuously backed up and we monitor uptime around the clock so your
+              study sessions are always available.
+            </p>
+          ),
         },
         {
           heading: "Responsible Disclosure",

@@ -9,7 +9,6 @@ const statusEnum = z.enum(["draft", "scheduled", "sent", "failed", "paused"]);
 const audienceEnum = z.enum(["all", "level", "subject", "role", "users"]);
 const roleEnum = z.enum(["admin", "moderator", "student"]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // ---------- Admin: list ----------
 const listInput = z.object({
   search: z.string().trim().max(200).optional(),
@@ -47,7 +46,10 @@ export const adminNotificationStats = createServerFn({ method: "GET" })
     const [total, sent, scheduled, draft, failed] = await Promise.all([
       sb.from("notifications").select("id", { count: "exact", head: true }),
       sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "sent"),
-      sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
+      sb
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "scheduled"),
       sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "draft"),
       sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "failed"),
     ]);
@@ -120,14 +122,21 @@ export const adminSendNotification = createServerFn({ method: "POST" })
     await assertPermission(context.supabase, context.userId, "manage_content");
     const sb = context.supabase;
     // Estimate delivered_count from audience
-    const { data: n, error } = await sb.from("notifications").select("*").eq("id", data.id).single();
+    const { data: n, error } = await sb
+      .from("notifications")
+      .select("*")
+      .eq("id", data.id)
+      .single();
     if (error) throw error;
     let delivered = 0;
     if (n.audience === "all") {
       const { count } = await sb.from("profiles").select("id", { count: "exact", head: true });
       delivered = count ?? 0;
     } else if (n.audience === "level" && n.audience_level) {
-      const { count } = await sb.from("profiles").select("id", { count: "exact", head: true }).eq("level", n.audience_level);
+      const { count } = await sb
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("level", n.audience_level);
       delivered = count ?? 0;
     } else if (n.audience === "role" && n.audience_role) {
       const { count } = await sb
@@ -153,7 +162,10 @@ export const adminSetNotificationStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
-    const { error } = await context.supabase.from("notifications").update({ status: data.status }).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("notifications")
+      .update({ status: data.status })
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -174,7 +186,9 @@ export const listMyNotifications = createServerFn({ method: "GET" })
       .from("notification_reads")
       .select("notification_id")
       .eq("user_id", context.userId);
-    const readSet = new Set((reads ?? []).map((r: { notification_id: string }) => r.notification_id));
+    const readSet = new Set(
+      (reads ?? []).map((r: { notification_id: string }) => r.notification_id),
+    );
     return (data ?? []).map((n: { id: string }) => ({ ...n, read: readSet.has(n.id) }));
   });
 
@@ -184,7 +198,10 @@ export const markNotificationRead = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("notification_reads")
-      .upsert({ notification_id: data.id, user_id: context.userId }, { onConflict: "notification_id,user_id" });
+      .upsert(
+        { notification_id: data.id, user_id: context.userId },
+        { onConflict: "notification_id,user_id" },
+      );
     if (error) throw error;
     return { ok: true };
   });
@@ -200,7 +217,10 @@ export const markAllNotificationsRead = createServerFn({ method: "POST" })
       .limit(500);
     if (ne) throw ne;
     if (!notifs?.length) return { ok: true, count: 0 };
-    const rows = notifs.map((n: { id: string }) => ({ notification_id: n.id, user_id: context.userId }));
+    const rows = notifs.map((n: { id: string }) => ({
+      notification_id: n.id,
+      user_id: context.userId,
+    }));
     const { error } = await sb
       .from("notification_reads")
       .upsert(rows, { onConflict: "notification_id,user_id" });

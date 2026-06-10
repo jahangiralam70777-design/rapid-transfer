@@ -10,7 +10,11 @@ import { useEditorEngine } from "@/stores/editor-engine";
 import { editorRemote } from "@/lib/editor/remote-storage";
 import { subscribeEditorPage } from "@/lib/editor/realtime";
 import { publishPage } from "@/lib/editor/editor.functions";
-import { resolveConflict, type ConflictInfo, type ConflictResolution } from "@/lib/editor/conflicts";
+import {
+  resolveConflict,
+  type ConflictInfo,
+  type ConflictResolution,
+} from "@/lib/editor/conflicts";
 import type { PageState } from "@/lib/editor/types";
 
 export type SyncStatus = "idle" | "loading" | "synced" | "offline" | "conflict";
@@ -151,5 +155,13 @@ export function useEditorSync(pageId: string): EditorSyncApi {
     }
   }
 
-  return { status, conflict, publishStatus, remoteSnapshotCount, syncNow, publish, resolveConflictWith };
+  return {
+    status,
+    conflict,
+    publishStatus,
+    remoteSnapshotCount,
+    syncNow,
+    publish,
+    resolveConflictWith,
+  };
 }

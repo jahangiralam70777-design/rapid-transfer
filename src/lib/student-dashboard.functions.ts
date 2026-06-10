@@ -30,13 +30,43 @@ export const studentDashboardSnapshot = createServerFn({ method: "GET" })
       subjectsR,
     ] = await Promise.all([
       supabase.from("mcqs").select("id", { count: "exact", head: true }).eq("status", "published"),
-      supabase.from("mcqs").select("id", { count: "exact", head: true }).eq("status", "published").gte("created_at", since7),
-      supabase.from("quizzes").select("id", { count: "exact", head: true }).eq("status", "published").eq("kind", "quiz"),
-      supabase.from("quizzes").select("id", { count: "exact", head: true }).eq("status", "published").eq("kind", "quiz").gte("created_at", since7),
-      supabase.from("quizzes").select("id", { count: "exact", head: true }).eq("status", "published").eq("kind", "mock"),
-      supabase.from("quizzes").select("id", { count: "exact", head: true }).eq("status", "published").eq("kind", "mock").gte("created_at", since7),
-      supabase.from("short_notes").select("id", { count: "exact", head: true }).eq("status", "published").eq("is_hidden", false),
-      supabase.from("video_classes").select("id", { count: "exact", head: true }).eq("status", "published").eq("is_hidden", false),
+      supabase
+        .from("mcqs")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .gte("created_at", since7),
+      supabase
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("kind", "quiz"),
+      supabase
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("kind", "quiz")
+        .gte("created_at", since7),
+      supabase
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("kind", "mock"),
+      supabase
+        .from("quizzes")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("kind", "mock")
+        .gte("created_at", since7),
+      supabase
+        .from("short_notes")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("is_hidden", false),
+      supabase
+        .from("video_classes")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("is_hidden", false),
       supabase
         .from("exam_attempts")
         .select("id,quiz_id,score,correct_count,total_count,completed_at,started_at,status")
@@ -59,15 +89,14 @@ export const studentDashboardSnapshot = createServerFn({ method: "GET" })
         .limit(1),
       supabase
         .from("quizzes")
-        .select("id,title,description,difficulty,total_questions,duration_seconds,subject_id,created_at,kind,level")
+        .select(
+          "id,title,description,difficulty,total_questions,duration_seconds,subject_id,created_at,kind,level",
+        )
         .eq("status", "published")
         .eq("kind", "quiz")
         .order("created_at", { ascending: false })
         .limit(8),
-      supabase
-        .from("subjects")
-        .select("id,name,color")
-        .eq("status", "published"),
+      supabase.from("subjects").select("id,name,color").eq("status", "published"),
     ]);
 
     const attempts = attemptsR.data ?? [];
@@ -109,7 +138,9 @@ export const studentDashboardSnapshot = createServerFn({ method: "GET" })
       const d = new Date(today);
       d.setUTCDate(today.getUTCDate() - i);
       const key = d.toISOString().slice(0, 10);
-      const day = completed.filter((a) => (a.completed_at ?? a.started_at ?? "").slice(0, 10) === key);
+      const day = completed.filter(
+        (a) => (a.completed_at ?? a.started_at ?? "").slice(0, 10) === key,
+      );
       const t = day.reduce((s, a) => s + (a.total_count ?? 0), 0);
       const c = day.reduce((s, a) => s + (a.correct_count ?? 0), 0);
       bars.push(t ? Math.round((c / t) * 100) : 0);
@@ -165,7 +196,7 @@ export const studentDashboardSnapshot = createServerFn({ method: "GET" })
 
     const subjectAgg = new Map<string, { correct: number; total: number }>();
     for (const a of completed) {
-      const sid = a.quiz_id ? quizSubjectMap.get(a.quiz_id) ?? null : null;
+      const sid = a.quiz_id ? (quizSubjectMap.get(a.quiz_id) ?? null) : null;
       if (!sid) continue;
       const cur = subjectAgg.get(sid) ?? { correct: 0, total: 0 };
       cur.correct += a.correct_count ?? 0;

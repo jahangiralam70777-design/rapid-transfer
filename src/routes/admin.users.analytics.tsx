@@ -5,8 +5,21 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Loader2, Activity, Smartphone, Calendar, Clock } from "lucide-react";
 import {
-  ResponsiveContainer, AreaChart, Area, LineChart, Line, BarChart, Bar,
-  XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 import { adminUserAnalyticsMetric } from "@/lib/admin-user-analytics-service.functions";
 import { Button } from "@/components/ui/button";
@@ -26,7 +39,10 @@ export const Route = createFileRoute("/admin/users/analytics")({
   head: () => ({
     meta: [
       { title: "User Analytics · CA Aspire BD Admin" },
-      { name: "description", content: "Drill into live user activity, device, heatmap and usage analytics." },
+      {
+        name: "description",
+        content: "Drill into live user activity, device, heatmap and usage analytics.",
+      },
     ],
   }),
 });
@@ -63,18 +79,27 @@ function AdminUserAnalyticsPage() {
       <header className="glass shadow-card-soft rounded-2xl p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="space-y-2">
-            <Link to="/admin/users" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <Link
+              to="/admin/users"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
               <ArrowLeft className="h-3 w-3" /> Back to User Management
             </Link>
-            <h1 className="font-display text-2xl font-bold tracking-tight md:text-3xl">{metricLabels[metric]}</h1>
+            <h1 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
+              {metricLabels[metric]}
+            </h1>
             <p className="text-xs text-muted-foreground">
               {isFetching ? "Loading live data…" : `Range: ${range}`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="rounded-xl">Real-time · Supabase</Badge>
+            <Badge variant="outline" className="rounded-xl">
+              Real-time · Supabase
+            </Badge>
             <Link to="/admin/users/list">
-              <Button size="sm" variant="outline" className="rounded-xl">View users</Button>
+              <Button size="sm" variant="outline" className="rounded-xl">
+                View users
+              </Button>
             </Link>
           </div>
         </div>
@@ -82,17 +107,21 @@ function AdminUserAnalyticsPage() {
 
       {/* Metric tabs */}
       <section className="glass shadow-card-soft flex flex-wrap items-center gap-2 rounded-2xl p-3">
-        {([
-          ["active", "Active Users", Activity],
-          ["usage", "Usage Time", Clock],
-          ["devices", "Devices", Smartphone],
-          ["heatmap", "Heatmap", Calendar],
-        ] as const).map(([k, l, Icon]) => (
+        {(
+          [
+            ["active", "Active Users", Activity],
+            ["usage", "Usage Time", Clock],
+            ["devices", "Devices", Smartphone],
+            ["heatmap", "Heatmap", Calendar],
+          ] as const
+        ).map(([k, l, Icon]) => (
           <button
             key={k}
             onClick={() => setMetric(k)}
             className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition ${
-              metric === k ? "bg-gradient-to-r from-violet-600/30 to-fuchsia-500/20 text-foreground" : "text-muted-foreground hover:text-foreground"
+              metric === k
+                ? "bg-gradient-to-r from-violet-600/30 to-fuchsia-500/20 text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Icon className="h-3.5 w-3.5" /> {l}
@@ -104,7 +133,9 @@ function AdminUserAnalyticsPage() {
               key={r}
               onClick={() => setRange(r)}
               className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition ${
-                range === r ? "bg-violet-500/20 text-violet-200" : "text-muted-foreground hover:text-foreground"
+                range === r
+                  ? "bg-violet-500/20 text-violet-200"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {r}
@@ -161,7 +192,11 @@ function SeriesView({ data }: { data: Extract<AnyData, { metric: "active" | "usa
   return (
     <>
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="Unique users" value={data.summary.uniqueUsers.toLocaleString()} sub={`in ${data.range}`} />
+        <StatCard
+          label="Unique users"
+          value={data.summary.uniqueUsers.toLocaleString()}
+          sub={`in ${data.range}`}
+        />
         <StatCard label="Total logins" value={data.summary.totalLogins.toLocaleString()} />
         <StatCard label="Total usage" value={fmtDuration(data.summary.totalUsageSeconds)} />
         <StatCard label="Avg / user" value={fmtDuration(data.summary.avgUsagePerUser)} />
@@ -172,7 +207,9 @@ function SeriesView({ data }: { data: Extract<AnyData, { metric: "active" | "usa
           {isUsage ? "Usage minutes over time" : "Active users over time"}
         </h3>
         {empty ? (
-          <p className="py-10 text-center text-xs text-muted-foreground">No activity recorded in this window.</p>
+          <p className="py-10 text-center text-xs text-muted-foreground">
+            No activity recorded in this window.
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={chartData}>
@@ -185,8 +222,22 @@ function SeriesView({ data }: { data: Extract<AnyData, { metric: "active" | "usa
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
               <XAxis dataKey="label" stroke="#71717a" fontSize={11} />
               <YAxis stroke="#71717a" fontSize={11} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "rgba(15,15,20,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 12 }} />
-              <Area type="monotone" dataKey="value" stroke="#a855f7" strokeWidth={2} fill="url(#grad)" name={isUsage ? "minutes" : "active users"} />
+              <Tooltip
+                contentStyle={{
+                  background: "rgba(15,15,20,0.95)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 12,
+                  fontSize: 12,
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#a855f7"
+                strokeWidth={2}
+                fill="url(#grad)"
+                name={isUsage ? "minutes" : "active users"}
+              />
             </AreaChart>
           </ResponsiveContainer>
         )}
@@ -199,7 +250,14 @@ function SeriesView({ data }: { data: Extract<AnyData, { metric: "active" | "usa
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
             <XAxis dataKey="label" stroke="#71717a" fontSize={11} />
             <YAxis stroke="#71717a" fontSize={11} allowDecimals={false} />
-            <Tooltip contentStyle={{ background: "rgba(15,15,20,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                background: "rgba(15,15,20,0.95)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                fontSize: 12,
+              }}
+            />
             <Line type="monotone" dataKey="logins" stroke="#22d3ee" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
@@ -213,9 +271,18 @@ function DevicesView({ data }: { data: Extract<AnyData, { metric: "devices" }> }
   return (
     <>
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="Total logins" value={data.totalLogins.toLocaleString()} sub={`in ${data.range}`} />
+        <StatCard
+          label="Total logins"
+          value={data.totalLogins.toLocaleString()}
+          sub={`in ${data.range}`}
+        />
         {data.breakdown.slice(0, 3).map((d) => (
-          <StatCard key={d.label} label={d.label} value={`${d.percent}%`} sub={`${d.count.toLocaleString()} logins · ${d.uniqueUsers} users`} />
+          <StatCard
+            key={d.label}
+            label={d.label}
+            value={`${d.percent}%`}
+            sub={`${d.count.toLocaleString()} logins · ${d.uniqueUsers} users`}
+          />
         ))}
       </section>
 
@@ -223,16 +290,32 @@ function DevicesView({ data }: { data: Extract<AnyData, { metric: "devices" }> }
         <div className="glass shadow-card-soft rounded-2xl p-4">
           <h3 className="mb-3 font-display text-sm font-bold tracking-tight">Device share</h3>
           {empty ? (
-            <p className="py-10 text-center text-xs text-muted-foreground">No device data recorded.</p>
+            <p className="py-10 text-center text-xs text-muted-foreground">
+              No device data recorded.
+            </p>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={data.breakdown} dataKey="count" nameKey="label" innerRadius={60} outerRadius={100} paddingAngle={3}>
+                <Pie
+                  data={data.breakdown}
+                  dataKey="count"
+                  nameKey="label"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={3}
+                >
                   {data.breakdown.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: "rgba(15,15,20,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "rgba(15,15,20,0.95)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
+                />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
@@ -241,14 +324,23 @@ function DevicesView({ data }: { data: Extract<AnyData, { metric: "devices" }> }
         <div className="glass shadow-card-soft rounded-2xl p-4">
           <h3 className="mb-3 font-display text-sm font-bold tracking-tight">Device counts</h3>
           {empty ? (
-            <p className="py-10 text-center text-xs text-muted-foreground">No device data recorded.</p>
+            <p className="py-10 text-center text-xs text-muted-foreground">
+              No device data recorded.
+            </p>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={data.breakdown}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                 <XAxis dataKey="label" stroke="#71717a" fontSize={11} />
                 <YAxis stroke="#71717a" fontSize={11} allowDecimals={false} />
-                <Tooltip contentStyle={{ background: "rgba(15,15,20,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "rgba(15,15,20,0.95)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
+                />
                 <Bar dataKey="count" fill="#a855f7" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -267,25 +359,37 @@ function HeatmapView({ data }: { data: Extract<AnyData, { metric: "heatmap" }> }
   return (
     <>
       <section className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <StatCard label="Total logins" value={data.total.toLocaleString()} sub={`last ${data.days} days`} />
+        <StatCard
+          label="Total logins"
+          value={data.total.toLocaleString()}
+          sub={`last ${data.days} days`}
+        />
         <StatCard label="Peak hour count" value={data.max.toLocaleString()} />
         <StatCard label="Time buckets" value={`${data.days} × 24h`} />
       </section>
 
       <section className="glass shadow-card-soft overflow-x-auto rounded-2xl p-4">
-        <h3 className="mb-3 font-display text-sm font-bold tracking-tight">Hourly login intensity</h3>
+        <h3 className="mb-3 font-display text-sm font-bold tracking-tight">
+          Hourly login intensity
+        </h3>
         {data.total === 0 ? (
-          <p className="py-10 text-center text-xs text-muted-foreground">No login activity recorded in this window.</p>
+          <p className="py-10 text-center text-xs text-muted-foreground">
+            No login activity recorded in this window.
+          </p>
         ) : (
           <div className="inline-block min-w-full">
             <div className="flex gap-1 pl-16 text-[9px] text-muted-foreground">
               {Array.from({ length: 24 }, (_, h) => (
-                <div key={h} className="w-5 text-center">{h}</div>
+                <div key={h} className="w-5 text-center">
+                  {h}
+                </div>
               ))}
             </div>
             {Array.from({ length: data.days }, (_, day) => (
               <div key={day} className="flex items-center gap-1">
-                <div className="w-16 truncate text-[10px] text-muted-foreground">{dayLabels[day]}</div>
+                <div className="w-16 truncate text-[10px] text-muted-foreground">
+                  {dayLabels[day]}
+                </div>
                 {Array.from({ length: 24 }, (_, h) => {
                   const v = data.cells[day * 24 + h] ?? 0;
                   const intensity = data.max > 0 ? Math.max(0.06, v / data.max) : 0.06;

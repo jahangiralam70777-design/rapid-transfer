@@ -57,7 +57,11 @@ function GlassTooltip({ active, payload, label, unit }: any) {
       <p className="font-display font-bold">{label}</p>
       {payload.map((p: any) => (
         <p key={p.dataKey} className="text-muted-foreground">
-          <span style={{ color: p.color }}>●</span> {p.name}: <b className="text-foreground">{p.value}{unit ?? ""}</b>
+          <span style={{ color: p.color }}>●</span> {p.name}:{" "}
+          <b className="text-foreground">
+            {p.value}
+            {unit ?? ""}
+          </b>
         </p>
       ))}
     </div>
@@ -86,7 +90,11 @@ export function TrendCharts({
     .filter((s) => s.avgScore > 0 || s.completionPct > 0)
     .sort((a, b) => b.avgScore - a.avgScore)
     .slice(0, 8)
-    .map((s) => ({ name: s.name.length > 12 ? s.name.slice(0, 11) + "…" : s.name, accuracy: s.avgScore, completion: s.completionPct }));
+    .map((s) => ({
+      name: s.name.length > 12 ? s.name.slice(0, 11) + "…" : s.name,
+      accuracy: s.avgScore,
+      completion: s.completionPct,
+    }));
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -103,7 +111,14 @@ export function TrendCharts({
             <XAxis dataKey="label" {...axisProps} minTickGap={24} />
             <YAxis {...axisProps} domain={[0, 100]} width={34} />
             <Tooltip content={<GlassTooltip unit="%" />} />
-            <Area type="monotone" dataKey="accuracy" name="Accuracy" stroke="var(--neon-purple)" strokeWidth={2} fill="url(#accGrad)" />
+            <Area
+              type="monotone"
+              dataKey="accuracy"
+              name="Accuracy"
+              stroke="var(--neon-purple)"
+              strokeWidth={2}
+              fill="url(#accGrad)"
+            />
           </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -133,7 +148,14 @@ export function TrendCharts({
             <XAxis dataKey="label" {...axisProps} minTickGap={24} />
             <YAxis {...axisProps} allowDecimals={false} width={34} />
             <Tooltip content={<GlassTooltip unit="m" />} />
-            <Area type="monotone" dataKey="minutes" name="Minutes" stroke="var(--neon-pink)" strokeWidth={2} fill="url(#timeGrad)" />
+            <Area
+              type="monotone"
+              dataKey="minutes"
+              name="Minutes"
+              stroke="var(--neon-pink)"
+              strokeWidth={2}
+              fill="url(#timeGrad)"
+            />
           </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -141,14 +163,30 @@ export function TrendCharts({
       <ChartCard title="Subject Performance" subtitle="Average accuracy by subject">
         <ResponsiveContainer>
           {subjData.length ? (
-            <BarChart data={subjData} layout="vertical" margin={{ top: 6, right: 12, left: 8, bottom: 0 }}>
+            <BarChart
+              data={subjData}
+              layout="vertical"
+              margin={{ top: 6, right: 12, left: 8, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
               <XAxis type="number" domain={[0, 100]} {...axisProps} />
               <YAxis type="category" dataKey="name" {...axisProps} width={86} />
-              <Tooltip content={<GlassTooltip unit="%" />} cursor={{ fill: "var(--muted)", opacity: 0.3 }} />
+              <Tooltip
+                content={<GlassTooltip unit="%" />}
+                cursor={{ fill: "var(--muted)", opacity: 0.3 }}
+              />
               <Bar dataKey="accuracy" name="Accuracy" radius={[0, 4, 4, 0]}>
                 {subjData.map((s, i) => (
-                  <Cell key={i} fill={s.accuracy >= 70 ? "var(--neon-purple)" : s.accuracy >= 50 ? "var(--neon-blue)" : "oklch(0.7 0.2 25)"} />
+                  <Cell
+                    key={i}
+                    fill={
+                      s.accuracy >= 70
+                        ? "var(--neon-purple)"
+                        : s.accuracy >= 50
+                          ? "var(--neon-blue)"
+                          : "oklch(0.7 0.2 25)"
+                    }
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -161,15 +199,33 @@ export function TrendCharts({
       </ChartCard>
 
       <div className="lg:col-span-2">
-        <ChartCard title="Chapter Completion Trend" subtitle="Completion % across your top subjects">
+        <ChartCard
+          title="Chapter Completion Trend"
+          subtitle="Completion % across your top subjects"
+        >
           <ResponsiveContainer>
             {subjData.length ? (
               <BarChart data={subjData} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="name" {...axisProps} interval={0} angle={-12} textAnchor="end" height={48} />
+                <XAxis
+                  dataKey="name"
+                  {...axisProps}
+                  interval={0}
+                  angle={-12}
+                  textAnchor="end"
+                  height={48}
+                />
                 <YAxis {...axisProps} domain={[0, 100]} width={34} />
-                <Tooltip content={<GlassTooltip unit="%" />} cursor={{ fill: "var(--muted)", opacity: 0.3 }} />
-                <Bar dataKey="completion" name="Completion" radius={[4, 4, 0, 0]} fill="var(--neon-blue)" />
+                <Tooltip
+                  content={<GlassTooltip unit="%" />}
+                  cursor={{ fill: "var(--muted)", opacity: 0.3 }}
+                />
+                <Bar
+                  dataKey="completion"
+                  name="Completion"
+                  radius={[4, 4, 0, 0]}
+                  fill="var(--neon-blue)"
+                />
               </BarChart>
             ) : (
               <div className="flex h-full items-center justify-center text-xs text-muted-foreground">

@@ -14,8 +14,7 @@ export const Route = createFileRoute("/admin/quiz")({
       { property: "og:title", content: "Quiz Manager · CA Aspire BD Admin" },
       {
         property: "og:description",
-        content:
-          "Quiz builder, MCQ selection, analytics and publish controls for administrators.",
+        content: "Quiz builder, MCQ selection, analytics and publish controls for administrators.",
       },
     ],
   }),

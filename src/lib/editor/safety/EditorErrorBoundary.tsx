@@ -24,7 +24,7 @@ export class EditorErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Surface to console for debugging without bubbling.
-    // eslint-disable-next-line no-console
+
     console.warn(`[editor:${this.props.area}] crashed`, error, info);
     this.props.onError?.(error, info);
   }
@@ -39,12 +39,8 @@ export class EditorErrorBoundary extends Component<Props, State> {
         role="alert"
         className="m-2 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm"
       >
-        <div className="font-medium text-destructive">
-          {this.props.area} failed to render
-        </div>
-        <div className="mt-1 text-xs text-muted-foreground">
-          {this.state.error.message}
-        </div>
+        <div className="font-medium text-destructive">{this.props.area} failed to render</div>
+        <div className="mt-1 text-xs text-muted-foreground">{this.state.error.message}</div>
         <button
           type="button"
           onClick={this.reset}

@@ -27,17 +27,25 @@ const mcqInputBase = z.object({
   tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
 });
 
-function refineMcq<T extends { question_type?: "mcq" | "true_false"; option_c?: string | null; option_d?: string | null; correct_option?: "A" | "B" | "C" | "D" }>(
-  v: T,
-  ctx: z.RefinementCtx,
-) {
+function refineMcq<
+  T extends {
+    question_type?: "mcq" | "true_false";
+    option_c?: string | null;
+    option_d?: string | null;
+    correct_option?: "A" | "B" | "C" | "D";
+  },
+>(v: T, ctx: z.RefinementCtx) {
   const qt = v.question_type ?? "mcq";
   if (qt === "true_false") {
     if (v.correct_option && !["A", "B"].includes(v.correct_option)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "True/False correct_option must be A or B" });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "True/False correct_option must be A or B",
+      });
     }
   } else if (
-    v.option_c !== undefined && v.option_d !== undefined &&
+    v.option_c !== undefined &&
+    v.option_d !== undefined &&
     (!v.option_c || !v.option_c.trim() || !v.option_d || !v.option_d.trim())
   ) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: "MCQ requires all four options" });
@@ -47,7 +55,7 @@ function refineMcq<T extends { question_type?: "mcq" | "true_false"; option_c?: 
 const mcqInputSchema = mcqInputBase.superRefine(refineMcq);
 
 // ---------- Helpers ----------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 // ---------- Subjects (admin view: all statuses) ----------
 export const adminListSubjects = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -536,9 +544,12 @@ export const adminCreateMcq = createServerFn({ method: "POST" })
     return row;
   });
 
-const updateInput = mcqInputBase.partial().extend({
-  id: z.string().uuid(),
-}).superRefine(refineMcq);
+const updateInput = mcqInputBase
+  .partial()
+  .extend({
+    id: z.string().uuid(),
+  })
+  .superRefine(refineMcq);
 export const adminUpdateMcq = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof updateInput>) => updateInput.parse(i))

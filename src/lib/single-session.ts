@@ -155,7 +155,6 @@ export function installSingleSessionGuard(
   // and Realtime will surface any real takeover within seconds anyway).
   const initialTimer = window.setTimeout(() => void check(), 5_000);
 
-
   return {
     stop: () => {
       window.clearTimeout(initialTimer);

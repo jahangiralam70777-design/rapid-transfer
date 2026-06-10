@@ -20,7 +20,12 @@ export function ContributionHeatmap({ days }: { days: Day[] }) {
   const [hover, setHover] = useState<{ d: Day; x: number; y: number } | null>(null);
 
   const { weeks, max, monthMarks } = useMemo(() => {
-    if (!days.length) return { weeks: [] as (Day | null)[][], max: 1, monthMarks: [] as { col: number; label: string }[] };
+    if (!days.length)
+      return {
+        weeks: [] as (Day | null)[][],
+        max: 1,
+        monthMarks: [] as { col: number; label: string }[],
+      };
     // Pad the start so the first column begins on Monday.
     const first = new Date(days[0].date + "T00:00:00");
     const offset = (first.getDay() + 6) % 7; // Mon=0 .. Sun=6
@@ -34,7 +39,10 @@ export function ContributionHeatmap({ days }: { days: Day[] }) {
       const firstReal = col.find((c) => c);
       if (!firstReal) return;
       const m = new Date(firstReal.date + "T00:00:00").getMonth();
-      if (m !== lastMonth) { marks.push({ col: ci, label: MONTHS[m] }); lastMonth = m; }
+      if (m !== lastMonth) {
+        marks.push({ col: ci, label: MONTHS[m] });
+        lastMonth = m;
+      }
     });
     return { weeks: cols, max, monthMarks: marks };
   }, [days]);
@@ -72,7 +80,9 @@ export function ContributionHeatmap({ days }: { days: Day[] }) {
             {/* weekday labels */}
             <div className="mr-1 flex w-6 flex-col gap-[3px] text-[8px] text-muted-foreground">
               {["Mon", "", "Wed", "", "Fri", "", "Sun"].map((d, i) => (
-                <div key={i} className="flex h-[11px] items-center">{d}</div>
+                <div key={i} className="flex h-[11px] items-center">
+                  {d}
+                </div>
               ))}
             </div>
             {weeks.map((col, ci) => (
@@ -90,7 +100,10 @@ export function ContributionHeatmap({ days }: { days: Day[] }) {
                       className="h-[11px] w-[11px] rounded-[3px] ring-1 ring-inset ring-border/40 transition-transform hover:scale-125 hover:ring-foreground/40"
                       style={{
                         background: tone(lvl),
-                        boxShadow: lvl >= 3 ? `0 0 6px color-mix(in oklab, var(--neon-purple) ${lvl * 12}%, transparent)` : undefined,
+                        boxShadow:
+                          lvl >= 3
+                            ? `0 0 6px color-mix(in oklab, var(--neon-purple) ${lvl * 12}%, transparent)`
+                            : undefined,
                       }}
                     />
                   );
@@ -105,7 +118,11 @@ export function ContributionHeatmap({ days }: { days: Day[] }) {
       <div className="mt-3 flex items-center justify-end gap-1.5 text-[9px] text-muted-foreground">
         <span>Less</span>
         {[0, 1, 2, 3, 4].map((l) => (
-          <span key={l} className="h-[11px] w-[11px] rounded-[3px] ring-1 ring-inset ring-border/40" style={{ background: tone(l) }} />
+          <span
+            key={l}
+            className="h-[11px] w-[11px] rounded-[3px] ring-1 ring-inset ring-border/40"
+            style={{ background: tone(l) }}
+          />
         ))}
         <span>More</span>
       </div>
@@ -116,10 +133,15 @@ export function ContributionHeatmap({ days }: { days: Day[] }) {
           style={{ left: hover.x + 12, top: hover.y + 12 }}
         >
           <p className="font-display font-bold">
-            {new Date(hover.d.date + "T00:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}
+            {new Date(hover.d.date + "T00:00:00").toLocaleDateString("en", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })}
           </p>
           <p className="text-muted-foreground">
-            {hover.d.count} session{hover.d.count === 1 ? "" : "s"} · {fmtMinutes(hover.d.minutes)} · {hover.d.mcqs} MCQs
+            {hover.d.count} session{hover.d.count === 1 ? "" : "s"} · {fmtMinutes(hover.d.minutes)}{" "}
+            · {hover.d.mcqs} MCQs
           </p>
         </div>
       )}
@@ -136,7 +158,9 @@ export function HeatmapSummary({ days }: { days: Day[] }) {
     <div className="rounded-xl bg-background/40 p-3 text-center">
       <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="font-display mt-1 text-base font-bold">{fmtMinutes(sum(arr, "minutes"))}</p>
-      <p className="text-[10px] text-muted-foreground">{sum(arr, "mcqs")} MCQs · {arr.filter((d) => d.count > 0).length} days</p>
+      <p className="text-[10px] text-muted-foreground">
+        {sum(arr, "mcqs")} MCQs · {arr.filter((d) => d.count > 0).length} days
+      </p>
     </div>
   );
   return (

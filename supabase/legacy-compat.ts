@@ -19,7 +19,7 @@ export type LegacyResult<T = LegacyRow> = {
 };
 
 /** No-op identity helper used by legacy modules to bypass strict inserts. */
-export const asLegacyPayload = <T,>(value: T): any => value as any;
+export const asLegacyPayload = <T>(value: T): any => value as any;
 
 /** Cast helper for legacy reads where the generated row type is too narrow. */
-export const asLegacyRow = <T = LegacyRow,>(value: unknown): T => value as T;
+export const asLegacyRow = <T = LegacyRow>(value: unknown): T => value as T;

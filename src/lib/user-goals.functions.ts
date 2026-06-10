@@ -44,11 +44,24 @@ export const getUserGoals = createServerFn({ method: "GET" })
     const sb = supabase as unknown as {
       from: (table: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            maybeSingle: () => Promise<{ data: { daily_mcqs: number | null; weekly_mcqs: number | null; monthly_mcqs: number | null } | null; error: { message: string; code?: string } | null }>;
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            maybeSingle: () => Promise<{
+              data: {
+                daily_mcqs: number | null;
+                weekly_mcqs: number | null;
+                monthly_mcqs: number | null;
+              } | null;
+              error: { message: string; code?: string } | null;
+            }>;
           };
         };
-        upsert: (row: Record<string, unknown>, opts: { onConflict: string }) => Promise<{ error: { message: string; code?: string } | null }>;
+        upsert: (
+          row: Record<string, unknown>,
+          opts: { onConflict: string },
+        ) => Promise<{ error: { message: string; code?: string } | null }>;
       };
     };
     const { data, error } = await sb
@@ -56,7 +69,6 @@ export const getUserGoals = createServerFn({ method: "GET" })
       .select("daily_mcqs,weekly_mcqs,monthly_mcqs")
       .eq("user_id", userId)
       .maybeSingle();
-
 
     if (error) {
       if (isMissingTableError(error)) {
@@ -81,11 +93,24 @@ export const setUserGoals = createServerFn({ method: "POST" })
     const sb = supabase as unknown as {
       from: (table: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            maybeSingle: () => Promise<{ data: { daily_mcqs: number | null; weekly_mcqs: number | null; monthly_mcqs: number | null } | null; error: { message: string; code?: string } | null }>;
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            maybeSingle: () => Promise<{
+              data: {
+                daily_mcqs: number | null;
+                weekly_mcqs: number | null;
+                monthly_mcqs: number | null;
+              } | null;
+              error: { message: string; code?: string } | null;
+            }>;
           };
         };
-        upsert: (row: Record<string, unknown>, opts: { onConflict: string }) => Promise<{ error: { message: string; code?: string } | null }>;
+        upsert: (
+          row: Record<string, unknown>,
+          opts: { onConflict: string },
+        ) => Promise<{ error: { message: string; code?: string } | null }>;
       };
     };
 
@@ -105,17 +130,30 @@ export const setUserGoals = createServerFn({ method: "POST" })
     const next = {
       user_id: userId,
       daily_mcqs: clampInt(data.daily ?? existing?.daily_mcqs, 1, 500, DEFAULT_USER_GOALS.daily),
-      weekly_mcqs: clampInt(data.weekly ?? existing?.weekly_mcqs, 1, 3000, DEFAULT_USER_GOALS.weekly),
-      monthly_mcqs: clampInt(data.monthly ?? existing?.monthly_mcqs, 1, 10000, DEFAULT_USER_GOALS.monthly),
+      weekly_mcqs: clampInt(
+        data.weekly ?? existing?.weekly_mcqs,
+        1,
+        3000,
+        DEFAULT_USER_GOALS.weekly,
+      ),
+      monthly_mcqs: clampInt(
+        data.monthly ?? existing?.monthly_mcqs,
+        1,
+        10000,
+        DEFAULT_USER_GOALS.monthly,
+      ),
     };
 
-    const { error: writeErr } = await sb
-      .from("user_goals")
-      .upsert(next, { onConflict: "user_id" });
+    const { error: writeErr } = await sb.from("user_goals").upsert(next, { onConflict: "user_id" });
 
     if (writeErr) {
       if (isMissingTableError(writeErr)) {
-        return { daily: next.daily_mcqs, weekly: next.weekly_mcqs, monthly: next.monthly_mcqs, fallback: true };
+        return {
+          daily: next.daily_mcqs,
+          weekly: next.weekly_mcqs,
+          monthly: next.monthly_mcqs,
+          fallback: true,
+        };
       }
       throw new Error(writeErr.message);
     }
@@ -126,6 +164,7 @@ function sanitize(d: { daily?: number; weekly?: number; monthly?: number }): Par
   const out: Partial<UserGoals> = {};
   if (d.daily !== undefined) out.daily = clampInt(d.daily, 1, 500, DEFAULT_USER_GOALS.daily);
   if (d.weekly !== undefined) out.weekly = clampInt(d.weekly, 1, 3000, DEFAULT_USER_GOALS.weekly);
-  if (d.monthly !== undefined) out.monthly = clampInt(d.monthly, 1, 10000, DEFAULT_USER_GOALS.monthly);
+  if (d.monthly !== undefined)
+    out.monthly = clampInt(d.monthly, 1, 10000, DEFAULT_USER_GOALS.monthly);
   return out;
 }

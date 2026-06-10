@@ -47,7 +47,12 @@ export function DashTopbar({ onMenu }: { onMenu?: () => void }) {
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
 
-        <Link to="/notifications" className={iconBtn} aria-label="Notifications" title="Notifications">
+        <Link
+          to="/notifications"
+          className={iconBtn}
+          aria-label="Notifications"
+          title="Notifications"
+        >
           <Bell className="h-4 w-4" />
           {unread > 0 && (
             <span className="bg-cta-gradient shadow-glow absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white">

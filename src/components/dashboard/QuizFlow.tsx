@@ -20,7 +20,14 @@ import {
   Loader2,
   BookOpen,
 } from "lucide-react";
-import { listQuizzes, getQuiz, submitAttempt, listSubjects, listChapters, listMyAttempts } from "@/lib/learning.functions";
+import {
+  listQuizzes,
+  getQuiz,
+  submitAttempt,
+  listSubjects,
+  listChapters,
+  listMyAttempts,
+} from "@/lib/learning.functions";
 import { useLevels, type LevelRow } from "@/hooks/use-levels";
 
 type Step = 0 | 1 | 2 | 3 | 4;
@@ -34,8 +41,12 @@ const LEVEL_TONES = [
 ];
 const LEVEL_ICONS = [Sparkles, Award, Crown];
 
-type LevelChoice = Omit<LevelRow, "icon"> & { t: string; d: string; tone: string; icon: typeof Sparkles };
-
+type LevelChoice = Omit<LevelRow, "icon"> & {
+  t: string;
+  d: string;
+  tone: string;
+  icon: typeof Sparkles;
+};
 
 const diffColor: Record<string, string> = {
   easy: "oklch(0.75 0.18 150)",
@@ -68,7 +79,9 @@ export function QuizFlow() {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
   const [submitted, setSubmitted] = useState(false);
-  const [result, setResult] = useState<{ correct: number; total: number; score: number } | null>(null);
+  const [result, setResult] = useState<{ correct: number; total: number; score: number } | null>(
+    null,
+  );
   const [timeLeft, setTimeLeft] = useState(600);
   const [startedAt, setStartedAt] = useState<number>(0);
   const [diffFilter, setDiffFilter] = useState<"all" | "easy" | "medium" | "hard">("all");
@@ -93,8 +106,6 @@ export function QuizFlow() {
     };
   });
 
-
-
   // Realtime: any quiz/question change on admin side refreshes student view
   useEffect(() => {
     const ch = supabase
@@ -112,7 +123,9 @@ export function QuizFlow() {
         qc.invalidateQueries({ queryKey: ["my-attempts"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const subjectsQ = useQuery({
@@ -149,7 +162,7 @@ export function QuizFlow() {
     staleTime: 15_000,
   });
 
-  const questions = ((quizQ.data?.questions ?? []) as unknown) as QuizQ[];
+  const questions = (quizQ.data?.questions ?? []) as unknown as QuizQ[];
   const meta = quizQ.data?.quiz;
   const total = questions.length;
   const q = questions[current];
@@ -218,12 +231,16 @@ export function QuizFlow() {
   }
 
   const allQuizzes = quizzesQ.data ?? [];
-  const filteredQuizzes = diffFilter === "all" ? allQuizzes : allQuizzes.filter((q) => q.difficulty === diffFilter);
+  const filteredQuizzes =
+    diffFilter === "all" ? allQuizzes : allQuizzes.filter((q) => q.difficulty === diffFilter);
   const attemptCountByQuiz = new Map<string, { count: number; best: number }>();
   for (const a of attemptsQ.data ?? []) {
     if (!a.quiz_id) continue;
     const prev = attemptCountByQuiz.get(a.quiz_id) ?? { count: 0, best: 0 };
-    attemptCountByQuiz.set(a.quiz_id, { count: prev.count + 1, best: Math.max(prev.best, a.score ?? 0) });
+    attemptCountByQuiz.set(a.quiz_id, {
+      count: prev.count + 1,
+      best: Math.max(prev.best, a.score ?? 0),
+    });
   }
   const quizTitleById = new Map<string, string>(allQuizzes.map((q) => [q.id, q.title]));
   const recentAttempts = (attemptsQ.data ?? []).slice(0, 5);
@@ -242,19 +259,25 @@ export function QuizFlow() {
                   <button
                     onClick={() => i <= step && setStep(i as Step)}
                     className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-                      active ? "bg-cta-gradient text-white shadow-glow"
-                      : done ? "bg-muted text-foreground"
-                      : "text-muted-foreground"
+                      active
+                        ? "bg-cta-gradient text-white shadow-glow"
+                        : done
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground"
                     }`}
                   >
-                    <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
-                      active ? "bg-white/20" : done ? "bg-foreground/10" : "border border-border"
-                    }`}>
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+                        active ? "bg-white/20" : done ? "bg-foreground/10" : "border border-border"
+                      }`}
+                    >
                       {done ? <Check className="h-3 w-3" /> : i + 1}
                     </span>
                     {l}
                   </button>
-                  {i < stepLabels.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                  {i < stepLabels.length - 1 && (
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
                 </div>
               );
             })}
@@ -268,20 +291,35 @@ export function QuizFlow() {
             <p className="text-sm text-muted-foreground">Select your level to begin.</p>
             <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
               {levelChoices.length === 0 && !levelsQ.isLoading && (
-                <p className="col-span-full text-sm text-muted-foreground">No levels published yet.</p>
+                <p className="col-span-full text-sm text-muted-foreground">
+                  No levels published yet.
+                </p>
               )}
               {levelChoices.map((l) => {
                 const Icon = l.icon;
                 return (
                   <button
                     key={l.code}
-                    onClick={() => { setLevel(l); setSubjectId(null); setChapterId(null); setStep(1); }}
+                    onClick={() => {
+                      setLevel(l);
+                      setSubjectId(null);
+                      setChapterId(null);
+                      setStep(1);
+                    }}
                     className="group relative rounded-3xl p-px text-left transition-transform hover:-translate-y-1"
                     style={{ background: `linear-gradient(135deg, ${l.tone}, transparent 65%)` }}
                   >
                     <div className="glass relative h-full overflow-hidden rounded-[calc(theme(borderRadius.3xl)-1px)] p-6">
-                      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-40 blur-3xl transition-opacity group-hover:opacity-80" style={{ background: l.tone }} />
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-glow" style={{ background: `linear-gradient(135deg, ${l.tone}, oklch(0.55 0.2 270))` }}>
+                      <div
+                        className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-40 blur-3xl transition-opacity group-hover:opacity-80"
+                        style={{ background: l.tone }}
+                      />
+                      <div
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-glow"
+                        style={{
+                          background: `linear-gradient(135deg, ${l.tone}, oklch(0.55 0.2 270))`,
+                        }}
+                      >
                         <Icon className="h-6 w-6" />
                       </div>
                       <h3 className="font-display mt-5 text-xl font-bold">{l.t}</h3>
@@ -294,7 +332,6 @@ export function QuizFlow() {
                 );
               })}
             </div>
-
           </section>
         )}
 
@@ -312,14 +349,23 @@ export function QuizFlow() {
                 {(subjectsQ.data ?? []).map((s) => (
                   <button
                     key={s.id}
-                    onClick={() => { setSubjectId(s.id); setChapterId(null); setStep(2); }}
+                    onClick={() => {
+                      setSubjectId(s.id);
+                      setChapterId(null);
+                      setStep(2);
+                    }}
                     className="glass shadow-card-soft group rounded-3xl p-5 text-left transition-transform hover:-translate-y-1"
                   >
-                    <div className="bg-cta-gradient flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-glow" style={s.color ? { background: s.color } : undefined}>
+                    <div
+                      className="bg-cta-gradient flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-glow"
+                      style={s.color ? { background: s.color } : undefined}
+                    >
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <h3 className="font-display mt-4 text-lg font-bold">{s.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{s.description ?? "Tap to see chapters"}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {s.description ?? "Tap to see chapters"}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -331,17 +377,24 @@ export function QuizFlow() {
         {step === 2 && (
           <section className="animate-fade-up">
             <h2 className="font-display text-2xl font-bold">Pick a Chapter</h2>
-            <p className="text-sm text-muted-foreground">Or skip to see all quizzes for this subject.</p>
+            <p className="text-sm text-muted-foreground">
+              Or skip to see all quizzes for this subject.
+            </p>
             <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <button
-                onClick={() => { setChapterId(null); setStep(3); }}
+                onClick={() => {
+                  setChapterId(null);
+                  setStep(3);
+                }}
                 className="glass shadow-card-soft group rounded-3xl p-5 text-left transition-transform hover:-translate-y-1"
               >
                 <div className="bg-cta-gradient flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-glow">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <h3 className="font-display mt-4 text-lg font-bold">All Chapters</h3>
-                <p className="mt-1 text-xs text-muted-foreground">Show every quiz in this subject</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Show every quiz in this subject
+                </p>
               </button>
               {chaptersQ.isLoading ? (
                 <Loading />
@@ -349,14 +402,19 @@ export function QuizFlow() {
                 (chaptersQ.data ?? []).map((c) => (
                   <button
                     key={c.id}
-                    onClick={() => { setChapterId(c.id); setStep(3); }}
+                    onClick={() => {
+                      setChapterId(c.id);
+                      setStep(3);
+                    }}
                     className="glass shadow-card-soft group rounded-3xl p-5 text-left transition-transform hover:-translate-y-1"
                   >
                     <div className="bg-cta-gradient flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-glow">
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <h3 className="font-display mt-4 text-lg font-bold">{c.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.description ?? ""}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {c.description ?? ""}
+                    </p>
                   </button>
                 ))
               )}
@@ -370,7 +428,9 @@ export function QuizFlow() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="font-display text-2xl font-bold">Pick a Quiz</h2>
-                <p className="text-sm text-muted-foreground">{level?.t} Level · choose a quiz to attempt.</p>
+                <p className="text-sm text-muted-foreground">
+                  {level?.t} Level · choose a quiz to attempt.
+                </p>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 {(["all", "easy", "medium", "hard"] as const).map((d) => (
@@ -399,7 +459,11 @@ export function QuizFlow() {
                   return (
                     <button
                       key={qz.id}
-                      onClick={() => { setQuizId(qz.id); setStep(4); resetAll(); }}
+                      onClick={() => {
+                        setQuizId(qz.id);
+                        setStep(4);
+                        resetAll();
+                      }}
                       className="glass shadow-card-soft group rounded-3xl p-5 text-left transition-all hover:-translate-y-1 hover:shadow-glow"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -412,16 +476,28 @@ export function QuizFlow() {
                               Best {stats.best}%
                             </span>
                           )}
-                          <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize text-white" style={{ background: diffColor[qz.difficulty] }}>
+                          <span
+                            className="rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize text-white"
+                            style={{ background: diffColor[qz.difficulty] }}
+                          >
                             {qz.difficulty}
                           </span>
                         </div>
                       </div>
                       <h3 className="font-display mt-4 text-lg font-bold">{qz.title}</h3>
-                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{qz.description ?? "Tap to start"}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        {qz.description ?? "Tap to start"}
+                      </p>
                       <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{(qz as { mcq_count?: number }).mcq_count ?? qz.total_questions} questions · {Math.round((qz.duration_seconds ?? 600) / 60)} min</span>
-                        {stats && <span>{stats.count} attempt{stats.count > 1 ? "s" : ""}</span>}
+                        <span>
+                          {(qz as { mcq_count?: number }).mcq_count ?? qz.total_questions} questions
+                          · {Math.round((qz.duration_seconds ?? 600) / 60)} min
+                        </span>
+                        {stats && (
+                          <span>
+                            {stats.count} attempt{stats.count > 1 ? "s" : ""}
+                          </span>
+                        )}
                       </div>
                     </button>
                   );
@@ -437,13 +513,17 @@ export function QuizFlow() {
                 </div>
                 <div className="mt-3 divide-y divide-border/60">
                   {recentAttempts.map((a) => (
-                    <div key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                    >
                       <div className="min-w-0">
                         <p className="truncate font-medium">
                           {(a.quiz_id && quizTitleById.get(a.quiz_id)) || "Quiz attempt"}
                         </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {new Date(a.completed_at ?? a.started_at).toLocaleString()} · {a.correct_count}/{a.total_count}
+                          {new Date(a.completed_at ?? a.started_at).toLocaleString()} ·{" "}
+                          {a.correct_count}/{a.total_count}
                         </p>
                       </div>
                       <span
@@ -471,23 +551,35 @@ export function QuizFlow() {
             <div className="glass shadow-card-soft rounded-2xl p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{level?.t}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {level?.t}
+                  </p>
                   <h3 className="font-display text-lg font-bold">{meta?.title ?? "Loading…"}</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`glass flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-bold ${timeLeft < 60 ? "text-red-400" : "text-gradient"}`}>
+                  <div
+                    className={`glass flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-bold ${timeLeft < 60 ? "text-red-400" : "text-gradient"}`}
+                  >
                     <Clock className="h-4 w-4" /> {m}:{s}
                   </div>
-                  <button onClick={() => setStep(3)} className="glass inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-destructive/10">
+                  <button
+                    onClick={() => setStep(3)}
+                    className="glass inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-destructive/10"
+                  >
                     <LogOut className="h-3.5 w-3.5" /> Exit
                   </button>
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-3">
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] transition-all" style={{ width: `${progress}%`, boxShadow: "0 0 12px var(--neon-purple)" }} />
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)] transition-all"
+                    style={{ width: `${progress}%`, boxShadow: "0 0 12px var(--neon-purple)" }}
+                  />
                 </div>
-                <span className="text-xs text-muted-foreground">{attempted}/{total}</span>
+                <span className="text-xs text-muted-foreground">
+                  {attempted}/{total}
+                </span>
               </div>
             </div>
 
@@ -501,38 +593,58 @@ export function QuizFlow() {
                 <>
                   <div className="relative flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="glass rounded-xl px-3 py-1.5 text-xs font-semibold">Q {String(current + 1).padStart(2, "0")} / {total}</span>
-                      <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize text-white" style={{ background: diffColor[q.difficulty] ?? "var(--neon-blue)" }}>
+                      <span className="glass rounded-xl px-3 py-1.5 text-xs font-semibold">
+                        Q {String(current + 1).padStart(2, "0")} / {total}
+                      </span>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize text-white"
+                        style={{ background: diffColor[q.difficulty] ?? "var(--neon-blue)" }}
+                      >
                         {q.difficulty}
                       </span>
                     </div>
                     <button
-                      onClick={() => { const b = new Set(bookmarks); b.has(current) ? b.delete(current) : b.add(current); setBookmarks(b); }}
+                      onClick={() => {
+                        const b = new Set(bookmarks);
+                        b.has(current) ? b.delete(current) : b.add(current);
+                        setBookmarks(b);
+                      }}
                       className={`glass flex h-9 w-9 items-center justify-center rounded-xl transition-transform hover:scale-105 ${bookmarks.has(current) ? "text-[var(--neon-pink)]" : ""}`}
                     >
-                      <Bookmark className="h-4 w-4" fill={bookmarks.has(current) ? "currentColor" : "none"} />
+                      <Bookmark
+                        className="h-4 w-4"
+                        fill={bookmarks.has(current) ? "currentColor" : "none"}
+                      />
                     </button>
                   </div>
 
-                  <h3 className="font-display relative mt-6 text-xl font-bold leading-snug sm:text-2xl">{sanitizeOptionText(q.question)}</h3>
+                  <h3 className="font-display relative mt-6 text-xl font-bold leading-snug sm:text-2xl">
+                    {sanitizeOptionText(q.question)}
+                  </h3>
 
                   <div className="relative mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {(["A", "B", "C", "D"] as const).map((k) => {
-                      const text = sanitizeOptionText((q as unknown as Record<string, string>)[`option_${k.toLowerCase()}`]);
+                      const text = sanitizeOptionText(
+                        (q as unknown as Record<string, string>)[`option_${k.toLowerCase()}`],
+                      );
                       const isPicked = answers[current] === k;
                       return (
                         <button
                           key={k}
                           onClick={() => setAnswers({ ...answers, [current]: k })}
                           className={`group relative flex items-center gap-4 rounded-2xl border p-4 text-left transition-all ${
-                            isPicked ? "border-primary bg-primary/10 shadow-glow"
+                            isPicked
+                              ? "border-primary bg-primary/10 shadow-glow"
                               : "border-border hover:border-primary/50 hover:bg-muted/40"
                           }`}
                         >
-                          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display text-base font-bold transition-all ${
-                            isPicked ? "bg-cta-gradient text-white shadow-glow"
-                              : "bg-muted text-foreground group-hover:bg-cta-gradient group-hover:text-white"
-                          }`}>
+                          <span
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display text-base font-bold transition-all ${
+                              isPicked
+                                ? "bg-cta-gradient text-white shadow-glow"
+                                : "bg-muted text-foreground group-hover:bg-cta-gradient group-hover:text-white"
+                            }`}
+                          >
                             {k}
                           </span>
                           <span className="text-sm font-medium">{text}</span>
@@ -558,11 +670,16 @@ export function QuizFlow() {
                         {submitMut.isPending ? "Submitting…" : "Submit Quiz"}
                       </button>
                       <button
-                        onClick={() => current === total - 1 ? doSubmit() : setCurrent((c) => Math.min(total - 1, c + 1))}
+                        onClick={() =>
+                          current === total - 1
+                            ? doSubmit()
+                            : setCurrent((c) => Math.min(total - 1, c + 1))
+                        }
                         disabled={submitMut.isPending}
                         className="bg-cta-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02] disabled:opacity-50"
                       >
-                        {current === total - 1 ? "Finish" : "Next"} <ArrowRight className="h-4 w-4" />
+                        {current === total - 1 ? "Finish" : "Next"}{" "}
+                        <ArrowRight className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -592,13 +709,17 @@ export function QuizFlow() {
                     key={i}
                     onClick={() => setCurrent(i)}
                     className={`relative flex h-10 items-center justify-center rounded-lg text-xs font-semibold transition-transform hover:scale-110 ${
-                      isCurrent ? "bg-cta-gradient text-white shadow-glow"
-                      : isDone ? "border border-emerald-400/40 bg-emerald-500/15 text-emerald-400"
-                      : "border border-border bg-card/40 text-muted-foreground"
+                      isCurrent
+                        ? "bg-cta-gradient text-white shadow-glow"
+                        : isDone
+                          ? "border border-emerald-400/40 bg-emerald-500/15 text-emerald-400"
+                          : "border border-border bg-card/40 text-muted-foreground"
                     }`}
                   >
                     {i + 1}
-                    {isBookmarked && <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_var(--neon-pink)]" />}
+                    {isBookmarked && (
+                      <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_var(--neon-pink)]" />
+                    )}
                   </button>
                 );
               })}
@@ -641,12 +762,33 @@ export function QuizFlow() {
                         <stop offset="100%" stopColor="oklch(0.72 0.2 235)" />
                       </linearGradient>
                     </defs>
-                    <circle cx="60" cy="60" r="54" stroke="currentColor" strokeWidth="10" fill="none" className="text-muted/40" />
-                    <circle cx="60" cy="60" r="54" stroke="url(#qres)" strokeWidth="10" fill="none" strokeLinecap="round" strokeDasharray="339" strokeDashoffset={339 - (339 * result.score) / 100} style={{ transition: "stroke-dashoffset 1.2s ease-out" }} />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="54"
+                      stroke="currentColor"
+                      strokeWidth="10"
+                      fill="none"
+                      className="text-muted/40"
+                    />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="54"
+                      stroke="url(#qres)"
+                      strokeWidth="10"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeDasharray="339"
+                      strokeDashoffset={339 - (339 * result.score) / 100}
+                      style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
+                    />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <p className="font-display text-3xl font-bold text-gradient">{result.score}%</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Score</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Score
+                    </p>
                   </div>
                 </div>
 
@@ -657,10 +799,18 @@ export function QuizFlow() {
                 </div>
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <button onClick={() => { setSubmitted(false); }} className="glass inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-transform hover:scale-[1.02]">
+                  <button
+                    onClick={() => {
+                      setSubmitted(false);
+                    }}
+                    className="glass inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-transform hover:scale-[1.02]"
+                  >
                     <Eye className="h-4 w-4" /> Review Answers
                   </button>
-                  <button onClick={resetAll} className="bg-cta-gradient inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]">
+                  <button
+                    onClick={resetAll}
+                    className="bg-cta-gradient inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]"
+                  >
                     <RotateCw className="h-4 w-4" /> Try Again
                   </button>
                 </div>
@@ -677,7 +827,9 @@ function Stat({ label, value, gradient }: { label: string; value: string; gradie
   return (
     <div className="rounded-2xl border border-border bg-card/40 p-3">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`font-display mt-1 text-xl font-bold ${gradient ? "text-gradient" : ""}`}>{value}</p>
+      <p className={`font-display mt-1 text-xl font-bold ${gradient ? "text-gradient" : ""}`}>
+        {value}
+      </p>
     </div>
   );
 }

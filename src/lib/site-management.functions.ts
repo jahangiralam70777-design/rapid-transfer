@@ -30,59 +30,65 @@ const jsonSchema: z.ZodType<unknown> = z.lazy(() =>
   ]),
 );
 
-const sectionKeySchema = z.string().min(1).max(64).regex(/^[a-z0-9_-]+$/);
-const settingKeySchema = z.string().min(1).max(64).regex(/^[a-z0-9_-]+$/);
+const sectionKeySchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9_-]+$/);
+const settingKeySchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9_-]+$/);
 
 // =============================================================
 // PUBLIC READS — used by landing/site to render published content
 // These bypass RLS via supabaseAdmin but ONLY return *published* columns.
 // =============================================================
 
-export const publicGetHomepageContent = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const supabaseAdmin = await getAdmin();
-    try {
-      // Use the server-only admin client (bypasses RLS, no localStorage/window
-      // access). The previous implementation dynamically imported the BROWSER
-      // client which intermittently 500'd on the Worker SSR cold-start because
-      // its auth/realtime init touches browser globals.
-      const { data, error } = await supabaseAdmin
-        .from("homepage_sections")
-        .select("section_key,position,visible,published_content,published_at")
-        .eq("visible", true)
-        .order("position", { ascending: true });
-      if (error) throw new Error(error.message);
-      return {
-        sections: (data ?? []).map((s: any) => ({
-          key: s.section_key,
-          position: s.position,
-          content: s.published_content ?? {},
-          publishedAt: s.published_at,
-        })),
-      };
-    } catch (e) {
-      // Public landing content must never blank the page on a transient read error.
-      console.error("publicGetHomepageContent failed:", e);
-      return { sections: [] as Array<Record<string, unknown>> };
-    }
-  });
+export const publicGetHomepageContent = createServerFn({ method: "GET" }).handler(async () => {
+  const supabaseAdmin = await getAdmin();
+  try {
+    // Use the server-only admin client (bypasses RLS, no localStorage/window
+    // access). The previous implementation dynamically imported the BROWSER
+    // client which intermittently 500'd on the Worker SSR cold-start because
+    // its auth/realtime init touches browser globals.
+    const { data, error } = await supabaseAdmin
+      .from("homepage_sections")
+      .select("section_key,position,visible,published_content,published_at")
+      .eq("visible", true)
+      .order("position", { ascending: true });
+    if (error) throw new Error(error.message);
+    return {
+      sections: (data ?? []).map((s: any) => ({
+        key: s.section_key,
+        position: s.position,
+        content: s.published_content ?? {},
+        publishedAt: s.published_at,
+      })),
+    };
+  } catch (e) {
+    // Public landing content must never blank the page on a transient read error.
+    console.error("publicGetHomepageContent failed:", e);
+    return { sections: [] as Array<Record<string, unknown>> };
+  }
+});
 
-export const publicGetSiteSettings = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const supabaseAdmin = await getAdmin();
-    try {
-      const { data, error } = await supabaseAdmin
-        .from("site_settings")
-        .select("key,published_value,published_at");
-      if (error) throw new Error(error.message);
-      const map: Record<string, any> = {};
-      for (const row of data ?? []) map[row.key] = row.published_value ?? {};
-      return { settings: map };
-    } catch (e) {
-      console.error("publicGetSiteSettings failed:", e);
-      return { settings: {} as Record<string, any> };
-    }
-  });
+export const publicGetSiteSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const supabaseAdmin = await getAdmin();
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("site_settings")
+      .select("key,published_value,published_at");
+    if (error) throw new Error(error.message);
+    const map: Record<string, any> = {};
+    for (const row of data ?? []) map[row.key] = row.published_value ?? {};
+    return { settings: map };
+  } catch (e) {
+    console.error("publicGetSiteSettings failed:", e);
+    return { settings: {} as Record<string, any> };
+  }
+});
 
 // =============================================================
 // ADMIN — SECTIONS
@@ -91,7 +97,7 @@ export const publicGetSiteSettings = createServerFn({ method: "GET" })
 export const adminListSections = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data, error } = await (context.supabase as any)
       .from("homepage_sections")
       .select(
@@ -109,11 +115,9 @@ const updateDraftInput = z.object({
 
 export const adminUpdateSectionDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof updateDraftInput>) =>
-    updateDraftInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof updateDraftInput>) => updateDraftInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { error } = await (context.supabase as any)
       .from("homepage_sections")
       .update({
@@ -132,11 +136,9 @@ const publishSectionInput = z.object({
 
 export const adminPublishSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof publishSectionInput>) =>
-    publishSectionInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof publishSectionInput>) => publishSectionInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
 
     // Read draft
     const { data: row, error: readErr } = await (context.supabase as any)
@@ -160,19 +162,17 @@ export const adminPublishSection = createServerFn({ method: "POST" })
     if (updErr) throw new Error(updErr.message);
 
     // Snapshot
-    const { error: verErr } = await (context.supabase as any)
-      .from("content_versions")
-      .insert({
-        target_kind: "section",
-        target_key: data.sectionKey,
-        snapshot: {
-          content: row.draft_content,
-          position: row.position,
-          visible: row.visible,
-        },
-        label: data.label ?? null,
-        created_by: context.userId,
-      });
+    const { error: verErr } = await (context.supabase as any).from("content_versions").insert({
+      target_kind: "section",
+      target_key: data.sectionKey,
+      snapshot: {
+        content: row.draft_content,
+        position: row.position,
+        visible: row.visible,
+      },
+      label: data.label ?? null,
+      created_by: context.userId,
+    });
     if (verErr) throw new Error(verErr.message);
 
     return { ok: true as const, publishedAt: now };
@@ -185,11 +185,9 @@ const toggleVisibilityInput = z.object({
 
 export const adminToggleSectionVisibility = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof toggleVisibilityInput>) =>
-    toggleVisibilityInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof toggleVisibilityInput>) => toggleVisibilityInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { error } = await (context.supabase as any)
       .from("homepage_sections")
       .update({ visible: data.visible, updated_by: context.userId })
@@ -209,7 +207,7 @@ export const adminReorderSections = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.infer<typeof reorderInput>) => reorderInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     // Sequential updates — list is small
     for (const item of data.order) {
       const { error } = await (context.supabase as any)
@@ -228,7 +226,7 @@ export const adminReorderSections = createServerFn({ method: "POST" })
 export const adminListSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data, error } = await (context.supabase as any)
       .from("site_settings")
       .select("key,published_value,draft_value,updated_at,published_at");
@@ -243,22 +241,18 @@ const updateSettingInput = z.object({
 
 export const adminUpdateSettingDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof updateSettingInput>) =>
-    updateSettingInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof updateSettingInput>) => updateSettingInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     // Upsert so admin can introduce new keys safely
-    const { error } = await (context.supabase as any)
-      .from("site_settings")
-      .upsert(
-        {
-          key: data.key,
-          draft_value: data.draftValue as object,
-          updated_by: context.userId,
-        },
-        { onConflict: "key" },
-      );
+    const { error } = await (context.supabase as any).from("site_settings").upsert(
+      {
+        key: data.key,
+        draft_value: data.draftValue as object,
+        updated_by: context.userId,
+      },
+      { onConflict: "key" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -270,11 +264,9 @@ const publishSettingInput = z.object({
 
 export const adminPublishSetting = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof publishSettingInput>) =>
-    publishSettingInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof publishSettingInput>) => publishSettingInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: row, error: readErr } = await (context.supabase as any)
       .from("site_settings")
       .select("key,draft_value")
@@ -293,15 +285,13 @@ export const adminPublishSetting = createServerFn({ method: "POST" })
       .eq("key", data.key);
     if (updErr) throw new Error(updErr.message);
 
-    const { error: verErr } = await (context.supabase as any)
-      .from("content_versions")
-      .insert({
-        target_kind: "setting",
-        target_key: data.key,
-        snapshot: { value: row.draft_value },
-        label: data.label ?? null,
-        created_by: context.userId,
-      });
+    const { error: verErr } = await (context.supabase as any).from("content_versions").insert({
+      target_kind: "setting",
+      target_key: data.key,
+      snapshot: { value: row.draft_value },
+      label: data.label ?? null,
+      created_by: context.userId,
+    });
     if (verErr) throw new Error(verErr.message);
     return { ok: true as const, publishedAt: now };
   });
@@ -318,11 +308,9 @@ const listVersionsInput = z.object({
 
 export const adminListVersions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof listVersionsInput>) =>
-    listVersionsInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof listVersionsInput>) => listVersionsInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: rows, error } = await (context.supabase as any)
       .from("content_versions")
       .select("id,target_kind,target_key,snapshot,label,created_by,created_at")
@@ -339,11 +327,9 @@ const restoreVersionInput = z.object({ versionId: z.string().uuid() });
 // Restore writes into DRAFT, never directly publishes — admin must publish.
 export const adminRestoreVersionToDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof restoreVersionInput>) =>
-    restoreVersionInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof restoreVersionInput>) => restoreVersionInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: ver, error: readErr } = await (context.supabase as any)
       .from("content_versions")
       .select("target_kind,target_key,snapshot")
@@ -390,12 +376,10 @@ const listMediaInput = z.object({
 
 export const adminListMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof listMediaInput>) =>
-    listMediaInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof listMediaInput>) => listMediaInput.parse(i))
   .handler(async ({ data, context }) => {
     const supabaseAdmin = await getAdmin();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
     let q = (context.supabase as any)
@@ -413,33 +397,37 @@ export const adminListMedia = createServerFn({ method: "POST" })
 
     // Compute public URL for each
     const items = (rows ?? []).map((r: any) => {
-      const { data: pub } = (supabaseAdmin as any).storage
-        .from(r.bucket)
-        .getPublicUrl(r.path);
+      const { data: pub } = (supabaseAdmin as any).storage.from(r.bucket).getPublicUrl(r.path);
       return { ...r, publicUrl: pub.publicUrl };
     });
     return { items, total: count ?? 0, page: data.page, pageSize: data.pageSize };
   });
 
 const createUploadInput = z.object({
-  fileName: z.string().min(1).max(200).regex(/^[a-zA-Z0-9._-]+$/),
+  fileName: z
+    .string()
+    .min(1)
+    .max(200)
+    .regex(/^[a-zA-Z0-9._-]+$/),
   mimeType: z
     .string()
     .min(1)
     .max(120)
     .regex(/^(image|video|audio|application)\/[a-zA-Z0-9.+_-]+$/),
-  sizeBytes: z.number().int().min(1).max(20 * 1024 * 1024), // 20MB cap
+  sizeBytes: z
+    .number()
+    .int()
+    .min(1)
+    .max(20 * 1024 * 1024), // 20MB cap
 });
 
 // Returns a SIGNED upload URL — client uploads directly, then calls finalize.
 export const adminCreateMediaUploadUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof createUploadInput>) =>
-    createUploadInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof createUploadInput>) => createUploadInput.parse(i))
   .handler(async ({ data, context }) => {
     const supabaseAdmin = await getAdmin();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const ext = data.fileName.includes(".")
       ? data.fileName.slice(data.fileName.lastIndexOf("."))
       : "";
@@ -469,7 +457,11 @@ const finalizeMediaInput = z.object({
   path: z.string().min(1).max(300),
   fileName: z.string().min(1).max(200),
   mimeType: z.string().min(1).max(120),
-  sizeBytes: z.number().int().min(0).max(40 * 1024 * 1024),
+  sizeBytes: z
+    .number()
+    .int()
+    .min(0)
+    .max(40 * 1024 * 1024),
   width: z.number().int().min(0).max(20000).optional(),
   height: z.number().int().min(0).max(20000).optional(),
   altText: z.string().trim().max(500).optional(),
@@ -478,12 +470,10 @@ const finalizeMediaInput = z.object({
 
 export const adminFinalizeMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof finalizeMediaInput>) =>
-    finalizeMediaInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof finalizeMediaInput>) => finalizeMediaInput.parse(i))
   .handler(async ({ data, context }) => {
     const supabaseAdmin = await getAdmin();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: row, error } = await (context.supabase as any)
       .from("media_assets")
       .insert({
@@ -502,9 +492,7 @@ export const adminFinalizeMedia = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const { data: pub } = (supabaseAdmin as any).storage
-      .from(row.bucket)
-      .getPublicUrl(row.path);
+    const { data: pub } = (supabaseAdmin as any).storage.from(row.bucket).getPublicUrl(row.path);
     return { id: row.id, publicUrl: pub.publicUrl, path: row.path };
   });
 
@@ -516,11 +504,9 @@ const updateMediaMetaInput = z.object({
 
 export const adminUpdateMediaMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof updateMediaMetaInput>) =>
-    updateMediaMetaInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof updateMediaMetaInput>) => updateMediaMetaInput.parse(i))
   .handler(async ({ data, context }) => {
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const patch: Record<string, any> = {};
     if (data.altText !== undefined) patch.alt_text = data.altText;
     if (data.tags !== undefined) patch.tags = data.tags;
@@ -536,12 +522,10 @@ const deleteMediaInput = z.object({ id: z.string().uuid() });
 
 export const adminDeleteMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof deleteMediaInput>) =>
-    deleteMediaInput.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof deleteMediaInput>) => deleteMediaInput.parse(i))
   .handler(async ({ data, context }) => {
     const supabaseAdmin = await getAdmin();
-    await assertAdmin((context.supabase as any), context.userId);
+    await assertAdmin(context.supabase as any, context.userId);
     const { data: row, error: readErr } = await (context.supabase as any)
       .from("media_assets")
       .select("bucket,path")

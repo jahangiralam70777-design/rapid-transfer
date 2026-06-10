@@ -21,9 +21,9 @@ import type {
 } from "@/lib/editor/types";
 
 const uid = () =>
-  (typeof crypto !== "undefined" && "randomUUID" in crypto
+  typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2) + Date.now().toString(36));
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 function defaultState(pageId: string): PageState {
   const now = Date.now();
@@ -71,9 +71,7 @@ function defaultState(pageId: string): PageState {
         type: "footer",
         name: "Footer",
         visible: true,
-        elements: [
-          { id: uid(), type: "text", content: "© Your company", styles: {} },
-        ],
+        elements: [{ id: uid(), type: "text", content: "© Your company", styles: {} }],
       },
     ],
     meta: { createdAt: now, updatedAt: now },
@@ -204,7 +202,10 @@ interface EditorEngineState {
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-function scheduleAutoSave(get: () => EditorEngineState, set: (p: Partial<EditorEngineState>) => void) {
+function scheduleAutoSave(
+  get: () => EditorEngineState,
+  set: (p: Partial<EditorEngineState>) => void,
+) {
   if (saveTimer) clearTimeout(saveTimer);
   set({ saveStatus: "dirty" });
   saveTimer = setTimeout(() => {
@@ -278,12 +279,7 @@ export const useEditorEngine = create<EditorEngineState>((set, get) => ({
   dispatch(action, label) {
     const prev = get().state;
     const next = applyAction(prev, action);
-    const audit = pushAudit(
-      get().pageId,
-      label ?? action.kind,
-      { kind: action.kind },
-      get().audit,
-    );
+    const audit = pushAudit(get().pageId, label ?? action.kind, { kind: action.kind }, get().audit);
     set({
       state: next,
       undoStack: pushCapped(get().undoStack, action, MAX_UNDO),
@@ -349,12 +345,7 @@ export const useEditorEngine = create<EditorEngineState>((set, get) => ({
       versionId: uid(),
       meta: { ...snap.state.meta, updatedAt: Date.now() },
     };
-    const audit = pushAudit(
-      get().pageId,
-      "snapshot_restored",
-      { from: versionId },
-      get().audit,
-    );
+    const audit = pushAudit(get().pageId, "snapshot_restored", { from: versionId }, get().audit);
     set({
       state: restored,
       undoStack: [],
@@ -385,10 +376,7 @@ export const useEditorEngine = create<EditorEngineState>((set, get) => ({
 }));
 
 // Helpers exported for components.
-export function makeElement(
-  type: EditorElement["type"],
-  content: unknown = "",
-): EditorElement {
+export function makeElement(type: EditorElement["type"], content: unknown = ""): EditorElement {
   return { id: uid(), type, content, styles: {} };
 }
 

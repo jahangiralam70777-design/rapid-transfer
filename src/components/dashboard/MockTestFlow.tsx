@@ -63,7 +63,9 @@ function cap(s: string) {
 }
 
 function fmtSeconds(s: number) {
-  const mm = Math.floor(s / 60).toString().padStart(2, "0");
+  const mm = Math.floor(s / 60)
+    .toString()
+    .padStart(2, "0");
   const ss = (s % 60).toString().padStart(2, "0");
   return `${mm}:${ss}`;
 }
@@ -85,7 +87,12 @@ function fmtCountdown(target: string | null): string | null {
 export function MockTestFlow() {
   const [stage, setStage] = useState<Stage>("browse");
   const [selected, setSelected] = useState<MockRow | null>(null);
-  const [lastAttempt, setLastAttempt] = useState<{ correct: number; total: number; score: number; attemptId: string } | null>(null);
+  const [lastAttempt, setLastAttempt] = useState<{
+    correct: number;
+    total: number;
+    score: number;
+    attemptId: string;
+  } | null>(null);
 
   return (
     <div className="space-y-6">
@@ -147,7 +154,9 @@ function BrowseStage({ onStart }: { onStart: (m: MockRow) => void }) {
         qc.invalidateQueries({ queryKey: ["my-mock-attempts"] });
       })
       .subscribe();
-    return () => { void supabase.removeChannel(ch); };
+    return () => {
+      void supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const levelsQ = useLevels();
@@ -185,7 +194,8 @@ function BrowseStage({ onStart }: { onStart: (m: MockRow) => void }) {
     const now = Date.now();
     return all
       .filter((m) => {
-        if (m.starts_at && new Date(m.starts_at).getTime() > now + 1000 * 60 * 60 * 24 * 365) return false;
+        if (m.starts_at && new Date(m.starts_at).getTime() > now + 1000 * 60 * 60 * 24 * 365)
+          return false;
         if (scope === "level") return m.subject_id == null;
         if (scope === "subject") return m.subject_id != null && m.chapter_id == null;
         if (scope === "chapter") return m.chapter_id != null;
@@ -256,7 +266,7 @@ function BrowseStage({ onStart }: { onStart: (m: MockRow) => void }) {
               }}
               options={[
                 { value: "all", label: "All levels" },
-                ...((levelsQ.data ?? []).map((l) => ({ value: l.code, label: l.name }))),
+                ...(levelsQ.data ?? []).map((l) => ({ value: l.code, label: l.name })),
               ]}
             />
             <Select
@@ -267,7 +277,7 @@ function BrowseStage({ onStart }: { onStart: (m: MockRow) => void }) {
               }}
               options={[
                 { value: "all", label: "All subjects" },
-                ...((subjectsQ.data ?? []).map((s) => ({ value: s.id, label: s.name }))),
+                ...(subjectsQ.data ?? []).map((s) => ({ value: s.id, label: s.name })),
               ]}
             />
             <Select
@@ -276,18 +286,20 @@ function BrowseStage({ onStart }: { onStart: (m: MockRow) => void }) {
               disabled={subjectId === "all"}
               options={[
                 { value: "all", label: "All chapters" },
-                ...((chaptersQ.data ?? []).map((c) => ({ value: c.id, label: c.name }))),
+                ...(chaptersQ.data ?? []).map((c) => ({ value: c.id, label: c.name })),
               ]}
             />
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          {([
-            ["all", "All"],
-            ["level", "Level-wide"],
-            ["subject", "Full Subject"],
-            ["chapter", "Chapter-wise"],
-          ] as [ScopeFilter, string][]).map(([k, label]) => {
+          {(
+            [
+              ["all", "All"],
+              ["level", "Level-wide"],
+              ["subject", "Full Subject"],
+              ["chapter", "Chapter-wise"],
+            ] as [ScopeFilter, string][]
+          ).map(([k, label]) => {
             const active = scope === k;
             return (
               <button
@@ -373,15 +385,7 @@ function Stat({ label, value, icon: Icon }: { label: string; value: string; icon
   );
 }
 
-function MockCard({
-  mock,
-  delay,
-  onStart,
-}: {
-  mock: MockRow;
-  delay: number;
-  onStart: () => void;
-}) {
+function MockCard({ mock, delay, onStart }: { mock: MockRow; delay: number; onStart: () => void }) {
   const getMyAttemptsFn = useServerFn(getMyMockAttempts);
   const { data: attempts } = useQuery({
     queryKey: ["my-mock-attempts", mock.id],
@@ -396,21 +400,24 @@ function MockCard({
   const endsIn = !notStarted && mock.ends_at ? fmtCountdown(mock.ends_at) : null;
 
   const inProgress = (attempts ?? []).find((a) => a.status === "in_progress");
-  const best = (attempts ?? []).filter((a) => a.status === "completed").reduce<number | null>(
-    (acc, a) => (acc == null || a.score > acc ? a.score : acc),
-    null,
-  );
+  const best = (attempts ?? [])
+    .filter((a) => a.status === "completed")
+    .reduce<number | null>((acc, a) => (acc == null || a.score > acc ? a.score : acc), null);
   const attemptCount = (attempts ?? []).filter((a) => a.status === "completed").length;
 
   const diffColor =
     mock.difficulty === "easy"
       ? "text-emerald-400 bg-emerald-400/10"
       : mock.difficulty === "hard"
-      ? "text-rose-400 bg-rose-400/10"
-      : "text-amber-400 bg-amber-400/10";
+        ? "text-rose-400 bg-rose-400/10"
+        : "text-amber-400 bg-amber-400/10";
 
   const scopeLabel =
-    mock.subject_id == null ? "Level-wide" : mock.chapter_id == null ? "Full Subject" : "Chapter-wise";
+    mock.subject_id == null
+      ? "Level-wide"
+      : mock.chapter_id == null
+        ? "Full Subject"
+        : "Chapter-wise";
 
   const subjectName = mock.subjects?.name ?? "General";
   const chapterName = mock.chapters?.name;
@@ -430,10 +437,14 @@ function MockCard({
           <Trophy className="h-5 w-5" />
         </div>
 
-        <h3 className="font-display mt-3 line-clamp-2 text-lg font-bold tracking-tight">{mock.title}</h3>
+        <h3 className="font-display mt-3 line-clamp-2 text-lg font-bold tracking-tight">
+          {mock.title}
+        </h3>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <span className="rounded-full bg-muted/60 px-2 py-0.5">{subjectName}</span>
-          {chapterName && <span className="rounded-full bg-muted/60 px-2 py-0.5">{chapterName}</span>}
+          {chapterName && (
+            <span className="rounded-full bg-muted/60 px-2 py-0.5">{chapterName}</span>
+          )}
           <span className="rounded-full bg-muted/60 px-2 py-0.5">{scopeLabel}</span>
           <span className={`rounded-full px-2 py-0.5 font-semibold ${diffColor}`}>
             {cap(mock.difficulty)}
@@ -552,7 +563,7 @@ function ExamStage({
     queryKey: ["mock-quiz", mock.id],
     queryFn: () => getQuizFn({ data: { quizId: mock.id } }),
   });
-  const questions = ((quizQ.data?.questions ?? []) as unknown) as QuizQ[];
+  const questions = (quizQ.data?.questions ?? []) as unknown as QuizQ[];
 
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -656,12 +667,14 @@ function ExamStage({
       return n;
     });
 
-  const options: [string, "A" | "B" | "C" | "D"][] = ([
-    [sanitizeOptionText(q.option_a), "A"],
-    [sanitizeOptionText(q.option_b), "B"],
-    [sanitizeOptionText(q.option_c), "C"],
-    [sanitizeOptionText(q.option_d), "D"],
-  ] as [string, "A" | "B" | "C" | "D"][]).filter(([t]) => t && t.length > 0);
+  const options: [string, "A" | "B" | "C" | "D"][] = (
+    [
+      [sanitizeOptionText(q.option_a), "A"],
+      [sanitizeOptionText(q.option_b), "B"],
+      [sanitizeOptionText(q.option_c), "C"],
+      [sanitizeOptionText(q.option_d), "D"],
+    ] as [string, "A" | "B" | "C" | "D"][]
+  ).filter(([t]) => t && t.length > 0);
 
   return (
     <>
@@ -801,8 +814,8 @@ function ExamStage({
                       isActive
                         ? "bg-cta-gradient text-white shadow-glow"
                         : isDone
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-muted/60 text-muted-foreground hover:text-foreground"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-muted/60 text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {i + 1}
@@ -866,8 +879,7 @@ function ResultStage({
   const radius = 70;
   const circ = 2 * Math.PI * radius;
   const dash = (result.score / 100) * circ;
-  const myRank =
-    (lbQ.data ?? []).findIndex((r) => r.attempt_id === result.attemptId) + 1;
+  const myRank = (lbQ.data ?? []).findIndex((r) => r.attempt_id === result.attemptId) + 1;
 
   return (
     <>
@@ -881,7 +893,14 @@ function ResultStage({
                   <stop offset="100%" stopColor="var(--neon-blue)" />
                 </linearGradient>
               </defs>
-              <circle cx="90" cy="90" r={radius} stroke="hsl(var(--muted))" strokeWidth="14" fill="none" />
+              <circle
+                cx="90"
+                cy="90"
+                r={radius}
+                stroke="hsl(var(--muted))"
+                strokeWidth="14"
+                fill="none"
+              />
               <circle
                 cx="90"
                 cy="90"
@@ -896,7 +915,9 @@ function ResultStage({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div className="font-display text-4xl font-bold text-gradient">{result.score}%</div>
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Score</div>
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                Score
+              </div>
             </div>
           </div>
 
@@ -918,10 +939,25 @@ function ResultStage({
             </p>
 
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatCard icon={CheckCircle2} label="Correct" value={result.correct} color="text-emerald-400" />
+              <StatCard
+                icon={CheckCircle2}
+                label="Correct"
+                value={result.correct}
+                color="text-emerald-400"
+              />
               <StatCard icon={XCircle} label="Wrong" value={wrong} color="text-rose-400" />
-              <StatCard icon={Target} label="Accuracy" value={`${accuracy}%`} color="text-[var(--neon-blue)]" />
-              <StatCard icon={TrendingUp} label="Total" value={result.total} color="text-[var(--neon-purple)]" />
+              <StatCard
+                icon={Target}
+                label="Accuracy"
+                value={`${accuracy}%`}
+                color="text-[var(--neon-blue)]"
+              />
+              <StatCard
+                icon={TrendingUp}
+                label="Total"
+                value={result.total}
+                color="text-[var(--neon-purple)]"
+              />
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -969,18 +1005,16 @@ function ResultStage({
                     i === 0
                       ? "bg-amber-400/20 text-amber-400"
                       : i === 1
-                      ? "bg-zinc-400/20 text-zinc-300"
-                      : i === 2
-                      ? "bg-orange-500/20 text-orange-400"
-                      : "bg-muted text-muted-foreground"
+                        ? "bg-zinc-400/20 text-zinc-300"
+                        : i === 2
+                          ? "bg-orange-500/20 text-orange-400"
+                          : "bg-muted text-muted-foreground"
                   }`}
                 >
                   #{i + 1}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold">
-                    {u.is_you ? "You" : u.name}
-                  </div>
+                  <div className="text-sm font-semibold">{u.is_you ? "You" : u.name}</div>
                   <div className="text-[11px] text-muted-foreground">
                     Time {fmtSeconds(u.duration_seconds)}
                   </div>

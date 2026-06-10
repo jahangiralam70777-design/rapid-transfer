@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertPermission } from "@/lib/admin-permissions";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RecentUpload = {
   id: string;
   title: string;
@@ -61,21 +60,58 @@ export const adminDashboardSnapshot = createServerFn({ method: "GET" })
     ] = await Promise.all([
       sb.from("profiles").select("id", { count: "exact", head: true }).eq("status", "active"),
       sb.from("profiles").select("id", { count: "exact", head: true }),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("status", "in_progress"),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "in_progress"),
       sb.from("mcqs").select("id", { count: "exact", head: true }).eq("status", "draft"),
       sb.from("short_notes").select("id", { count: "exact", head: true }).eq("status", "draft"),
       sb.from("flash_cards").select("id", { count: "exact", head: true }).eq("status", "draft"),
       sb.from("video_classes").select("id", { count: "exact", head: true }).eq("status", "draft"),
-      sb.from("question_bank_resources").select("id", { count: "exact", head: true }).eq("status", "draft"),
+      sb
+        .from("question_bank_resources")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "draft"),
       sb.from("quizzes").select("id", { count: "exact", head: true }).eq("status", "draft"),
-      sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
-      sb.from("mcqs").select("id,question,created_at,status").order("created_at", { ascending: false }).limit(5),
-      sb.from("short_notes").select("id,title,created_at,status").order("created_at", { ascending: false }).limit(5),
-      sb.from("flash_cards").select("id,front,created_at,status").order("created_at", { ascending: false }).limit(5),
-      sb.from("video_classes").select("id,title,created_at,status").order("created_at", { ascending: false }).limit(5),
-      sb.from("question_bank_resources").select("id,title,created_at,status").order("created_at", { ascending: false }).limit(5),
-      sb.from("quizzes").select("id,title,created_at,status").order("created_at", { ascending: false }).limit(5),
-      sb.from("notifications").select("id,title,status,audience,created_at,sent_at").order("created_at", { ascending: false }).limit(8),
+      sb
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "scheduled"),
+      sb
+        .from("mcqs")
+        .select("id,question,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      sb
+        .from("short_notes")
+        .select("id,title,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      sb
+        .from("flash_cards")
+        .select("id,front,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      sb
+        .from("video_classes")
+        .select("id,title,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      sb
+        .from("question_bank_resources")
+        .select("id,title,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      sb
+        .from("quizzes")
+        .select("id,title,created_at,status")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      sb
+        .from("notifications")
+        .select("id,title,status,audience,created_at,sent_at")
+        .order("created_at", { ascending: false })
+        .limit(8),
     ]);
 
     const pendingDrafts =
@@ -88,17 +124,53 @@ export const adminDashboardSnapshot = createServerFn({ method: "GET" })
 
     const ups: RecentUpload[] = [
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(recentMcqs.data ?? []).map((r: any) => ({ id: r.id, title: r.question?.slice(0, 80) ?? "MCQ", kind: "mcq" as const, created_at: r.created_at, status: r.status })),
+      ...(recentMcqs.data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.question?.slice(0, 80) ?? "MCQ",
+        kind: "mcq" as const,
+        created_at: r.created_at,
+        status: r.status,
+      })),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(recentNotes.data ?? []).map((r: any) => ({ id: r.id, title: r.title, kind: "note" as const, created_at: r.created_at, status: r.status })),
+      ...(recentNotes.data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        kind: "note" as const,
+        created_at: r.created_at,
+        status: r.status,
+      })),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(recentFlash.data ?? []).map((r: any) => ({ id: r.id, title: r.front?.slice(0, 80) ?? "Flash card", kind: "flash" as const, created_at: r.created_at, status: r.status })),
+      ...(recentFlash.data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.front?.slice(0, 80) ?? "Flash card",
+        kind: "flash" as const,
+        created_at: r.created_at,
+        status: r.status,
+      })),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(recentVideos.data ?? []).map((r: any) => ({ id: r.id, title: r.title, kind: "video" as const, created_at: r.created_at, status: r.status })),
+      ...(recentVideos.data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        kind: "video" as const,
+        created_at: r.created_at,
+        status: r.status,
+      })),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(recentQbank.data ?? []).map((r: any) => ({ id: r.id, title: r.title, kind: "qbank" as const, created_at: r.created_at, status: r.status })),
+      ...(recentQbank.data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        kind: "qbank" as const,
+        created_at: r.created_at,
+        status: r.status,
+      })),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(recentQuiz.data ?? []).map((r: any) => ({ id: r.id, title: r.title, kind: "quiz" as const, created_at: r.created_at, status: r.status })),
+      ...(recentQuiz.data ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        kind: "quiz" as const,
+        created_at: r.created_at,
+        status: r.status,
+      })),
     ]
       .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
       .slice(0, 10);
@@ -134,7 +206,13 @@ export type ModuleStat = {
 };
 
 export type SeriesPoint = { date: string; value: number };
-export type ModuleUsagePoint = { date: string; mcq_practice: number; quiz: number; mock_test: number; flash_cards: number };
+export type ModuleUsagePoint = {
+  date: string;
+  mcq_practice: number;
+  quiz: number;
+  mock_test: number;
+  flash_cards: number;
+};
 
 export type AdminControlCenter = {
   users: {
@@ -160,9 +238,24 @@ export type AdminControlCenter = {
   growth_series: SeriesPoint[];
   login_series: SeriesPoint[];
   module_usage_series: ModuleUsagePoint[];
-  top_users: { id: string; display_name: string | null; total_login_count: number; total_usage_seconds: number; last_login_at: string | null }[];
+  top_users: {
+    id: string;
+    display_name: string | null;
+    total_login_count: number;
+    total_usage_seconds: number;
+    last_login_at: string | null;
+  }[];
   top_features: { module: string; event_count: number; unique_users: number }[];
-  recent_activity: { id: string; event_type: string; element_label: string | null; page_path: string | null; module: string | null; user_id: string | null; user_name: string | null; created_at: string }[];
+  recent_activity: {
+    id: string;
+    event_type: string;
+    element_label: string | null;
+    page_path: string | null;
+    module: string | null;
+    user_id: string | null;
+    user_name: string | null;
+    created_at: string;
+  }[];
 };
 
 function bucketByDay(rows: { ts: string }[], days: number): SeriesPoint[] {
@@ -219,12 +312,24 @@ export const adminControlCenter = createServerFn({ method: "GET" })
       sb.from("module_visibility").select("key,label,hidden"),
       sb.from("exam_attempts").select("kind, chapter_id, completed_at, created_at, user_id"),
       sb.from("exam_attempts").select("kind, user_id, created_at").gte("created_at", dayAgo),
-      sb.from("activity_events").select("user_id, created_at").eq("module", "flash_cards").gte("created_at", dayAgo),
+      sb
+        .from("activity_events")
+        .select("user_id, created_at")
+        .eq("module", "flash_cards")
+        .gte("created_at", dayAgo),
       sb.from("activity_events").select("created_at").eq("module", "flash_cards"),
       sb.from("profiles").select("created_at").gte("created_at", monthAgo),
       sb.from("user_login_events").select("login_at").gte("login_at", monthAgo),
-      sb.from("activity_events").select("module, created_at").gte("created_at", weekAgo).not("module", "is", null),
-      sb.from("activity_events").select("id, event_type, element_label, page_path, module, user_id, created_at").order("created_at", { ascending: false }).limit(15),
+      sb
+        .from("activity_events")
+        .select("module, created_at")
+        .gte("created_at", weekAgo)
+        .not("module", "is", null),
+      sb
+        .from("activity_events")
+        .select("id, event_type, element_label, page_path, module, user_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(15),
     ]);
 
     const ua = (userAnalyticsRpc.data ?? {}) as Record<string, number>;
@@ -234,10 +339,12 @@ export const adminControlCenter = createServerFn({ method: "GET" })
     // exam_attempts.kind values are 'mcq_practice' | 'quiz' | 'mock' | 'custom_exam';
     // module-visibility key is 'mock_test'. Map between them at query time.
     const kindForModule = (mod: string) => (mod === "mock_test" ? "mock" : mod);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const attemptsByKind = (kind: string) => (attemptsAll.data ?? []).filter((a: any) => a.kind === kindForModule(kind));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const attempts24hByKind = (kind: string) => (attempts24h.data ?? []).filter((a: any) => a.kind === kindForModule(kind));
+
+    const attemptsByKind = (kind: string) =>
+      (attemptsAll.data ?? []).filter((a: any) => a.kind === kindForModule(kind));
+
+    const attempts24hByKind = (kind: string) =>
+      (attempts24h.data ?? []).filter((a: any) => a.kind === kindForModule(kind));
 
     // Top chapter lookup
     const chapterIds = Array.from(
@@ -264,30 +371,49 @@ export const adminControlCenter = createServerFn({ method: "GET" })
       }
       let topId: string | null = null;
       let max = 0;
-      counts.forEach((v, k) => { if (v > max) { max = v; topId = k; } });
-      return topId ? chapterNames.get(topId) ?? null : null;
+      counts.forEach((v, k) => {
+        if (v > max) {
+          max = v;
+          topId = k;
+        }
+      });
+      return topId ? (chapterNames.get(topId) ?? null) : null;
     };
     const lastUsedFor = (kind: string): string | null => {
       const rows = attemptsByKind(kind);
       if (rows.length === 0) return null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return rows.map((r: any) => r.completed_at ?? r.created_at).sort().slice(-1)[0] ?? null;
+
+      return (
+        rows
+          .map((r: any) => r.completed_at ?? r.created_at)
+          .sort()
+          .slice(-1)[0] ?? null
+      );
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const visMap = new Map<string, { hidden: boolean; label: string }>(((moduleVis.data ?? []) as any[]).map((m) => [m.key, { hidden: m.hidden, label: m.label }]));
+    const visMap = new Map<string, { hidden: boolean; label: string }>(
+      ((moduleVis.data ?? []) as any[]).map((m) => [m.key, { hidden: m.hidden, label: m.label }]),
+    );
 
     const buildModule = (key: ModuleStat["key"], fallbackLabel: string): ModuleStat => {
       const vis = visMap.get(key);
       if (key === "flash_cards") {
-        const last = (flashEventsAll.data ?? []).map((r: { created_at: string }) => r.created_at).sort().slice(-1)[0] ?? null;
+        const last =
+          (flashEventsAll.data ?? [])
+            .map((r: { created_at: string }) => r.created_at)
+            .sort()
+            .slice(-1)[0] ?? null;
         return {
           key,
           label: vis?.label ?? fallbackLabel,
           enabled: !(vis?.hidden ?? false),
           attempts_total: flashEventsAll.data?.length ?? 0,
           attempts_24h: flashEvents24h.data?.length ?? 0,
-          active_users_24h: new Set((flashEvents24h.data ?? []).map((r: { user_id: string | null }) => r.user_id).filter(Boolean)).size,
+          active_users_24h: new Set(
+            (flashEvents24h.data ?? [])
+              .map((r: { user_id: string | null }) => r.user_id)
+              .filter(Boolean),
+          ).size,
           last_used_at: last,
           top_chapter: null,
         };
@@ -298,8 +424,12 @@ export const adminControlCenter = createServerFn({ method: "GET" })
         enabled: !(vis?.hidden ?? false),
         attempts_total: attemptsByKind(key).length,
         attempts_24h: attempts24hByKind(key).length,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        active_users_24h: new Set(attempts24hByKind(key).map((a: any) => a.user_id).filter(Boolean)).size,
+
+        active_users_24h: new Set(
+          attempts24hByKind(key)
+            .map((a: any) => a.user_id)
+            .filter(Boolean),
+        ).size,
         last_used_at: lastUsedFor(key),
         top_chapter: topChapterFor(key),
       };
@@ -349,7 +479,10 @@ export const adminControlCenter = createServerFn({ method: "GET" })
     const userIds = Array.from(new Set(recRows.map((r) => r.user_id).filter(Boolean)));
     let nameMap = new Map<string, string | null>();
     if (userIds.length > 0) {
-      const { data: profs } = await sb.from("profiles").select("id, display_name").in("id", userIds);
+      const { data: profs } = await sb
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", userIds);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       nameMap = new Map((profs ?? []).map((p: any) => [p.id, p.display_name]));
     }
@@ -399,7 +532,7 @@ export const adminControlCenter = createServerFn({ method: "GET" })
         page_path: r.page_path,
         module: r.module,
         user_id: r.user_id,
-        user_name: r.user_id ? nameMap.get(r.user_id) ?? null : null,
+        user_name: r.user_id ? (nameMap.get(r.user_id) ?? null) : null,
         created_at: r.created_at,
       })),
     };
@@ -426,7 +559,12 @@ export type DeviceBreakdown = { name: string; pct: number; count: number };
 export type BrowserBreakdown = { name: string; pct: number; count: number };
 export type SubjectPerf = { id: string; name: string; accuracy: number; attempts: number };
 export type EngagementPoint = { date: string; dau: number };
-export type SystemHealthItem = { key: string; label: string; status: "healthy" | "warning" | "down"; detail: string };
+export type SystemHealthItem = {
+  key: string;
+  label: string;
+  status: "healthy" | "warning" | "down";
+  detail: string;
+};
 
 export type AdminPremiumOverview = {
   kpi: PremiumKpi;
@@ -469,7 +607,10 @@ export type PremiumOverviewInput = {
 export const adminPremiumOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d?: PremiumOverviewInput) => ({
-    period_days: (d?.period_days === 7 || d?.period_days === 90 ? d.period_days : 30) as 7 | 30 | 90,
+    period_days: (d?.period_days === 7 || d?.period_days === 90 ? d.period_days : 30) as
+      | 7
+      | 30
+      | 90,
     participation_scope: (d?.participation_scope === "month" ? "month" : "all") as "all" | "month",
   }))
   .handler(async ({ data, context }): Promise<AdminPremiumOverview> => {
@@ -484,7 +625,9 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
     const thirtyDayAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const fourteenDayAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
     const periodStartIso = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000).toISOString();
-    const prevPeriodStartIso = new Date(now.getTime() - periodDays * 2 * 24 * 60 * 60 * 1000).toISOString();
+    const prevPeriodStartIso = new Date(
+      now.getTime() - periodDays * 2 * 24 * 60 * 60 * 1000,
+    ).toISOString();
     const monthStartIso = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
     const [
@@ -516,35 +659,138 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
       latestEvent,
     ] = await Promise.all([
       sb.from("profiles").select("id", { count: "exact", head: true }).is("deleted_at", null),
-      sb.from("activity_events").select("user_id").gte("created_at", weekAgo).not("user_id", "is", null),
-      sb.from("activity_events").select("user_id").gte("created_at", twoWeekAgo).lt("created_at", weekAgo).not("user_id", "is", null),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("status", "in_progress"),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("status", "in_progress").lt("created_at", dayAgo),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("status", "completed").gte("completed_at", weekAgo),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("status", "completed").gte("completed_at", twoWeekAgo).lt("completed_at", weekAgo),
+      sb
+        .from("activity_events")
+        .select("user_id")
+        .gte("created_at", weekAgo)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("user_id")
+        .gte("created_at", twoWeekAgo)
+        .lt("created_at", weekAgo)
+        .not("user_id", "is", null),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "in_progress"),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "in_progress")
+        .lt("created_at", dayAgo),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "completed")
+        .gte("completed_at", weekAgo),
+      sb
+        .from("exam_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "completed")
+        .gte("completed_at", twoWeekAgo)
+        .lt("completed_at", weekAgo),
       sb.from("mcqs").select("id", { count: "exact", head: true }).eq("status", "published"),
-      sb.from("mcqs").select("id", { count: "exact", head: true }).eq("status", "published").lt("created_at", weekAgo),
-      sb.from("activity_events").select("user_id").gte("created_at", dayAgo).not("user_id", "is", null),
-      sb.from("activity_events").select("user_id").gte("created_at", twoDayAgo).lt("created_at", dayAgo).not("user_id", "is", null),
+      sb
+        .from("mcqs")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .lt("created_at", weekAgo),
+      sb
+        .from("activity_events")
+        .select("user_id")
+        .gte("created_at", dayAgo)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("user_id")
+        .gte("created_at", twoDayAgo)
+        .lt("created_at", dayAgo)
+        .not("user_id", "is", null),
       sb.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
-      sb.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", twoWeekAgo).lt("created_at", weekAgo),
-      sb.from("activity_events").select("created_at, user_id").gte("created_at", periodStartIso).not("user_id", "is", null),
-      sb.from("activity_events").select("created_at, user_id").gte("created_at", prevPeriodStartIso).lt("created_at", periodStartIso).not("user_id", "is", null),
-      sb.from("activity_events").select("device").gte("created_at", thirtyDayAgo).not("device", "is", null),
-      sb.from("activity_events").select("user_agent").gte("created_at", thirtyDayAgo).not("user_agent", "is", null).limit(5000),
-      sb.from("exam_attempts").select("subject_id, correct_count, total_count").eq("status", "completed").not("subject_id", "is", null).gte("created_at", thirtyDayAgo).limit(5000),
+      sb
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", twoWeekAgo)
+        .lt("created_at", weekAgo),
+      sb
+        .from("activity_events")
+        .select("created_at, user_id")
+        .gte("created_at", periodStartIso)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("created_at, user_id")
+        .gte("created_at", prevPeriodStartIso)
+        .lt("created_at", periodStartIso)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("device")
+        .gte("created_at", thirtyDayAgo)
+        .not("device", "is", null),
+      sb
+        .from("activity_events")
+        .select("user_agent")
+        .gte("created_at", thirtyDayAgo)
+        .not("user_agent", "is", null)
+        .limit(5000),
+      sb
+        .from("exam_attempts")
+        .select("subject_id, correct_count, total_count")
+        .eq("status", "completed")
+        .not("subject_id", "is", null)
+        .gte("created_at", thirtyDayAgo)
+        .limit(5000),
       sb.from("subjects").select("id, name, level"),
       data.participation_scope === "month"
-        ? sb.from("exam_attempts").select("user_id", { count: "exact", head: true }).eq("kind", "mock").gte("created_at", monthStartIso)
-        : sb.from("exam_attempts").select("user_id", { count: "exact", head: true }).eq("kind", "mock"),
+        ? sb
+            .from("exam_attempts")
+            .select("user_id", { count: "exact", head: true })
+            .eq("kind", "mock")
+            .gte("created_at", monthStartIso)
+        : sb
+            .from("exam_attempts")
+            .select("user_id", { count: "exact", head: true })
+            .eq("kind", "mock"),
       data.participation_scope === "month"
-        ? sb.from("exam_attempts").select("user_id", { count: "exact", head: true }).eq("kind", "mock").eq("status", "completed").gte("created_at", monthStartIso)
-        : sb.from("exam_attempts").select("user_id", { count: "exact", head: true }).eq("kind", "mock").eq("status", "completed"),
-      sb.from("activity_events").select("created_at, user_id").gte("created_at", fourteenDayAgo).not("user_id", "is", null),
-      sb.from("activity_events").select("user_id").gte("created_at", dayAgo).not("user_id", "is", null),
-      sb.from("activity_events").select("user_id").gte("created_at", twoDayAgo).lt("created_at", dayAgo).not("user_id", "is", null),
-      sb.from("activity_events").select("id", { count: "exact", head: true }).eq("event_type", "api_call").gte("created_at", dayAgo),
-      sb.from("activity_events").select("created_at").order("created_at", { ascending: false }).limit(1),
+        ? sb
+            .from("exam_attempts")
+            .select("user_id", { count: "exact", head: true })
+            .eq("kind", "mock")
+            .eq("status", "completed")
+            .gte("created_at", monthStartIso)
+        : sb
+            .from("exam_attempts")
+            .select("user_id", { count: "exact", head: true })
+            .eq("kind", "mock")
+            .eq("status", "completed"),
+      sb
+        .from("activity_events")
+        .select("created_at, user_id")
+        .gte("created_at", fourteenDayAgo)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("user_id")
+        .gte("created_at", dayAgo)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("user_id")
+        .gte("created_at", twoDayAgo)
+        .lt("created_at", dayAgo)
+        .not("user_id", "is", null),
+      sb
+        .from("activity_events")
+        .select("id", { count: "exact", head: true })
+        .eq("event_type", "api_call")
+        .gte("created_at", dayAgo),
+      sb
+        .from("activity_events")
+        .select("created_at")
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
 
     // ---- KPI calc ----
@@ -562,9 +808,15 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
       live_exams: liveExamsNow.count ?? 0,
       live_exams_delta_pct: pctChange(liveExamsNow.count ?? 0, liveExamsPrev.count ?? 0),
       tests_completed: testsCompleted7d.count ?? 0,
-      tests_completed_delta_pct: pctChange(testsCompleted7d.count ?? 0, testsCompletedPrev7d.count ?? 0),
+      tests_completed_delta_pct: pctChange(
+        testsCompleted7d.count ?? 0,
+        testsCompletedPrev7d.count ?? 0,
+      ),
       questions_in_bank: questionsInBank.count ?? 0,
-      questions_in_bank_delta_pct: pctChange(questionsInBank.count ?? 0, questionsInBankPrev.count ?? 0),
+      questions_in_bank_delta_pct: pctChange(
+        questionsInBank.count ?? 0,
+        questionsInBankPrev.count ?? 0,
+      ),
       active_sessions: sessCurr,
       active_sessions_delta_pct: pctChange(sessCurr, sessPrev),
       new_registrations: newRegs7d.count ?? 0,
@@ -573,16 +825,21 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
 
     // ---- Platform overview (DAU per day, 30d) ----
     const dailyUsers = new Map<string, Set<string>>();
-    for (const r of (platformEvents30d.data ?? []) as { created_at: string; user_id: string | null }[]) {
+    for (const r of (platformEvents30d.data ?? []) as {
+      created_at: string;
+      user_id: string | null;
+    }[]) {
       const key = new Date(r.created_at).toISOString().slice(0, 10);
       if (!r.user_id) continue;
       if (!dailyUsers.has(key)) dailyUsers.set(key, new Set());
       dailyUsers.get(key)!.add(r.user_id);
     }
     const platform_overview: { date: string; value: number }[] = [];
-    const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
     for (let i = periodDays - 1; i >= 0; i--) {
-      const d = new Date(today); d.setUTCDate(d.getUTCDate() - i);
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
       const key = d.toISOString().slice(0, 10);
       platform_overview.push({ date: key, value: dailyUsers.get(key)?.size ?? 0 });
     }
@@ -594,12 +851,23 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
     const devCounts = new Map<string, number>();
     for (const r of (deviceRows.data ?? []) as { device: string | null }[]) {
       const k = (r.device ?? "unknown").toLowerCase();
-      const norm = k === "mobile" ? "Mobile" : k === "desktop" ? "Desktop" : k === "tablet" ? "Tablet" : "Other";
+      const norm =
+        k === "mobile"
+          ? "Mobile"
+          : k === "desktop"
+            ? "Desktop"
+            : k === "tablet"
+              ? "Tablet"
+              : "Other";
       devCounts.set(norm, (devCounts.get(norm) ?? 0) + 1);
     }
     const devTotal = Array.from(devCounts.values()).reduce((s, v) => s + v, 0) || 1;
     const devices: DeviceBreakdown[] = ["Mobile", "Desktop", "Tablet", "Other"]
-      .map((name) => ({ name, count: devCounts.get(name) ?? 0, pct: Math.round(((devCounts.get(name) ?? 0) / devTotal) * 1000) / 10 }))
+      .map((name) => ({
+        name,
+        count: devCounts.get(name) ?? 0,
+        pct: Math.round(((devCounts.get(name) ?? 0) / devTotal) * 1000) / 10,
+      }))
       .filter((d) => d.count > 0);
 
     // ---- Browsers ----
@@ -610,7 +878,11 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
     }
     const brTotal = Array.from(brCounts.values()).reduce((s, v) => s + v, 0) || 1;
     const browsers: BrowserBreakdown[] = ["Chrome", "Safari", "Firefox", "Edge", "Opera", "Other"]
-      .map((name) => ({ name, count: brCounts.get(name) ?? 0, pct: Math.round(((brCounts.get(name) ?? 0) / brTotal) * 1000) / 10 }))
+      .map((name) => ({
+        name,
+        count: brCounts.get(name) ?? 0,
+        pct: Math.round(((brCounts.get(name) ?? 0) / brTotal) * 1000) / 10,
+      }))
       .filter((b) => b.count > 0)
       .slice(0, 5);
 
@@ -618,7 +890,11 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subjs = (subjectsRows.data ?? []) as any[];
     const subjAgg = new Map<string, { correct: number; total: number; attempts: number }>();
-    for (const a of (attemptsForSubjects.data ?? []) as { subject_id: string; correct_count: number | null; total_count: number | null }[]) {
+    for (const a of (attemptsForSubjects.data ?? []) as {
+      subject_id: string;
+      correct_count: number | null;
+      total_count: number | null;
+    }[]) {
       const sid = a.subject_id;
       if (!sid) continue;
       const cur = subjAgg.get(sid) ?? { correct: 0, total: 0, attempts: 0 };
@@ -653,7 +929,8 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
     }
     const series: EngagementPoint[] = [];
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(today); d.setUTCDate(d.getUTCDate() - i);
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
       const key = d.toISOString().slice(0, 10);
       series.push({ date: key, dau: dauMap.get(key)?.size ?? 0 });
     }
@@ -663,15 +940,38 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
     // ---- System health ----
     const errors = errors24h.count ?? 0;
     const totalEvents24h = (activeSessions24h.data ?? []).length || 1;
-    const uptime_pct = Math.max(0, Math.min(100, 100 - (errors / Math.max(totalEvents24h, 1)) * 100));
+    const uptime_pct = Math.max(
+      0,
+      Math.min(100, 100 - (errors / Math.max(totalEvents24h, 1)) * 100),
+    );
     const lastEventIso = (latestEvent.data?.[0]?.created_at as string | undefined) ?? null;
-    const dbStale = lastEventIso ? (Date.now() - +new Date(lastEventIso)) > 10 * 60 * 1000 : true;
+    const dbStale = lastEventIso ? Date.now() - +new Date(lastEventIso) > 10 * 60 * 1000 : true;
 
     const health: SystemHealthItem[] = [
-      { key: "server", label: "Server Status", status: "healthy", detail: "All servers are running normally" },
-      { key: "db", label: "Database", status: dbStale ? "warning" : "healthy", detail: dbStale ? "No recent events" : "Database performance is optimal" },
-      { key: "storage", label: "Storage Usage", status: "healthy", detail: `${profilesTotal.count ?? 0} profiles tracked` },
-      { key: "api", label: "API Response Time", status: errors > 50 ? "warning" : "healthy", detail: errors > 0 ? `${errors} API errors in last 24h` : "No API errors detected" },
+      {
+        key: "server",
+        label: "Server Status",
+        status: "healthy",
+        detail: "All servers are running normally",
+      },
+      {
+        key: "db",
+        label: "Database",
+        status: dbStale ? "warning" : "healthy",
+        detail: dbStale ? "No recent events" : "Database performance is optimal",
+      },
+      {
+        key: "storage",
+        label: "Storage Usage",
+        status: "healthy",
+        detail: `${profilesTotal.count ?? 0} profiles tracked`,
+      },
+      {
+        key: "api",
+        label: "API Response Time",
+        status: errors > 50 ? "warning" : "healthy",
+        detail: errors > 0 ? `${errors} API errors in last 24h` : "No API errors detected",
+      },
     ];
 
     return {
@@ -684,7 +984,12 @@ export const adminPremiumOverview = createServerFn({ method: "POST" })
       top_subjects,
       exam_participation: { invited, joined, rate_pct },
       engagement: { dau_today: dauTodayN, delta_pct: pctChange(dauTodayN, dauYestN), series },
-      system: { uptime_pct: Math.round(uptime_pct * 100) / 100, server_time_iso: now.toISOString(), health, api_errors_24h: errors },
+      system: {
+        uptime_pct: Math.round(uptime_pct * 100) / 100,
+        server_time_iso: now.toISOString(),
+        health,
+        api_errors_24h: errors,
+      },
     };
   });
 
@@ -703,14 +1008,30 @@ export const adminNotificationsBadge = createServerFn({ method: "GET" })
     const sb = context.supabase;
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const [sentRecent, scheduled, latest] = await Promise.all([
-      sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "sent").gte("sent_at", sevenDaysAgo),
-      sb.from("notifications").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
-      sb.from("notifications").select("id,title,status,created_at").order("created_at", { ascending: false }).limit(6),
+      sb
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "sent")
+        .gte("sent_at", sevenDaysAgo),
+      sb
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "scheduled"),
+      sb
+        .from("notifications")
+        .select("id,title,status,created_at")
+        .order("created_at", { ascending: false })
+        .limit(6),
     ]);
     return {
       unread: sentRecent.count ?? 0,
       scheduled: scheduled.count ?? 0,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recent: ((latest.data ?? []) as any[]).map((r) => ({ id: r.id, title: r.title, status: r.status, created_at: r.created_at })),
+      recent: ((latest.data ?? []) as any[]).map((r) => ({
+        id: r.id,
+        title: r.title,
+        status: r.status,
+        created_at: r.created_at,
+      })),
     };
   });

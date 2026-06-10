@@ -7,7 +7,11 @@ export const Route = createFileRoute("/_student/mcq-practice")({
   head: () => ({
     meta: [
       { title: "MCQ Practice · CA Aspire BD" },
-      { name: "description", content: "Level → Subject → Chapter MCQ practice with instant explanations and live analytics." },
+      {
+        name: "description",
+        content:
+          "Level → Subject → Chapter MCQ practice with instant explanations and live analytics.",
+      },
     ],
   }),
 });

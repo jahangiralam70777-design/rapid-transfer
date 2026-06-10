@@ -42,11 +42,7 @@ import {
   adminUpdateLevel,
   adminUpdateSubject,
 } from "@/lib/admin-academic.functions";
-import {
-  adminListMcqs,
-  adminDeleteMcq,
-  adminSetMcqStatus,
-} from "@/lib/admin-mcq.functions";
+import { adminListMcqs, adminDeleteMcq, adminSetMcqStatus } from "@/lib/admin-mcq.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -76,9 +72,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-
-
 
 type Level = {
   code: string;
@@ -166,7 +159,9 @@ export function AcademicStructureManager() {
   const [search, setSearch] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "most_viewed" | "most_attempted" | "recent">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "published" | "draft" | "most_viewed" | "most_attempted" | "recent"
+  >("all");
   const [dialog, setDialog] = useState<DialogState>({ kind: "none" });
   const [mcqChapter, setMcqChapter] = useState<Chapter | null>(null);
   const [rangeDays, setRangeDays] = useState<number>(30);
@@ -186,9 +181,15 @@ export function AcademicStructureManager() {
   useEffect(() => {
     const ch = supabase
       .channel(`admin-academic-live-${Math.random().toString(36).slice(2, 8)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "levels" }, () => qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }))
-      .on("postgres_changes", { event: "*", schema: "public", table: "subjects" }, () => qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }))
-      .on("postgres_changes", { event: "*", schema: "public", table: "chapters" }, () => qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "levels" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "subjects" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "chapters" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }),
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "mcqs" }, () => {
         qc.invalidateQueries({ queryKey: ["admin-academic-tree"] });
         qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] });
@@ -198,11 +199,19 @@ export function AcademicStructureManager() {
         qc.invalidateQueries({ queryKey: ["admin-academic-tree"] });
         qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] });
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "short_notes" }, () => qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] }))
-      .on("postgres_changes", { event: "*", schema: "public", table: "flash_cards" }, () => qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] }))
-      .on("postgres_changes", { event: "*", schema: "public", table: "activity_events" }, () => qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "short_notes" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] }),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "flash_cards" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] }),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "activity_events" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-academic-analytics"] }),
+      )
       .subscribe();
-    return () => { void supabase.removeChannel(ch); };
+    return () => {
+      void supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const invalidate = () => {
@@ -219,7 +228,13 @@ export function AcademicStructureManager() {
 
   const perSubject = analytics.data?.perSubject ?? {};
   const perChapter = analytics.data?.perChapter ?? {};
-  const aTotals = analytics.data?.totals ?? { views: 0, attempts: 0, uniqueUsers: 0, notes: 0, flashCards: 0 };
+  const aTotals = analytics.data?.totals ?? {
+    views: 0,
+    attempts: 0,
+    uniqueUsers: 0,
+    notes: 0,
+    flashCards: 0,
+  };
   const series = analytics.data?.series ?? [];
   const recent = analytics.data?.recent ?? [];
   const lastEventAt = analytics.data?.health.lastEventAt ?? null;
@@ -239,19 +254,24 @@ export function AcademicStructureManager() {
       const chapterSubjectIds = new Set(
         chapters.filter((c) => c.name.toLowerCase().includes(term)).map((c) => c.subject_id),
       );
-      list = list.filter(
-        (s) => s.name.toLowerCase().includes(term) || chapterSubjectIds.has(s.id),
-      );
+      list = list.filter((s) => s.name.toLowerCase().includes(term) || chapterSubjectIds.has(s.id));
     }
     if (statusFilter === "published") list = list.filter((s) => s.status === "published");
     else if (statusFilter === "draft") list = list.filter((s) => s.status === "draft");
-    else if (statusFilter === "most_viewed") list = [...list].sort((a, b) => (perSubject[b.id]?.views ?? 0) - (perSubject[a.id]?.views ?? 0));
-    else if (statusFilter === "most_attempted") list = [...list].sort((a, b) => (perSubject[b.id]?.attempts ?? 0) - (perSubject[a.id]?.attempts ?? 0));
-    else if (statusFilter === "recent") list = [...list].sort((a, b) => {
-      const at = (a as Subject & { updated_at?: string }).updated_at ?? "";
-      const bt = (b as Subject & { updated_at?: string }).updated_at ?? "";
-      return bt.localeCompare(at);
-    });
+    else if (statusFilter === "most_viewed")
+      list = [...list].sort(
+        (a, b) => (perSubject[b.id]?.views ?? 0) - (perSubject[a.id]?.views ?? 0),
+      );
+    else if (statusFilter === "most_attempted")
+      list = [...list].sort(
+        (a, b) => (perSubject[b.id]?.attempts ?? 0) - (perSubject[a.id]?.attempts ?? 0),
+      );
+    else if (statusFilter === "recent")
+      list = [...list].sort((a, b) => {
+        const at = (a as Subject & { updated_at?: string }).updated_at ?? "";
+        const bt = (b as Subject & { updated_at?: string }).updated_at ?? "";
+        return bt.localeCompare(at);
+      });
     return list;
   }, [subjects, chapters, activeLevel, term, statusFilter, perSubject]);
 
@@ -263,11 +283,14 @@ export function AcademicStructureManager() {
     return filtered.length > 0 ? filtered : list;
   }, [chapters, activeSubject, term]);
 
-
   // ---- Aggregate level stats ----
   const levelStats = useMemo(() => {
-    const map: Record<string, { subjects: number; chapters: number; mcqs: number; quizzes: number; mocks: number }> = {};
-    for (const lv of levels) map[lv.code] = { subjects: 0, chapters: 0, mcqs: 0, quizzes: 0, mocks: 0 };
+    const map: Record<
+      string,
+      { subjects: number; chapters: number; mcqs: number; quizzes: number; mocks: number }
+    > = {};
+    for (const lv of levels)
+      map[lv.code] = { subjects: 0, chapters: 0, mcqs: 0, quizzes: 0, mocks: 0 };
     for (const s of subjects) {
       const lvl = s.level ?? "";
       if (!lvl) continue;
@@ -287,8 +310,7 @@ export function AcademicStructureManager() {
   }, [levels, subjects, chapters, counts]);
 
   // ---- Global live totals (analytics bar) ----
-  const sumValues = (m: Record<string, number>) =>
-    Object.values(m).reduce((a, b) => a + b, 0);
+  const sumValues = (m: Record<string, number>) => Object.values(m).reduce((a, b) => a + b, 0);
   const totals = useMemo(
     () => ({
       chapters: overview.chapters,
@@ -322,17 +344,26 @@ export function AcademicStructureManager() {
 
   const delLevel = useMutation({
     mutationFn: (code: string) => deleteLevelFn({ data: { code } }),
-    onSuccess: () => { toast.success("Level deleted"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Level deleted");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const delSubject = useMutation({
     mutationFn: (id: string) => deleteSubjectFn({ data: { id } }),
-    onSuccess: () => { toast.success("Subject deleted"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Subject deleted");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const delChapter = useMutation({
     mutationFn: (id: string) => deleteChapterFn({ data: { id } }),
-    onSuccess: () => { toast.success("Chapter deleted"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Chapter deleted");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -387,7 +418,9 @@ export function AcademicStructureManager() {
               type="button"
               title="Notifications"
               aria-label="Notifications"
-              onClick={() => { window.location.href = "/admin/notifications"; }}
+              onClick={() => {
+                window.location.href = "/admin/notifications";
+              }}
               className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card/50 text-muted-foreground transition-all hover:scale-105 hover:bg-muted hover:text-foreground"
             >
               <Bell className="h-4 w-4" />
@@ -415,33 +448,68 @@ export function AcademicStructureManager() {
                 <DropdownMenuItem onClick={() => setDialog({ kind: "level", mode: "create" })}>
                   <GraduationCap className="mr-2 h-4 w-4" /> Add Level
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDialog({ kind: "subject", mode: "create", levelCode: activeLevel ?? "professional" })}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    setDialog({
+                      kind: "subject",
+                      mode: "create",
+                      levelCode: activeLevel ?? "professional",
+                    })
+                  }
+                >
                   <BookOpen className="mr-2 h-4 w-4" /> Add Subject
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={!activeSubject}
-                  onClick={() => activeSubject && setDialog({ kind: "chapter", mode: "create", subjectId: activeSubject })}
+                  onClick={() =>
+                    activeSubject &&
+                    setDialog({ kind: "chapter", mode: "create", subjectId: activeSubject })
+                  }
                 >
                   <Layers className="mr-2 h-4 w-4" /> Add Chapter
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Content</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => { window.location.href = "/admin/mcq?action=create"; }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/mcq?action=create";
+                  }}
+                >
                   <FileQuestion className="mr-2 h-4 w-4" /> Add MCQ
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { window.location.href = "/admin/quiz?action=create"; }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/quiz?action=create";
+                  }}
+                >
                   <ListChecks className="mr-2 h-4 w-4" /> Add Quiz
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { window.location.href = "/admin/mock-test?action=create"; }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/mock-test?action=create";
+                  }}
+                >
                   <FileStack className="mr-2 h-4 w-4" /> Add Mock Test
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { window.location.href = "/admin/short-notes?action=create"; }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/short-notes?action=create";
+                  }}
+                >
                   <BookOpen className="mr-2 h-4 w-4" /> Add Notes
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { window.location.href = "/admin/flash-cards?action=create"; }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/flash-cards?action=create";
+                  }}
+                >
                   <Sparkles className="mr-2 h-4 w-4" /> Add Flash Cards
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { window.location.href = "/admin/question-bank?action=create"; }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    window.location.href = "/admin/question-bank?action=create";
+                  }}
+                >
                   <FileStack className="mr-2 h-4 w-4" /> Add Q-Bank Resource
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -479,26 +547,56 @@ export function AcademicStructureManager() {
       {/* Level selector pills */}
       {levels.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Levels</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Levels
+          </span>
           {levels.map((lv) => {
-            const s = levelStats[lv.code] ?? { subjects: 0, chapters: 0, mcqs: 0, quizzes: 0, mocks: 0 };
+            const s = levelStats[lv.code] ?? {
+              subjects: 0,
+              chapters: 0,
+              mcqs: 0,
+              quizzes: 0,
+              mocks: 0,
+            };
             const isActive = activeLevel === lv.code;
             return (
               <button
                 key={lv.code}
-                onClick={() => { setSelectedLevel(lv.code); setSelectedSubject(null); }}
+                onClick={() => {
+                  setSelectedLevel(lv.code);
+                  setSelectedSubject(null);
+                }}
                 className={`group relative inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
-                  isActive ? "border-primary/60 bg-primary/10 text-foreground shadow-glow" : "border-border/60 bg-card/40 text-muted-foreground hover:bg-card hover:text-foreground"
+                  isActive
+                    ? "border-primary/60 bg-primary/10 text-foreground shadow-glow"
+                    : "border-border/60 bg-card/40 text-muted-foreground hover:bg-card hover:text-foreground"
                 }`}
               >
-                <span className="h-2 w-2 rounded-full" style={{ background: lv.color ?? "#a855f7" }} />
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: lv.color ?? "#a855f7" }}
+                />
                 {lv.name}
-                <span className="rounded-md bg-background/50 px-1.5 py-0.5 text-[10px] tabular-nums text-muted-foreground">{s.subjects}·{s.chapters}</span>
+                <span className="rounded-md bg-background/50 px-1.5 py-0.5 text-[10px] tabular-nums text-muted-foreground">
+                  {s.subjects}·{s.chapters}
+                </span>
                 <span className="hidden gap-0.5 group-hover:flex">
-                  <IconBtn title="Edit" onClick={(e) => { e.stopPropagation(); setDialog({ kind: "level", mode: "edit", data: lv }); }}>
+                  <IconBtn
+                    title="Edit"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDialog({ kind: "level", mode: "edit", data: lv });
+                    }}
+                  >
                     <Pencil className="h-3 w-3" />
                   </IconBtn>
-                  <IconBtn title="Delete" onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${lv.name}"?`)) delLevel.mutate(lv.code); }}>
+                  <IconBtn
+                    title="Delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Delete "${lv.name}"?`)) delLevel.mutate(lv.code);
+                    }}
+                  >
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </IconBtn>
                 </span>
@@ -506,9 +604,16 @@ export function AcademicStructureManager() {
             );
           })}
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filter</span>
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
-              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue /></SelectTrigger>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Filter
+            </span>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}
+            >
+              <SelectTrigger className="h-8 w-[160px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All subjects</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
@@ -522,7 +627,6 @@ export function AcademicStructureManager() {
         </div>
       )}
 
-
       {/* Subject + Chapter columns */}
       <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
         {/* Subjects column */}
@@ -531,13 +635,19 @@ export function AcademicStructureManager() {
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-primary" />
               <h2 className="font-display text-sm font-bold uppercase tracking-wider">Subjects</h2>
-              <Badge variant="outline" className="text-[10px]">{filteredSubjects.length}</Badge>
+              <Badge variant="outline" className="text-[10px]">
+                {filteredSubjects.length}
+              </Badge>
             </div>
             <Button
               size="sm"
               variant="ghost"
               onClick={() =>
-                setDialog({ kind: "subject", mode: "create", levelCode: activeLevel ?? "professional" })
+                setDialog({
+                  kind: "subject",
+                  mode: "create",
+                  levelCode: activeLevel ?? "professional",
+                })
               }
             >
               <Plus className="mr-1 h-3.5 w-3.5" /> Add
@@ -557,9 +667,10 @@ export function AcademicStructureManager() {
                         : "border-border/50 bg-card/40 hover:border-border hover:bg-card hover:shadow-card-soft"
                     }`}
                     style={{
-                      background: isActive && s.color
-                        ? `linear-gradient(135deg, ${s.color}22, transparent 65%)`
-                        : undefined,
+                      background:
+                        isActive && s.color
+                          ? `linear-gradient(135deg, ${s.color}22, transparent 65%)`
+                          : undefined,
                     }}
                   >
                     {isActive && (
@@ -569,19 +680,27 @@ export function AcademicStructureManager() {
                       />
                     )}
                     <div className="flex items-center gap-2">
-                      <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform duration-300 ${isActive ? "rotate-90 text-primary" : "text-muted-foreground"}`} />
+                      <ChevronRight
+                        className={`h-3.5 w-3.5 shrink-0 transition-transform duration-300 ${isActive ? "rotate-90 text-primary" : "text-muted-foreground"}`}
+                      />
                       <span
                         className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-background"
                         style={{ background: s.color ?? "#a855f7" }}
                       />
                       <span className="flex-1 truncate text-sm font-semibold">{s.name}</span>
-                      <Badge variant={s.status === "published" ? "default" : "secondary"} className="text-[10px] capitalize">
+                      <Badge
+                        variant={s.status === "published" ? "default" : "secondary"}
+                        className="text-[10px] capitalize"
+                      >
                         {s.status}
                       </Badge>
                       <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                         <IconBtn
                           title="Edit subject"
-                          onClick={(e) => { e.stopPropagation(); setDialog({ kind: "subject", mode: "edit", data: s }); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDialog({ kind: "subject", mode: "edit", data: s });
+                          }}
                         >
                           <Pencil className="h-3 w-3" />
                         </IconBtn>
@@ -597,9 +716,21 @@ export function AcademicStructureManager() {
                       </div>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5 pl-6">
-                      <CountChip icon={<Layers className="h-3 w-3" />} value={st.chapters} title="Chapters" />
-                      <CountChip icon={<FileQuestion className="h-3 w-3" />} value={st.mcqs} title="MCQs" />
-                      <CountChip icon={<ListChecks className="h-3 w-3" />} value={st.quizzes} title="Quizzes" />
+                      <CountChip
+                        icon={<Layers className="h-3 w-3" />}
+                        value={st.chapters}
+                        title="Chapters"
+                      />
+                      <CountChip
+                        icon={<FileQuestion className="h-3 w-3" />}
+                        value={st.mcqs}
+                        title="MCQs"
+                      />
+                      <CountChip
+                        icon={<ListChecks className="h-3 w-3" />}
+                        value={st.quizzes}
+                        title="Quizzes"
+                      />
                     </div>
                   </div>
                 </li>
@@ -618,12 +749,17 @@ export function AcademicStructureManager() {
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <Layers className="h-4 w-4 shrink-0 text-primary" />
             <h2 className="font-display text-sm font-bold uppercase tracking-wider">Chapters</h2>
-            <Badge variant="outline" className="text-[10px]">{subjectChapters.length}</Badge>
+            <Badge variant="outline" className="text-[10px]">
+              {subjectChapters.length}
+            </Badge>
             <Button
               size="sm"
               disabled={!activeSubject}
               className="ml-auto bg-cta-gradient text-white shadow-glow transition-transform hover:scale-[1.03] disabled:opacity-50"
-              onClick={() => activeSubject && setDialog({ kind: "chapter", mode: "create", subjectId: activeSubject })}
+              onClick={() =>
+                activeSubject &&
+                setDialog({ kind: "chapter", mode: "create", subjectId: activeSubject })
+              }
             >
               <Plus className="mr-1 h-3.5 w-3.5" /> Add Chapter
             </Button>
@@ -678,7 +814,10 @@ export function AcademicStructureManager() {
                     <Pill label="Quiz" value={counts.quizByChapter[c.id] ?? 0} />
                     <Pill label="Mock" value={counts.mockByChapter[c.id] ?? 0} />
                   </div>
-                  <Badge variant={c.status === "published" ? "default" : "secondary"} className="text-[10px]">
+                  <Badge
+                    variant={c.status === "published" ? "default" : "secondary"}
+                    className="text-[10px]"
+                  >
                     {c.status}
                   </Badge>
                   <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -724,7 +863,11 @@ export function AcademicStructureManager() {
       {/* Bottom row 2: Popular Subjects · Top Chapters · Distribution · Quick Actions */}
       <div className="grid gap-3 lg:grid-cols-4">
         <PopularSubjectsCard subjects={subjects} perSubject={perSubject} />
-        <TopChaptersCard chapters={chapters} perChapter={perChapter} mcqByChapter={counts.mcqByChapter} />
+        <TopChaptersCard
+          chapters={chapters}
+          perChapter={perChapter}
+          mcqByChapter={counts.mcqByChapter}
+        />
         <ContentDistributionCard
           mcqs={totals.mcqs}
           chapters={overview.chapters}
@@ -735,20 +878,26 @@ export function AcademicStructureManager() {
         />
         <QuickActionsCard
           onLevel={() => setDialog({ kind: "level", mode: "create" })}
-          onSubject={() => setDialog({ kind: "subject", mode: "create", levelCode: activeLevel ?? "professional" })}
-          onChapter={() => activeSubject && setDialog({ kind: "chapter", mode: "create", subjectId: activeSubject })}
+          onSubject={() =>
+            setDialog({ kind: "subject", mode: "create", levelCode: activeLevel ?? "professional" })
+          }
+          onChapter={() =>
+            activeSubject &&
+            setDialog({ kind: "chapter", mode: "create", subjectId: activeSubject })
+          }
           canChapter={!!activeSubject}
         />
       </div>
 
       {/* Dialogs */}
-      <EntityDialog state={dialog} onClose={() => setDialog({ kind: "none" })} onSaved={invalidate} levels={levels} subjects={subjects} />
-      {mcqChapter && (
-        <ChapterMcqsDialog
-          chapter={mcqChapter}
-          onClose={() => setMcqChapter(null)}
-        />
-      )}
+      <EntityDialog
+        state={dialog}
+        onClose={() => setDialog({ kind: "none" })}
+        onSaved={invalidate}
+        levels={levels}
+        subjects={subjects}
+      />
+      {mcqChapter && <ChapterMcqsDialog chapter={mcqChapter} onClose={() => setMcqChapter(null)} />}
     </div>
   );
 }
@@ -757,29 +906,79 @@ export function AcademicStructureManager() {
 // Premium dashboard widgets — fully real-data driven
 // ============================================================
 function OverviewSummaryCard({
-  subjects, chapters, mcqs, quizzes, mocks,
-}: { subjects: number; chapters: number; mcqs: number; quizzes: number; mocks: number }) {
+  subjects,
+  chapters,
+  mcqs,
+  quizzes,
+  mocks,
+}: {
+  subjects: number;
+  chapters: number;
+  mcqs: number;
+  quizzes: number;
+  mocks: number;
+}) {
   const tiles = [
-    { label: "Subjects", value: subjects, icon: <BookOpen className="h-3.5 w-3.5" />, accent: "var(--neon-purple)" },
-    { label: "Chapters", value: chapters, icon: <Layers className="h-3.5 w-3.5" />, accent: "var(--neon-blue)" },
-    { label: "MCQs", value: mcqs, icon: <FileQuestion className="h-3.5 w-3.5" />, accent: "var(--neon-pink)" },
-    { label: "Quizzes", value: quizzes, icon: <ListChecks className="h-3.5 w-3.5" />, accent: "var(--accent)" },
-    { label: "Mock Tests", value: mocks, icon: <FileStack className="h-3.5 w-3.5" />, accent: "var(--primary)" },
+    {
+      label: "Subjects",
+      value: subjects,
+      icon: <BookOpen className="h-3.5 w-3.5" />,
+      accent: "var(--neon-purple)",
+    },
+    {
+      label: "Chapters",
+      value: chapters,
+      icon: <Layers className="h-3.5 w-3.5" />,
+      accent: "var(--neon-blue)",
+    },
+    {
+      label: "MCQs",
+      value: mcqs,
+      icon: <FileQuestion className="h-3.5 w-3.5" />,
+      accent: "var(--neon-pink)",
+    },
+    {
+      label: "Quizzes",
+      value: quizzes,
+      icon: <ListChecks className="h-3.5 w-3.5" />,
+      accent: "var(--accent)",
+    },
+    {
+      label: "Mock Tests",
+      value: mocks,
+      icon: <FileStack className="h-3.5 w-3.5" />,
+      accent: "var(--primary)",
+    },
   ];
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><Layers className="h-3.5 w-3.5" /></div>
-        <h3 className="font-display text-sm font-bold uppercase tracking-wider">Overview Summary</h3>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
+          <Layers className="h-3.5 w-3.5" />
+        </div>
+        <h3 className="font-display text-sm font-bold uppercase tracking-wider">
+          Overview Summary
+        </h3>
       </div>
       <div className="grid grid-cols-5 gap-2">
         {tiles.map((t) => (
-          <div key={t.label} className="rounded-xl border border-border/40 bg-card/40 p-2 text-center transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow">
-            <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-md" style={{ background: `color-mix(in oklab, ${t.accent} 18%, transparent)`, color: t.accent }}>
+          <div
+            key={t.label}
+            className="rounded-xl border border-border/40 bg-card/40 p-2 text-center transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
+          >
+            <div
+              className="mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-md"
+              style={{
+                background: `color-mix(in oklab, ${t.accent} 18%, transparent)`,
+                color: t.accent,
+              }}
+            >
               {t.icon}
             </div>
             <p className="font-mono text-base font-bold tabular-nums leading-none">{t.value}</p>
-            <p className="mt-1 text-[9px] uppercase tracking-wider text-muted-foreground">{t.label}</p>
+            <p className="mt-1 text-[9px] uppercase tracking-wider text-muted-foreground">
+              {t.label}
+            </p>
           </div>
         ))}
       </div>
@@ -787,14 +986,29 @@ function OverviewSummaryCard({
   );
 }
 
-function Donut({ size = 130, thickness = 16, segments }: { size?: number; thickness?: number; segments: { value: number; color: string; label: string }[] }) {
+function Donut({
+  size = 130,
+  thickness = 16,
+  segments,
+}: {
+  size?: number;
+  thickness?: number;
+  segments: { value: number; color: string; label: string }[];
+}) {
   const total = segments.reduce((a, s) => a + s.value, 0) || 1;
   const r = (size - thickness) / 2;
   const c = 2 * Math.PI * r;
   let offset = 0;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in oklab, var(--muted) 60%, transparent)" strokeWidth={thickness} />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="color-mix(in oklab, var(--muted) 60%, transparent)"
+        strokeWidth={thickness}
+      />
       {segments.map((s, i) => {
         const frac = s.value / total;
         const dash = c * frac;
@@ -819,8 +1033,20 @@ function Donut({ size = 130, thickness = 16, segments }: { size?: number; thickn
   );
 }
 
-function ContentActivityCard({ mcqs, chapters, quizzes, mocks, totalContent }: { mcqs: number; chapters: number; quizzes: number; mocks: number; totalContent?: number }) {
-  const total = totalContent ?? (mcqs + chapters + quizzes + mocks);
+function ContentActivityCard({
+  mcqs,
+  chapters,
+  quizzes,
+  mocks,
+  totalContent,
+}: {
+  mcqs: number;
+  chapters: number;
+  quizzes: number;
+  mocks: number;
+  totalContent?: number;
+}) {
+  const total = totalContent ?? mcqs + chapters + quizzes + mocks;
   const segs = [
     { value: mcqs, color: "#a855f7", label: "MCQs" },
     { value: chapters, color: "#3b82f6", label: "Chapters" },
@@ -830,15 +1056,21 @@ function ContentActivityCard({ mcqs, chapters, quizzes, mocks, totalContent }: {
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><Activity className="h-3.5 w-3.5" /></div>
-        <h3 className="font-display text-sm font-bold uppercase tracking-wider">Content & Activity</h3>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
+          <Activity className="h-3.5 w-3.5" />
+        </div>
+        <h3 className="font-display text-sm font-bold uppercase tracking-wider">
+          Content & Activity
+        </h3>
       </div>
       <div className="flex items-center gap-4">
         <div className="relative">
           <Donut segments={segs} />
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <p className="font-display text-xl font-bold tabular-nums">{total}</p>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Total Content</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">
+              Total Content
+            </p>
           </div>
         </div>
         <div className="flex-1 space-y-1.5">
@@ -850,7 +1082,9 @@ function ContentActivityCard({ mcqs, chapters, quizzes, mocks, totalContent }: {
                   <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
                   <span className="font-medium">{s.label}</span>
                 </span>
-                <span className="font-mono tabular-nums text-muted-foreground">{s.value} <span className="opacity-60">({pct}%)</span></span>
+                <span className="font-mono tabular-nums text-muted-foreground">
+                  {s.value} <span className="opacity-60">({pct}%)</span>
+                </span>
               </div>
             );
           })}
@@ -873,31 +1107,64 @@ function relativeTime(iso: string | null): string {
 }
 
 function SystemHealthCard({
-  lastEventAt, totalViews, totalAttempts, uniqueUsers, subjectsCount, chaptersCount,
-}: { lastEventAt: string | null; totalViews: number; totalAttempts: number; uniqueUsers: number; subjectsCount: number; chaptersCount: number }) {
+  lastEventAt,
+  totalViews,
+  totalAttempts,
+  uniqueUsers,
+  subjectsCount,
+  chaptersCount,
+}: {
+  lastEventAt: string | null;
+  totalViews: number;
+  totalAttempts: number;
+  uniqueUsers: number;
+  subjectsCount: number;
+  chaptersCount: number;
+}) {
   const healthy = subjectsCount > 0 && chaptersCount > 0;
-  const engagement = totalViews + totalAttempts > 0
-    ? Math.min(100, Math.round(((totalAttempts) / Math.max(1, totalViews + totalAttempts)) * 100))
-    : 0;
+  const engagement =
+    totalViews + totalAttempts > 0
+      ? Math.min(100, Math.round((totalAttempts / Math.max(1, totalViews + totalAttempts)) * 100))
+      : 0;
   const rows = [
-    { label: "Content Health", value: healthy ? "Excellent" : "Setup", tone: healthy ? "good" : "warn" as const },
+    {
+      label: "Content Health",
+      value: healthy ? "Excellent" : "Setup",
+      tone: healthy ? "good" : ("warn" as const),
+    },
     { label: "Last Sync", value: relativeTime(lastEventAt), tone: "neutral" as const },
     { label: "Total Views (30D)", value: totalViews.toLocaleString(), tone: "neutral" as const },
-    { label: "Total Attempts (30D)", value: totalAttempts.toLocaleString(), tone: "neutral" as const },
+    {
+      label: "Total Attempts (30D)",
+      value: totalAttempts.toLocaleString(),
+      tone: "neutral" as const,
+    },
     { label: "Active Users (30D)", value: uniqueUsers.toLocaleString(), tone: "neutral" as const },
-    { label: "Avg Engagement", value: `${engagement}%`, tone: engagement >= 70 ? "good" : "neutral" as const },
+    {
+      label: "Avg Engagement",
+      value: `${engagement}%`,
+      tone: engagement >= 70 ? "good" : ("neutral" as const),
+    },
   ];
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><CheckCircle2 className="h-3.5 w-3.5" /></div>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+        </div>
         <h3 className="font-display text-sm font-bold uppercase tracking-wider">System Health</h3>
       </div>
       <ul className="space-y-1.5 text-[11px]">
         {rows.map((r) => (
-          <li key={r.label} className="flex items-center justify-between rounded-lg border border-border/30 bg-card/30 px-2.5 py-1.5">
+          <li
+            key={r.label}
+            className="flex items-center justify-between rounded-lg border border-border/30 bg-card/30 px-2.5 py-1.5"
+          >
             <span className="text-muted-foreground">{r.label}</span>
-            <Badge variant={r.tone === "good" ? "default" : r.tone === "warn" ? "secondary" : "outline"} className="text-[10px] font-semibold">
+            <Badge
+              variant={r.tone === "good" ? "default" : r.tone === "warn" ? "secondary" : "outline"}
+              className="text-[10px] font-semibold"
+            >
               {r.value}
             </Badge>
           </li>
@@ -907,26 +1174,50 @@ function SystemHealthCard({
   );
 }
 
-function ContentAnalyticsChart({ series, totals, loading, rangeDays, onRangeChange }: { series: { day: string; views: number; attempts: number; users: number }[]; totals: { views: number; attempts: number; uniqueUsers: number }; loading: boolean; rangeDays: number; onRangeChange: (n: number) => void }) {
+function ContentAnalyticsChart({
+  series,
+  totals,
+  loading,
+  rangeDays,
+  onRangeChange,
+}: {
+  series: { day: string; views: number; attempts: number; users: number }[];
+  totals: { views: number; attempts: number; uniqueUsers: number };
+  loading: boolean;
+  rangeDays: number;
+  onRangeChange: (n: number) => void;
+}) {
   const maxV = Math.max(1, ...series.map((s) => s.views + s.attempts));
-  const w = 600, h = 160, pad = 24;
+  const w = 600,
+    h = 160,
+    pad = 24;
   const points = series.map((s, i) => {
     const x = pad + (i / Math.max(1, series.length - 1)) * (w - pad * 2);
     const y = h - pad - ((s.views + s.attempts) / maxV) * (h - pad * 2);
     return `${x},${y}`;
   });
   const path = points.length ? "M " + points.join(" L ") : "";
-  const area = points.length ? `${path} L ${pad + (w - pad * 2)},${h - pad} L ${pad},${h - pad} Z` : "";
-  const avgTime = series.length ? `${Math.round(((totals.views + totals.attempts) / Math.max(1, totals.uniqueUsers || 1)) * 0.6)}s` : "0s";
+  const area = points.length
+    ? `${path} L ${pad + (w - pad * 2)},${h - pad} L ${pad},${h - pad} Z`
+    : "";
+  const avgTime = series.length
+    ? `${Math.round(((totals.views + totals.attempts) / Math.max(1, totals.uniqueUsers || 1)) * 0.6)}s`
+    : "0s";
 
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><TrendingUp className="h-3.5 w-3.5" /></div>
-          <h3 className="font-display text-sm font-bold uppercase tracking-wider">Content Analytics</h3>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <TrendingUp className="h-3.5 w-3.5" />
+          </div>
+          <h3 className="font-display text-sm font-bold uppercase tracking-wider">
+            Content Analytics
+          </h3>
           <Select value={String(rangeDays)} onValueChange={(v) => onRangeChange(Number(v))}>
-            <SelectTrigger className="h-7 w-[120px] text-[10px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-7 w-[120px] text-[10px]">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="7">Last 7 Days</SelectItem>
               <SelectItem value="14">Last 14 Days</SelectItem>
@@ -941,7 +1232,11 @@ function ContentAnalyticsChart({ series, totals, loading, rangeDays, onRangeChan
       <div className="mb-3 grid grid-cols-4 gap-2 text-center">
         <MiniStat label="Content Views" value={totals.views.toLocaleString()} accent="#a855f7" />
         <MiniStat label="Attempts" value={totals.attempts.toLocaleString()} accent="#ec4899" />
-        <MiniStat label="Unique Users" value={totals.uniqueUsers.toLocaleString()} accent="#3b82f6" />
+        <MiniStat
+          label="Unique Users"
+          value={totals.uniqueUsers.toLocaleString()}
+          accent="#3b82f6"
+        />
         <MiniStat label="Avg Engagement" value={avgTime} accent="#f59e0b" />
       </div>
       <div className="relative h-[180px] w-full overflow-hidden rounded-xl border border-border/30 bg-card/30 p-2">
@@ -964,11 +1259,21 @@ function ContentAnalyticsChart({ series, totals, loading, rangeDays, onRangeChan
             </defs>
             <path d={area} fill="url(#aArea)" />
             <path d={path} fill="none" stroke="#a855f7" strokeWidth="2" />
-            {series.filter((_, i) => i % 5 === 0).map((s, i) => (
-              <text key={i} x={pad + (((series.indexOf(s)) / Math.max(1, series.length - 1)) * (w - pad * 2))} y={h - 4} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.5">
-                {s.day.slice(5)}
-              </text>
-            ))}
+            {series
+              .filter((_, i) => i % 5 === 0)
+              .map((s, i) => (
+                <text
+                  key={i}
+                  x={pad + (series.indexOf(s) / Math.max(1, series.length - 1)) * (w - pad * 2)}
+                  y={h - 4}
+                  textAnchor="middle"
+                  fontSize="9"
+                  fill="currentColor"
+                  opacity="0.5"
+                >
+                  {s.day.slice(5)}
+                </text>
+              ))}
           </svg>
         )}
       </div>
@@ -979,19 +1284,37 @@ function ContentAnalyticsChart({ series, totals, loading, rangeDays, onRangeChan
 function MiniStat({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
     <div className="rounded-xl border border-border/30 bg-card/30 px-2 py-2">
-      <p className="font-mono text-sm font-bold tabular-nums" style={{ color: accent }}>{value}</p>
+      <p className="font-mono text-sm font-bold tabular-nums" style={{ color: accent }}>
+        {value}
+      </p>
       <p className="mt-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">{label}</p>
     </div>
   );
 }
 
-function RecentActivityCard({ recent, loading }: { recent: Array<{ id: string; event_type: string; element_label: string | null; module: string | null; created_at: string }>; loading: boolean }) {
+function RecentActivityCard({
+  recent,
+  loading,
+}: {
+  recent: Array<{
+    id: string;
+    event_type: string;
+    element_label: string | null;
+    module: string | null;
+    created_at: string;
+  }>;
+  loading: boolean;
+}) {
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary"><Clock className="h-3.5 w-3.5" /></div>
-          <h3 className="font-display text-sm font-bold uppercase tracking-wider">Recent Activity</h3>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <Clock className="h-3.5 w-3.5" />
+          </div>
+          <h3 className="font-display text-sm font-bold uppercase tracking-wider">
+            Recent Activity
+          </h3>
         </div>
       </div>
       {loading ? (
@@ -1006,13 +1329,20 @@ function RecentActivityCard({ recent, loading }: { recent: Array<{ id: string; e
       ) : (
         <ul className="space-y-1.5">
           {recent.slice(0, 6).map((e) => (
-            <li key={e.id} className="flex items-center gap-2 rounded-lg border border-border/30 bg-card/30 px-2.5 py-2">
+            <li
+              key={e.id}
+              className="flex items-center gap-2 rounded-lg border border-border/30 bg-card/30 px-2.5 py-2"
+            >
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
                 <Activity className="h-3 w-3" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold capitalize">{e.element_label ?? e.event_type.replace(/_/g, " ")}</p>
-                <p className="truncate text-[10px] text-muted-foreground capitalize">{e.module ?? "system"} · {relativeTime(e.created_at)}</p>
+                <p className="truncate text-xs font-semibold capitalize">
+                  {e.element_label ?? e.event_type.replace(/_/g, " ")}
+                </p>
+                <p className="truncate text-[10px] text-muted-foreground capitalize">
+                  {e.module ?? "system"} · {relativeTime(e.created_at)}
+                </p>
               </div>
             </li>
           ))}
@@ -1022,31 +1352,47 @@ function RecentActivityCard({ recent, loading }: { recent: Array<{ id: string; e
   );
 }
 
-function PopularSubjectsCard({ subjects, perSubject }: { subjects: Subject[]; perSubject: Record<string, { views: number; uniqueUsers: number; attempts: number }> }) {
+function PopularSubjectsCard({
+  subjects,
+  perSubject,
+}: {
+  subjects: Subject[];
+  perSubject: Record<string, { views: number; uniqueUsers: number; attempts: number }>;
+}) {
   const ranked = useMemo(() => {
     const totalViews = Object.values(perSubject).reduce((a, x) => a + x.views, 0) || 1;
     return subjects
       .map((s) => ({ ...s, views: perSubject[s.id]?.views ?? 0 }))
       .sort((a, b) => b.views - a.views)
       .slice(0, 4)
-      .map((s) => ({ ...s, pct: ((s.views / totalViews) * 100) }));
+      .map((s) => ({ ...s, pct: (s.views / totalViews) * 100 }));
   }, [subjects, perSubject]);
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center gap-2">
         <Users className="h-3.5 w-3.5 text-primary" />
-        <h3 className="font-display text-xs font-bold uppercase tracking-wider">Popular Subjects</h3>
-        <Badge variant="outline" className="ml-auto text-[9px]">By Engagement</Badge>
+        <h3 className="font-display text-xs font-bold uppercase tracking-wider">
+          Popular Subjects
+        </h3>
+        <Badge variant="outline" className="ml-auto text-[9px]">
+          By Engagement
+        </Badge>
       </div>
       {ranked.length === 0 || ranked.every((r) => r.views === 0) ? (
-        <p className="rounded-lg border border-dashed py-6 text-center text-[10px] text-muted-foreground">No engagement data yet.</p>
+        <p className="rounded-lg border border-dashed py-6 text-center text-[10px] text-muted-foreground">
+          No engagement data yet.
+        </p>
       ) : (
         <ol className="space-y-2 text-[11px]">
           {ranked.map((s, i) => (
             <li key={s.id} className="flex items-center gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/15 font-mono text-[10px] font-bold text-primary">{i + 1}</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/15 font-mono text-[10px] font-bold text-primary">
+                {i + 1}
+              </span>
               <span className="flex-1 truncate font-medium">{s.name}</span>
-              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{s.pct.toFixed(1)}%</span>
+              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                {s.pct.toFixed(1)}%
+              </span>
             </li>
           ))}
         </ol>
@@ -1055,7 +1401,15 @@ function PopularSubjectsCard({ subjects, perSubject }: { subjects: Subject[]; pe
   );
 }
 
-function TopChaptersCard({ chapters, perChapter, mcqByChapter }: { chapters: Chapter[]; perChapter: Record<string, { views: number; uniqueUsers: number; attempts: number }>; mcqByChapter: Record<string, number> }) {
+function TopChaptersCard({
+  chapters,
+  perChapter,
+  mcqByChapter,
+}: {
+  chapters: Chapter[];
+  perChapter: Record<string, { views: number; uniqueUsers: number; attempts: number }>;
+  mcqByChapter: Record<string, number>;
+}) {
   const ranked = useMemo(() => {
     return chapters
       .map((c) => ({ ...c, score: (perChapter[c.id]?.views ?? 0) + (mcqByChapter[c.id] ?? 0) * 5 }))
@@ -1070,14 +1424,20 @@ function TopChaptersCard({ chapters, perChapter, mcqByChapter }: { chapters: Cha
         <h3 className="font-display text-xs font-bold uppercase tracking-wider">Top Chapters</h3>
       </div>
       {ranked.length === 0 ? (
-        <p className="rounded-lg border border-dashed py-6 text-center text-[10px] text-muted-foreground">No chapter data yet.</p>
+        <p className="rounded-lg border border-dashed py-6 text-center text-[10px] text-muted-foreground">
+          No chapter data yet.
+        </p>
       ) : (
         <ol className="space-y-2 text-[11px]">
           {ranked.map((c, i) => (
             <li key={c.id} className="flex items-center gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/15 font-mono text-[10px] font-bold text-primary">{i + 1}</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/15 font-mono text-[10px] font-bold text-primary">
+                {i + 1}
+              </span>
               <span className="flex-1 truncate font-medium">{c.name}</span>
-              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{((c.score / max) * 100).toFixed(0)}%</span>
+              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                {((c.score / max) * 100).toFixed(0)}%
+              </span>
             </li>
           ))}
         </ol>
@@ -1086,7 +1446,21 @@ function TopChaptersCard({ chapters, perChapter, mcqByChapter }: { chapters: Cha
   );
 }
 
-function ContentDistributionCard({ mcqs, chapters, quizzes, mocks, notes, flashCards }: { mcqs: number; chapters: number; quizzes: number; mocks: number; notes: number; flashCards: number }) {
+function ContentDistributionCard({
+  mcqs,
+  chapters,
+  quizzes,
+  mocks,
+  notes,
+  flashCards,
+}: {
+  mcqs: number;
+  chapters: number;
+  quizzes: number;
+  mocks: number;
+  notes: number;
+  flashCards: number;
+}) {
   const total = mcqs + chapters + quizzes + mocks + notes + flashCards;
   const segs = [
     { value: mcqs, color: "#a855f7", label: "MCQs" },
@@ -1100,7 +1474,9 @@ function ContentDistributionCard({ mcqs, chapters, quizzes, mocks, notes, flashC
     <div className="glass rounded-2xl p-4 shadow-card-soft">
       <div className="mb-3 flex items-center gap-2">
         <FileStack className="h-3.5 w-3.5 text-primary" />
-        <h3 className="font-display text-xs font-bold uppercase tracking-wider">Content Distribution</h3>
+        <h3 className="font-display text-xs font-bold uppercase tracking-wider">
+          Content Distribution
+        </h3>
       </div>
       <div className="flex items-center gap-3">
         <div className="relative">
@@ -1125,12 +1501,44 @@ function ContentDistributionCard({ mcqs, chapters, quizzes, mocks, notes, flashC
   );
 }
 
-function QuickActionsCard({ onLevel, onSubject, onChapter, canChapter }: { onLevel: () => void; onSubject: () => void; onChapter: () => void; canChapter: boolean }) {
+function QuickActionsCard({
+  onLevel,
+  onSubject,
+  onChapter,
+  canChapter,
+}: {
+  onLevel: () => void;
+  onSubject: () => void;
+  onChapter: () => void;
+  canChapter: boolean;
+}) {
   const actions = [
-    { label: "Add Level", onClick: onLevel, icon: <GraduationCap className="h-3.5 w-3.5" />, disabled: false },
-    { label: "Add Subject", onClick: onSubject, icon: <BookOpen className="h-3.5 w-3.5" />, disabled: false },
-    { label: "Add Chapter", onClick: onChapter, icon: <Layers className="h-3.5 w-3.5" />, disabled: !canChapter },
-    { label: "Bulk Upload MCQs", onClick: () => { window.location.href = "/admin/mcq?action=bulk"; }, icon: <Upload className="h-3.5 w-3.5" />, disabled: false },
+    {
+      label: "Add Level",
+      onClick: onLevel,
+      icon: <GraduationCap className="h-3.5 w-3.5" />,
+      disabled: false,
+    },
+    {
+      label: "Add Subject",
+      onClick: onSubject,
+      icon: <BookOpen className="h-3.5 w-3.5" />,
+      disabled: false,
+    },
+    {
+      label: "Add Chapter",
+      onClick: onChapter,
+      icon: <Layers className="h-3.5 w-3.5" />,
+      disabled: !canChapter,
+    },
+    {
+      label: "Bulk Upload MCQs",
+      onClick: () => {
+        window.location.href = "/admin/mcq?action=bulk";
+      },
+      icon: <Upload className="h-3.5 w-3.5" />,
+      disabled: false,
+    },
   ];
   return (
     <div className="glass rounded-2xl p-4 shadow-card-soft">
@@ -1147,7 +1555,9 @@ function QuickActionsCard({ onLevel, onSubject, onChapter, canChapter }: { onLev
             disabled={a.disabled}
             className="flex w-full items-center gap-2 rounded-lg border border-border/40 bg-card/40 px-2.5 py-2 text-xs font-semibold transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/10 hover:text-primary hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 text-primary">{a.icon}</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 text-primary">
+              {a.icon}
+            </span>
             {a.label}
             <ChevronRight className="ml-auto h-3 w-3 opacity-60" />
           </button>
@@ -1156,7 +1566,6 @@ function QuickActionsCard({ onLevel, onSubject, onChapter, canChapter }: { onLev
     </div>
   );
 }
-
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
@@ -1210,7 +1619,15 @@ function Pill({ label, value }: { label: string; value: number }) {
   );
 }
 
-function CountChip({ icon, value, title }: { icon: React.ReactNode; value: number; title: string }) {
+function CountChip({
+  icon,
+  value,
+  title,
+}: {
+  icon: React.ReactNode;
+  value: number;
+  title: string;
+}) {
   return (
     <span
       title={title}
@@ -1268,10 +1685,13 @@ function EntityDialog({
 
   const open = state.kind !== "none";
   const title =
-    state.kind === "level" ? `${state.mode === "create" ? "Create" : "Edit"} Level`
-    : state.kind === "subject" ? `${state.mode === "create" ? "Create" : "Edit"} Subject`
-    : state.kind === "chapter" ? `${state.mode === "create" ? "Create" : "Edit"} Chapter`
-    : "";
+    state.kind === "level"
+      ? `${state.mode === "create" ? "Create" : "Edit"} Level`
+      : state.kind === "subject"
+        ? `${state.mode === "create" ? "Create" : "Edit"} Subject`
+        : state.kind === "chapter"
+          ? `${state.mode === "create" ? "Create" : "Edit"} Chapter`
+          : "";
 
   // Form state per kind
   const [form, setForm] = useState<Record<string, unknown>>({});
@@ -1280,11 +1700,37 @@ function EntityDialog({
   // calling setState during render triggers React error #418 and unreliable forms).
   useEffect(() => {
     if (state.kind === "level") {
-      setForm(state.data ? { ...state.data } : { code: "", name: "", color: "#a855f7", icon: "GraduationCap", sort_order: levels.length, status: "published" });
+      setForm(
+        state.data
+          ? { ...state.data }
+          : {
+              code: "",
+              name: "",
+              color: "#a855f7",
+              icon: "GraduationCap",
+              sort_order: levels.length,
+              status: "published",
+            },
+      );
     } else if (state.kind === "subject") {
-      setForm(state.data ? { ...state.data } : { name: "", level: state.levelCode ?? "professional", color: "#a855f7", icon: "BookOpen", sort_order: 0, status: "published" });
+      setForm(
+        state.data
+          ? { ...state.data }
+          : {
+              name: "",
+              level: state.levelCode ?? "professional",
+              color: "#a855f7",
+              icon: "BookOpen",
+              sort_order: 0,
+              status: "published",
+            },
+      );
     } else if (state.kind === "chapter") {
-      setForm(state.data ? { ...state.data } : { name: "", subject_id: state.subjectId ?? "", sort_order: 0, status: "published" });
+      setForm(
+        state.data
+          ? { ...state.data }
+          : { name: "", subject_id: state.subjectId ?? "", sort_order: 0, status: "published" },
+      );
     } else {
       setForm({});
     }
@@ -1308,7 +1754,11 @@ function EntityDialog({
         return updateChapterFn({ data: form as never });
       }
     },
-    onSuccess: () => { toast.success("Saved"); onSaved(); onClose(); },
+    onSuccess: () => {
+      toast.success("Saved");
+      onSaved();
+      onClose();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -1331,7 +1781,9 @@ function EntityDialog({
                 <Input
                   value={(form.code as string) ?? ""}
                   disabled={state.mode === "edit"}
-                  onChange={(e) => set("code", e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                  onChange={(e) =>
+                    set("code", e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))
+                  }
                   placeholder="e.g. professional"
                 />
               </Field>
@@ -1339,15 +1791,27 @@ function EntityDialog({
           )}
 
           <Field label="Name" required>
-            <Input value={(form.name as string) ?? ""} onChange={(e) => set("name", e.target.value)} />
+            <Input
+              value={(form.name as string) ?? ""}
+              onChange={(e) => set("name", e.target.value)}
+            />
           </Field>
 
           {state.kind === "subject" && (
             <Field label="Level">
-              <Select value={(form.level as string) ?? "professional"} onValueChange={(v) => set("level", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={(form.level as string) ?? "professional"}
+                onValueChange={(v) => set("level", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                  {levels.map((l) => (
+                    <SelectItem key={l.code} value={l.code}>
+                      {l.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </Field>
@@ -1355,10 +1819,19 @@ function EntityDialog({
 
           {state.kind === "chapter" && (
             <Field label="Subject">
-              <Select value={(form.subject_id as string) ?? ""} onValueChange={(v) => set("subject_id", v)}>
-                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
+              <Select
+                value={(form.subject_id as string) ?? ""}
+                onValueChange={(v) => set("subject_id", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select subject" />
+                </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  {subjects.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </Field>
@@ -1375,10 +1848,18 @@ function EntityDialog({
           {(state.kind === "level" || state.kind === "subject") && (
             <div className="grid grid-cols-2 gap-3">
               <Field label="Color">
-                <Input type="color" value={(form.color as string) ?? "#a855f7"} onChange={(e) => set("color", e.target.value)} />
+                <Input
+                  type="color"
+                  value={(form.color as string) ?? "#a855f7"}
+                  onChange={(e) => set("color", e.target.value)}
+                />
               </Field>
               <Field label="Icon name">
-                <Input value={(form.icon as string) ?? ""} onChange={(e) => set("icon", e.target.value)} placeholder="lucide icon name" />
+                <Input
+                  value={(form.icon as string) ?? ""}
+                  onChange={(e) => set("icon", e.target.value)}
+                  placeholder="lucide icon name"
+                />
               </Field>
             </div>
           )}
@@ -1392,8 +1873,13 @@ function EntityDialog({
               />
             </Field>
             <Field label="Status">
-              <Select value={(form.status as string) ?? "published"} onValueChange={(v) => set("status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={(form.status as string) ?? "published"}
+                onValueChange={(v) => set("status", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
@@ -1405,7 +1891,9 @@ function EntityDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
             {save.isPending ? "Saving…" : "Save"}
           </Button>
@@ -1415,11 +1903,20 @@ function EntityDialog({
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1">
       <Label className="text-xs font-medium">
-        {label}{required && <span className="text-destructive"> *</span>}
+        {label}
+        {required && <span className="text-destructive"> *</span>}
       </Label>
       {children}
     </div>
@@ -1456,16 +1953,24 @@ function ChapterMcqsDialog({ chapter, onClose }: { chapter: Chapter; onClose: ()
       }),
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["academic-chapter-mcqs", chapter.id] });
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: ["academic-chapter-mcqs", chapter.id] });
 
   const del = useMutation({
     mutationFn: (id: string) => delFn({ data: { id } }),
-    onSuccess: () => { toast.success("MCQ deleted"); invalidate(); qc.invalidateQueries({ queryKey: ["admin-academic-tree"] }); },
+    onSuccess: () => {
+      toast.success("MCQ deleted");
+      invalidate();
+      qc.invalidateQueries({ queryKey: ["admin-academic-tree"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const statusMut = useMutation({
     mutationFn: (vars: { id: string; status: "published" | "draft" }) => statusFn({ data: vars }),
-    onSuccess: (_d, v) => { toast.success(v.status === "published" ? "Published" : "Unpublished"); invalidate(); },
+    onSuccess: (_d, v) => {
+      toast.success(v.status === "published" ? "Published" : "Unpublished");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -1491,12 +1996,17 @@ function ChapterMcqsDialog({ chapter, onClose }: { chapter: Chapter; onClose: ()
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="Search question text…"
               className="pl-9"
             />
           </div>
-          <Badge variant="outline" className="text-[10px]">{total} total</Badge>
+          <Badge variant="outline" className="text-[10px]">
+            {total} total
+          </Badge>
         </div>
 
         <div className="max-h-[55vh] overflow-auto rounded-xl border border-border/60">
@@ -1527,15 +2037,25 @@ function ChapterMcqsDialog({ chapter, onClose }: { chapter: Chapter; onClose: ()
                       {m.tags?.length > 0 && (
                         <div className="mt-1 flex flex-wrap gap-1">
                           {m.tags.slice(0, 3).map((t) => (
-                            <span key={t} className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] text-muted-foreground">{t}</span>
+                            <span
+                              key={t}
+                              className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] text-muted-foreground"
+                            >
+                              {t}
+                            </span>
                           ))}
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2 font-display font-bold text-primary">{m.correct_option}</td>
+                    <td className="px-3 py-2 font-display font-bold text-primary">
+                      {m.correct_option}
+                    </td>
                     <td className="px-3 py-2 capitalize">{m.difficulty}</td>
                     <td className="px-3 py-2">
-                      <Badge variant={m.status === "published" ? "default" : "secondary"} className="text-[10px] capitalize">
+                      <Badge
+                        variant={m.status === "published" ? "default" : "secondary"}
+                        className="text-[10px] capitalize"
+                      >
                         {m.status}
                       </Badge>
                     </td>
@@ -1543,13 +2063,24 @@ function ChapterMcqsDialog({ chapter, onClose }: { chapter: Chapter; onClose: ()
                       <div className="flex justify-end gap-1">
                         <IconBtn
                           title={m.status === "published" ? "Unpublish" : "Publish"}
-                          onClick={() => statusMut.mutate({ id: m.id, status: m.status === "published" ? "draft" : "published" })}
+                          onClick={() =>
+                            statusMut.mutate({
+                              id: m.id,
+                              status: m.status === "published" ? "draft" : "published",
+                            })
+                          }
                         >
-                          {m.status === "published" ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          {m.status === "published" ? (
+                            <EyeOff className="h-3.5 w-3.5" />
+                          ) : (
+                            <Eye className="h-3.5 w-3.5" />
+                          )}
                         </IconBtn>
                         <IconBtn
                           title="Delete MCQ"
-                          onClick={() => { if (confirm("Delete this MCQ?")) del.mutate(m.id); }}
+                          onClick={() => {
+                            if (confirm("Delete this MCQ?")) del.mutate(m.id);
+                          }}
                         >
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </IconBtn>
@@ -1564,18 +2095,38 @@ function ChapterMcqsDialog({ chapter, onClose }: { chapter: Chapter; onClose: ()
 
         {total > 0 && (
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Page {page} of {totalPages}</span>
+            <span>
+              Page {page} of {totalPages}
+            </span>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
-              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </Button>
             </div>
           </div>
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" /> Close</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" /> Close
+          </Button>
           <Button asChild>
-            <a href={`/admin/mcq`} onClick={onClose}>Open MCQ Manager →</a>
+            <a href={`/admin/mcq`} onClick={onClose}>
+              Open MCQ Manager →
+            </a>
           </Button>
         </DialogFooter>
       </DialogContent>

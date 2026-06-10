@@ -22,8 +22,9 @@ async function request<T>(
   return res.json() as Promise<T>;
 }
 
-const get  = <T>(path: string, token?: string)               => request<T>("GET",  path, undefined, token);
-const post = <T>(path: string, body: unknown, token?: string) => request<T>("POST", path, body, token);
+const get = <T>(path: string, token?: string) => request<T>("GET", path, undefined, token);
+const post = <T>(path: string, body: unknown, token?: string) =>
+  request<T>("POST", path, body, token);
 
 // H-2: API token storage hardening.
 //
@@ -42,7 +43,11 @@ let inMemoryToken: string | undefined;
 
 function purgeLegacyTokens() {
   if (typeof window === "undefined") return;
-  try { window.localStorage.removeItem(TOKEN_KEY); } catch { /* noop */ }
+  try {
+    window.localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* noop */
+  }
 }
 
 function getToken(): string | undefined {
@@ -62,47 +67,74 @@ export function setApiToken(token: string) {
   inMemoryToken = token;
   if (typeof window === "undefined") return;
   purgeLegacyTokens();
-  try { window.sessionStorage.setItem(TOKEN_KEY, token); } catch { /* noop */ }
+  try {
+    window.sessionStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    /* noop */
+  }
 }
 
 export function clearApiToken() {
   inMemoryToken = undefined;
   if (typeof window === "undefined") return;
   purgeLegacyTokens();
-  try { window.sessionStorage.removeItem(TOKEN_KEY); } catch { /* noop */ }
+  try {
+    window.sessionStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* noop */
+  }
 }
 
 export const api = {
   health: {
-    get: () => get<{
-      status: string; service: string; version: string;
-      supabase_configured: boolean; mode: "demo" | "live"; timestamp: string;
-    }>("/health"),
+    get: () =>
+      get<{
+        status: string;
+        service: string;
+        version: string;
+        supabase_configured: boolean;
+        mode: "demo" | "live";
+        timestamp: string;
+      }>("/health"),
   },
 
   auth: {
     login: (email: string, password: string) =>
       post<{ token: string; user: ApiUser }>("/auth/login", { email, password }),
-    logout: (token?: string) =>
-      post<{ ok: boolean }>("/auth/logout", {}, token ?? getToken()),
-    me: (token?: string) =>
-      get<{ user: ApiUser }>("/auth/me", token ?? getToken()),
+    logout: (token?: string) => post<{ ok: boolean }>("/auth/logout", {}, token ?? getToken()),
+    me: (token?: string) => get<{ user: ApiUser }>("/auth/me", token ?? getToken()),
   },
 
   learning: {
     subjects: (token?: string) =>
       get<{ subjects: ApiSubject[] }>("/learning/subjects", token ?? getToken()),
     chapters: (subjectId: string, token?: string) =>
-      get<{ chapters: ApiChapter[] }>(`/learning/subjects/${subjectId}/chapters`, token ?? getToken()),
-    mcqs: (chapterId: string, params?: { limit?: number; offset?: number; difficulty?: string }, token?: string) => {
+      get<{ chapters: ApiChapter[] }>(
+        `/learning/subjects/${subjectId}/chapters`,
+        token ?? getToken(),
+      ),
+    mcqs: (
+      chapterId: string,
+      params?: { limit?: number; offset?: number; difficulty?: string },
+      token?: string,
+    ) => {
       const q = new URLSearchParams();
-      if (params?.limit)      q.set("limit",      String(params.limit));
-      if (params?.offset)     q.set("offset",     String(params.offset));
+      if (params?.limit) q.set("limit", String(params.limit));
+      if (params?.offset) q.set("offset", String(params.offset));
       if (params?.difficulty) q.set("difficulty", params.difficulty);
-      return get<{ mcqs: ApiMcq[]; total: number }>(`/learning/chapters/${chapterId}/mcqs?${q}`, token ?? getToken());
+      return get<{ mcqs: ApiMcq[]; total: number }>(
+        `/learning/chapters/${chapterId}/mcqs?${q}`,
+        token ?? getToken(),
+      );
     },
     submitAttempt: (mcqId: string, selectedOption: number, timeTakenMs?: number, token?: string) =>
-      post<{ ok: boolean; correct: boolean; correct_answer: number; explanation: string; xp_earned: number }>(
+      post<{
+        ok: boolean;
+        correct: boolean;
+        correct_answer: number;
+        explanation: string;
+        xp_earned: number;
+      }>(
         "/learning/attempts",
         { mcq_id: mcqId, selected_option: selectedOption, time_taken_ms: timeTakenMs },
         token ?? getToken(),
@@ -114,11 +146,10 @@ export const api = {
   admin: {
     dashboard: (token?: string) =>
       get<ApiDashboardSnapshot>("/admin/dashboard", token ?? getToken()),
-    analytics: (token?: string) =>
-      get<ApiAnalytics>("/admin/analytics", token ?? getToken()),
+    analytics: (token?: string) => get<ApiAnalytics>("/admin/analytics", token ?? getToken()),
     users: (params?: { role?: string; status?: string }, token?: string) => {
       const q = new URLSearchParams();
-      if (params?.role)   q.set("role",   params.role);
+      if (params?.role) q.set("role", params.role);
       if (params?.status) q.set("status", params.status);
       return get<{ users: ApiUser[]; total: number }>(`/admin/users?${q}`, token ?? getToken());
     },
@@ -126,12 +157,15 @@ export const api = {
       get<{ subjects: ApiSubject[]; total: number }>("/admin/subjects", token ?? getToken()),
     createSubject: (name: string, level: string, token?: string) =>
       post<{ subject: ApiSubject }>("/admin/subjects", { name, level }, token ?? getToken()),
-    mcqs: (params?: { subject_id?: string; chapter_id?: string; limit?: number; offset?: number }, token?: string) => {
+    mcqs: (
+      params?: { subject_id?: string; chapter_id?: string; limit?: number; offset?: number },
+      token?: string,
+    ) => {
       const q = new URLSearchParams();
       if (params?.subject_id) q.set("subject_id", params.subject_id);
       if (params?.chapter_id) q.set("chapter_id", params.chapter_id);
-      if (params?.limit)      q.set("limit",      String(params.limit));
-      if (params?.offset)     q.set("offset",     String(params.offset));
+      if (params?.limit) q.set("limit", String(params.limit));
+      if (params?.offset) q.set("offset", String(params.offset));
       return get<{ mcqs: ApiMcq[]; total: number }>(`/admin/mcqs?${q}`, token ?? getToken());
     },
     createMcq: (data: Partial<ApiMcq>, token?: string) =>
@@ -140,22 +174,44 @@ export const api = {
 };
 
 export type ApiUser = {
-  id: string; name: string; email: string;
-  role: "student" | "admin"; status: string; joined: string;
+  id: string;
+  name: string;
+  email: string;
+  role: "student" | "admin";
+  status: string;
+  joined: string;
 };
 export type ApiSubject = {
-  id: string; name: string; level: string; chapter_count: number; mcq_count: number;
+  id: string;
+  name: string;
+  level: string;
+  chapter_count: number;
+  mcq_count: number;
 };
 export type ApiChapter = {
-  id: string; subject_id: string; name: string; order: number; mcq_count: number;
+  id: string;
+  subject_id: string;
+  name: string;
+  order: number;
+  mcq_count: number;
 };
 export type ApiMcq = {
-  id: string; chapter_id: string; subject_id: string; question: string;
-  options: string[]; answer: number; explanation: string; difficulty: string;
+  id: string;
+  chapter_id: string;
+  subject_id: string;
+  question: string;
+  options: string[];
+  answer: number;
+  explanation: string;
+  difficulty: string;
 };
 export type ApiDashboardSnapshot = {
-  active_students: number; pending_drafts: number; live_exams: number;
-  total_mcqs: number; new_registrations_today: number; attempts_today: number;
+  active_students: number;
+  pending_drafts: number;
+  live_exams: number;
+  total_mcqs: number;
+  new_registrations_today: number;
+  attempts_today: number;
   recent_activity: { type: string; message: string; time: string }[];
 };
 export type ApiAnalytics = {
@@ -164,8 +220,13 @@ export type ApiAnalytics = {
   subject_performance: { subject: string; avg_score: number }[];
 };
 export type ApiStudentPerformance = {
-  user_id: string; accuracy: number; streak_days: number; xp: number;
-  success_rate: number; total_attempted: number; total_correct: number;
+  user_id: string;
+  accuracy: number;
+  streak_days: number;
+  xp: number;
+  success_rate: number;
+  total_attempted: number;
+  total_correct: number;
   weekly_scores: { day: string; score: number }[];
   subject_breakdown: { subject: string; correct: number; attempted: number; pct: number }[];
 };

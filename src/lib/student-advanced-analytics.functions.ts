@@ -18,7 +18,8 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
     const weeklyGoal = Math.max(1, Math.min(50000, Number(meta.weekly_mcq_goal) || 350));
 
     const now = new Date();
-    const dayStart = new Date(now); dayStart.setUTCHours(0, 0, 0, 0);
+    const dayStart = new Date(now);
+    dayStart.setUTCHours(0, 0, 0, 0);
     const since7 = new Date(now.getTime() - 7 * 86400_000);
     const since30 = new Date(now.getTime() - 30 * 86400_000);
     const since90 = new Date(now.getTime() - 90 * 86400_000);
@@ -31,7 +32,9 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
         .gte("started_at", since30.toISOString()),
       supabase
         .from("exam_attempts")
-        .select("id,quiz_id,subject_id,chapter_id,kind,score,correct_count,total_count,duration_seconds,started_at,completed_at,status")
+        .select(
+          "id,quiz_id,subject_id,chapter_id,kind,score,correct_count,total_count,duration_seconds,started_at,completed_at,status",
+        )
         .eq("user_id", userId)
         .gte("started_at", since90.toISOString())
         .order("started_at", { ascending: false })
@@ -53,9 +56,7 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
     const chapters = chaptersR.data ?? [];
 
     // Pull answers for the recent attempts (no FK declared, so do it in two steps)
-    const recentIds = attempts
-      .filter((a) => new Date(a.started_at) >= since30)
-      .map((a) => a.id);
+    const recentIds = attempts.filter((a) => new Date(a.started_at) >= since30).map((a) => a.id);
     let answers: Array<{ attempt_id: string; is_correct: boolean }> = [];
     if (recentIds.length) {
       const { data: ans } = await supabase
@@ -65,7 +66,6 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
       answers = ans ?? [];
     }
     const attemptById = new Map(attempts.map((a) => [a.id, a]));
-
 
     // ---- Study time ----
     const sumWhere = (pred: (d: string) => boolean) =>
@@ -79,15 +79,15 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
     // 7-day study minutes series
     const studyDaily: Array<{ date: string; minutes: number }> = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(now); d.setUTCHours(0, 0, 0, 0); d.setUTCDate(d.getUTCDate() - i);
-      const next = new Date(d); next.setUTCDate(next.getUTCDate() + 1);
-      const secs = sessions.reduce(
-        (s, x) => {
-          const t = new Date(x.started_at);
-          return t >= d && t < next ? s + (x.duration_seconds ?? 0) : s;
-        },
-        0,
-      );
+      const d = new Date(now);
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() - i);
+      const next = new Date(d);
+      next.setUTCDate(next.getUTCDate() + 1);
+      const secs = sessions.reduce((s, x) => {
+        const t = new Date(x.started_at);
+        return t >= d && t < next ? s + (x.duration_seconds ?? 0) : s;
+      }, 0);
       studyDaily.push({ date: d.toISOString().slice(0, 10), minutes: Math.round(secs / 60) });
     }
 
@@ -140,12 +140,14 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
       const cid = ea?.chapter_id ?? null;
       if (sid) {
         const cur = subjAgg.get(sid) ?? { correct: 0, total: 0 };
-        cur.total += 1; if (ans.is_correct) cur.correct += 1;
+        cur.total += 1;
+        if (ans.is_correct) cur.correct += 1;
         subjAgg.set(sid, cur);
       }
       if (cid) {
         const cur = chapAgg.get(cid) ?? { correct: 0, total: 0 };
-        cur.total += 1; if (ans.is_correct) cur.correct += 1;
+        cur.total += 1;
+        if (ans.is_correct) cur.correct += 1;
         chapAgg.set(cid, cur);
       }
     }
@@ -177,37 +179,68 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
     // ---- 30-day heatmap ----
     const heatmap: Array<{ date: string; count: number }> = [];
     for (let i = 29; i >= 0; i--) {
-      const d = new Date(now); d.setUTCHours(0, 0, 0, 0); d.setUTCDate(d.getUTCDate() - i);
+      const d = new Date(now);
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() - i);
       const key = d.toISOString().slice(0, 10);
-      const c = attempts.filter((a) => (a.completed_at ?? a.started_at ?? "").slice(0, 10) === key).length;
+      const c = attempts.filter(
+        (a) => (a.completed_at ?? a.started_at ?? "").slice(0, 10) === key,
+      ).length;
       heatmap.push({ date: key, count: c });
     }
 
     // ---- Streak ----
     const days = new Set(attempts.map((a) => (a.completed_at ?? a.started_at).slice(0, 10)));
-    let streak = 0; const cursor = new Date(now); cursor.setUTCHours(0, 0, 0, 0);
+    let streak = 0;
+    const cursor = new Date(now);
+    cursor.setUTCHours(0, 0, 0, 0);
     if (!days.has(cursor.toISOString().slice(0, 10))) cursor.setUTCDate(cursor.getUTCDate() - 1);
-    while (days.has(cursor.toISOString().slice(0, 10))) { streak++; cursor.setUTCDate(cursor.getUTCDate() - 1); }
+    while (days.has(cursor.toISOString().slice(0, 10))) {
+      streak++;
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+    }
     // Longest streak in last 90 days
     const sortedDays = Array.from(days).sort();
-    let longest = 0, run = 0; let prev: Date | null = null;
+    let longest = 0,
+      run = 0;
+    let prev: Date | null = null;
     for (const d of sortedDays) {
       const cur = new Date(d);
-      if (prev && (cur.getTime() - prev.getTime()) === 86400_000) run++; else run = 1;
+      if (prev && cur.getTime() - prev.getTime() === 86400_000) run++;
+      else run = 1;
       if (run > longest) longest = run;
       prev = cur;
     }
 
     // ---- Insights ----
     const insights: Array<{ kind: "up" | "down" | "info" | "goal"; text: string }> = [];
-    if (weeklyChange > 2) insights.push({ kind: "up", text: `Accuracy is up ${weeklyChange}% vs last week — keep going!` });
-    if (weeklyChange < -2) insights.push({ kind: "down", text: `Accuracy dropped ${Math.abs(weeklyChange)}% vs last week. Review your wrong questions.` });
-    if (subjectAccuracy[0]) insights.push({ kind: "info", text: `You are strongest in ${subjectAccuracy[0].name} (${subjectAccuracy[0].accuracy}%).` });
+    if (weeklyChange > 2)
+      insights.push({
+        kind: "up",
+        text: `Accuracy is up ${weeklyChange}% vs last week — keep going!`,
+      });
+    if (weeklyChange < -2)
+      insights.push({
+        kind: "down",
+        text: `Accuracy dropped ${Math.abs(weeklyChange)}% vs last week. Review your wrong questions.`,
+      });
+    if (subjectAccuracy[0])
+      insights.push({
+        kind: "info",
+        text: `You are strongest in ${subjectAccuracy[0].name} (${subjectAccuracy[0].accuracy}%).`,
+      });
     const worstSubj = [...subjectAccuracy].reverse()[0];
     if (worstSubj && worstSubj.id !== subjectAccuracy[0]?.id) {
-      insights.push({ kind: "down", text: `${worstSubj.name} needs work — only ${worstSubj.accuracy}% accuracy.` });
+      insights.push({
+        kind: "down",
+        text: `${worstSubj.name} needs work — only ${worstSubj.accuracy}% accuracy.`,
+      });
     }
-    if (weakTopics[0]) insights.push({ kind: "down", text: `${weakTopics[0].name} completion is below average (${weakTopics[0].accuracy}%).` });
+    if (weakTopics[0])
+      insights.push({
+        kind: "down",
+        text: `${weakTopics[0].name} completion is below average (${weakTopics[0].accuracy}%).`,
+      });
     const answeredThisWeek = thisWeekAttempts.reduce((s, a) => s + (a.total_count ?? 0), 0);
     if (answeredThisWeek < weeklyGoal) {
       insights.push({
@@ -217,7 +250,8 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
     } else {
       insights.push({ kind: "up", text: `Weekly goal hit — ${answeredThisWeek} MCQs answered!` });
     }
-    if (streak >= 3) insights.push({ kind: "up", text: `You're on a ${streak}-day learning streak.` });
+    if (streak >= 3)
+      insights.push({ kind: "up", text: `You're on a ${streak}-day learning streak.` });
 
     // ---- MCQ counts (real, derived from completed attempts) ----
     const inRange = (iso: string, from: Date, to?: Date) => {
@@ -225,15 +259,20 @@ export const studentAdvancedAnalytics = createServerFn({ method: "GET" })
       return t >= from.getTime() && (!to || t < to.getTime());
     };
     const sumMcqs = (xs: typeof attempts) => xs.reduce((s, a) => s + (a.total_count ?? 0), 0);
-    const mcqsToday = sumMcqs(attempts.filter((a) => inRange(a.completed_at ?? a.started_at, dayStart)));
+    const mcqsToday = sumMcqs(
+      attempts.filter((a) => inRange(a.completed_at ?? a.started_at, dayStart)),
+    );
     const mcqsWeek = sumMcqs(thisWeekAttempts);
     const mcqsMonth = sumMcqs(attempts.filter((a) => new Date(a.started_at) >= since30));
 
     // Daily MCQ series (last 7 days, count of questions answered per day)
     const mcqDaily: Array<{ date: string; count: number }> = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(now); d.setUTCHours(0, 0, 0, 0); d.setUTCDate(d.getUTCDate() - i);
-      const next = new Date(d); next.setUTCDate(next.getUTCDate() + 1);
+      const d = new Date(now);
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() - i);
+      const next = new Date(d);
+      next.setUTCDate(next.getUTCDate() + 1);
       const c = attempts.reduce((s, a) => {
         const t = new Date(a.completed_at ?? a.started_at);
         return t >= d && t < next ? s + (a.total_count ?? 0) : s;

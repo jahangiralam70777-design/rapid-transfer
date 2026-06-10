@@ -2,11 +2,24 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Upload, FileText, Loader2, X, Save, AlertTriangle, CheckCircle2, Trash2, Sparkles,
+  Upload,
+  FileText,
+  Loader2,
+  X,
+  Save,
+  AlertTriangle,
+  CheckCircle2,
+  Trash2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +27,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  adminListLevels, adminListSubjects, adminListChapters,
-  adminListMcqs, adminBulkImportMcqs,
+  adminListLevels,
+  adminListSubjects,
+  adminListChapters,
+  adminListMcqs,
+  adminBulkImportMcqs,
 } from "@/lib/admin-mcq.functions";
 import { parseMcqText, fingerprintQuestion, type ParsedMcq } from "@/lib/mcq-parse";
 import { extractTextFromFile } from "@/lib/flash-card-parse";
@@ -34,8 +54,12 @@ Answer: A
 Explanation: Audit is the independent examination of financial information.`;
 
 export function BulkUploadMcqsDialog({
-  onClose, onImported,
-}: { onClose: () => void; onImported: () => void }) {
+  onClose,
+  onImported,
+}: {
+  onClose: () => void;
+  onImported: () => void;
+}) {
   const qc = useQueryClient();
   const levelsFn = useServerFn(adminListLevels);
   const subjectsFn = useServerFn(adminListSubjects);
@@ -53,8 +77,16 @@ export function BulkUploadMcqsDialog({
   const [errors, setErrors] = useState<{ raw: string; reason: string }[]>([]);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
-  const levelsQ = useQuery({ queryKey: ["admin-levels"], queryFn: () => levelsFn(), staleTime: 60_000 });
-  const subjectsQ = useQuery({ queryKey: ["admin-subjects"], queryFn: () => subjectsFn(), staleTime: 60_000 });
+  const levelsQ = useQuery({
+    queryKey: ["admin-levels"],
+    queryFn: () => levelsFn(),
+    staleTime: 60_000,
+  });
+  const subjectsQ = useQuery({
+    queryKey: ["admin-subjects"],
+    queryFn: () => subjectsFn(),
+    staleTime: 60_000,
+  });
   const chaptersQ = useQuery({
     queryKey: ["admin-chapters", subjectId],
     queryFn: () => chaptersFn({ data: { subjectId } }),
@@ -68,8 +100,10 @@ export function BulkUploadMcqsDialog({
 
   const levels = (levelsQ.data ?? []) as Array<{ code: string; name: string }>;
   const subjects = useMemo(
-    () => ((subjectsQ.data ?? []) as Array<{ id: string; name: string; level: string }>)
-      .filter((s) => !level || s.level === level),
+    () =>
+      ((subjectsQ.data ?? []) as Array<{ id: string; name: string; level: string }>).filter(
+        (s) => !level || s.level === level,
+      ),
     [subjectsQ.data, level],
   );
   const chapters = (chaptersQ.data ?? []) as Array<{ id: string; name: string }>;
@@ -78,8 +112,9 @@ export function BulkUploadMcqsDialog({
   useEffect(() => {
     if (!rows.length) return;
     const existing = new Set(
-      ((existingQ.data?.rows ?? []) as Array<{ question: string }>)
-        .map((m) => fingerprintQuestion(m.question)),
+      ((existingQ.data?.rows ?? []) as Array<{ question: string }>).map((m) =>
+        fingerprintQuestion(m.question),
+      ),
     );
     const seen = new Set<string>();
     setRows((prev) =>
@@ -90,7 +125,6 @@ export function BulkUploadMcqsDialog({
         return { ...r, _dupe: dupe };
       }),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingQ.data, rows.length]);
 
   const handleParse = (text: string) => {
@@ -182,22 +216,54 @@ export function BulkUploadMcqsDialog({
 
         {/* Scope */}
         <div className="grid gap-2 rounded-xl border border-border/60 bg-background/40 p-3 sm:grid-cols-3">
-          <Select value={level} onValueChange={(v) => { setLevel(v); setSubjectId(""); setChapterId(""); }}>
-            <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
+          <Select
+            value={level}
+            onValueChange={(v) => {
+              setLevel(v);
+              setSubjectId("");
+              setChapterId("");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Level" />
+            </SelectTrigger>
             <SelectContent>
-              {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+              {levels.map((l) => (
+                <SelectItem key={l.code} value={l.code}>
+                  {l.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select value={subjectId} onValueChange={(v) => { setSubjectId(v); setChapterId(""); }} disabled={!level}>
-            <SelectTrigger><SelectValue placeholder={level ? "Subject" : "Pick a level first"} /></SelectTrigger>
+          <Select
+            value={subjectId}
+            onValueChange={(v) => {
+              setSubjectId(v);
+              setChapterId("");
+            }}
+            disabled={!level}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={level ? "Subject" : "Pick a level first"} />
+            </SelectTrigger>
             <SelectContent>
-              {subjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+              {subjects.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={chapterId} onValueChange={setChapterId} disabled={!subjectId}>
-            <SelectTrigger><SelectValue placeholder={subjectId ? "Chapter" : "Pick a subject first"} /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder={subjectId ? "Chapter" : "Pick a subject first"} />
+            </SelectTrigger>
             <SelectContent>
-              {chapters.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {chapters.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -211,7 +277,10 @@ export function BulkUploadMcqsDialog({
             <Input
               type="file"
               accept=".txt,.md,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) onFile(f);
+              }}
             />
             <p className="text-[10px] text-muted-foreground">
               We extract the text and auto-parse MCQ blocks. Legacy .doc isn't supported.
@@ -229,10 +298,17 @@ export function BulkUploadMcqsDialog({
               className="font-mono text-xs"
             />
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleParse(rawText)} disabled={!rawText.trim()}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleParse(rawText)}
+                disabled={!rawText.trim()}
+              >
                 Parse text
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setRawText(SAMPLE)}>Insert sample</Button>
+              <Button size="sm" variant="ghost" onClick={() => setRawText(SAMPLE)}>
+                Insert sample
+              </Button>
             </div>
           </div>
         </div>
@@ -256,7 +332,8 @@ export function BulkUploadMcqsDialog({
             )}
             {errors.length > 0 && (
               <Badge className="border-rose-400/30 bg-rose-400/10 text-rose-400">
-                <AlertTriangle className="mr-1 h-3 w-3" /> {errors.length} unparseable block{errors.length > 1 ? "s" : ""}
+                <AlertTriangle className="mr-1 h-3 w-3" /> {errors.length} unparseable block
+                {errors.length > 1 ? "s" : ""}
               </Badge>
             )}
             {!chapterId && rows.length > 0 && (
@@ -274,13 +351,20 @@ export function BulkUploadMcqsDialog({
                 className={`border-b border-border/30 p-3 text-xs ${r._dupe ? "bg-amber-400/5" : ""}`}
               >
                 <div className="mb-2 flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 text-[10px]">#{i + 1}</Badge>
+                  <Badge variant="outline" className="shrink-0 text-[10px]">
+                    #{i + 1}
+                  </Badge>
                   {r._dupe && (
                     <Badge className="border-amber-400/30 bg-amber-400/10 text-amber-400 text-[10px]">
                       Duplicate — will be skipped
                     </Badge>
                   )}
-                  <Button size="sm" variant="ghost" className="ml-auto h-7 px-2 text-rose-400" onClick={() => removeRow(i)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="ml-auto h-7 px-2 text-rose-400"
+                    onClick={() => removeRow(i)}
+                  >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -338,7 +422,9 @@ export function BulkUploadMcqsDialog({
               {errors.slice(0, 10).map((e, i) => (
                 <div key={i} className="rounded bg-background/40 p-2">
                   <p className="text-rose-300">{e.reason}</p>
-                  <pre className="mt-1 whitespace-pre-wrap text-[10px] text-muted-foreground">{e.raw.slice(0, 240)}</pre>
+                  <pre className="mt-1 whitespace-pre-wrap text-[10px] text-muted-foreground">
+                    {e.raw.slice(0, 240)}
+                  </pre>
                 </div>
               ))}
             </div>
@@ -349,7 +435,9 @@ export function BulkUploadMcqsDialog({
           <div className="rounded-xl border border-border/40 bg-background/40 p-2 text-xs">
             <div className="mb-1 flex justify-between">
               <span>Importing…</span>
-              <span>{progress.done} / {progress.total}</span>
+              <span>
+                {progress.done} / {progress.total}
+              </span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <div
@@ -361,13 +449,19 @@ export function BulkUploadMcqsDialog({
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" /> Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" /> Cancel
+          </Button>
           <Button
             className="bg-cta-gradient text-white"
             disabled={!chapterId || !validRows.length || importM.isPending}
             onClick={() => importM.mutate()}
           >
-            {importM.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+            {importM.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-1 h-4 w-4" />
+            )}
             Import {validRows.length} MCQ{validRows.length === 1 ? "" : "s"}
           </Button>
         </DialogFooter>

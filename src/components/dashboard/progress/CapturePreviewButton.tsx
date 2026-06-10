@@ -26,7 +26,8 @@ function download(dataUrl: string, filename: string) {
 async function captureNode(node: HTMLElement, mode: "light" | "dark") {
   const { default: html2canvas } = await import("html2canvas-pro");
   // Read background from the document so the capture isn't transparent
-  const bg = getComputedStyle(document.body).backgroundColor || (mode === "dark" ? "#0b1120" : "#ffffff");
+  const bg =
+    getComputedStyle(document.body).backgroundColor || (mode === "dark" ? "#0b1120" : "#ffffff");
   const canvas = await html2canvas(node, {
     backgroundColor: bg,
     scale: window.devicePixelRatio > 1 ? 2 : 1.5,

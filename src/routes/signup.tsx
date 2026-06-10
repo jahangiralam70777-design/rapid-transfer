@@ -13,15 +13,20 @@ import {
 import { useAppStore } from "@/stores/app-store";
 import { signUpWithEmail } from "@/lib/auth-client";
 
-
 export const Route = createFileRoute("/signup")({
   component: StudentSignup,
   head: () => ({
     meta: [
       { title: "Sign Up · CA Aspire BD" },
-      { name: "description", content: "Create your CA Aspire BD account and start learning smarter today." },
+      {
+        name: "description",
+        content: "Create your CA Aspire BD account and start learning smarter today.",
+      },
       { property: "og:title", content: "Sign Up · CA Aspire BD" },
-      { property: "og:description", content: "AI-personalized study paths, mock tests and adaptive practice." },
+      {
+        property: "og:description",
+        content: "AI-personalized study paths, mock tests and adaptive practice.",
+      },
     ],
   }),
 });
@@ -42,9 +47,6 @@ export const REFERRAL_SOURCES = [
   "Instagram",
   "Other",
 ] as const;
-
-
-
 
 function StudentSignup() {
   const [name, setName] = useState("");
@@ -95,8 +97,6 @@ function StudentSignup() {
       setLoading(false);
     }
   };
-
-
 
   return (
     <AuthShell variant="student">
@@ -195,13 +195,15 @@ function StudentSignup() {
         </NeonButton>
       </form>
 
-
       <div className="mt-5 flex gap-2">
         {[
           { icon: GraduationCap, t: "ICAB-aligned curriculum" },
           { icon: Trophy, t: "Adaptive mock tests" },
         ].map((b, i) => (
-          <div key={i} className="flex flex-1 items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2">
+          <div
+            key={i}
+            className="flex flex-1 items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2"
+          >
             <b.icon className="h-4 w-4 text-[var(--neon-purple)]" />
             <span className="text-[11px] font-medium">{b.t}</span>
           </div>

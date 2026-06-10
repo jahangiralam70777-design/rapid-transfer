@@ -7,33 +7,33 @@ import { sanitizeSearchTerm } from "@/lib/admin-search-sanitize";
 const statusEnum = z.enum(["draft", "published", "archived"]);
 const cardTypeEnum = z.enum(["concept", "formula", "diagram", "timeline", "definition", "other"]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const selectCols =
   "id,subject_id,chapter_id,level,front,back,formula,image_url,card_type,tags,status,is_hidden,scheduled_at,view_count,created_at,updated_at";
 
 // ---------- LIST (admin) ----------
 export const adminListFlashCards = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: {
-    search?: string;
-    level?: string;
-    subjectId?: string;
-    chapterId?: string;
-    status?: "draft" | "published" | "archived" | "hidden" | "all";
-    page?: number;
-    pageSize?: number;
-  }) =>
-    z
-      .object({
-        search: z.string().trim().max(200).optional(),
-        level: z.string().trim().max(40).optional(),
-        subjectId: z.string().uuid().optional(),
-        chapterId: z.string().uuid().optional(),
-        status: z.enum(["draft", "published", "archived", "hidden", "all"]).default("all"),
-        page: z.number().int().min(1).max(2000).default(1),
-        pageSize: z.number().int().min(1).max(100).default(20),
-      })
-      .parse(i),
+  .inputValidator(
+    (i: {
+      search?: string;
+      level?: string;
+      subjectId?: string;
+      chapterId?: string;
+      status?: "draft" | "published" | "archived" | "hidden" | "all";
+      page?: number;
+      pageSize?: number;
+    }) =>
+      z
+        .object({
+          search: z.string().trim().max(200).optional(),
+          level: z.string().trim().max(40).optional(),
+          subjectId: z.string().uuid().optional(),
+          chapterId: z.string().uuid().optional(),
+          status: z.enum(["draft", "published", "archived", "hidden", "all"]).default("all"),
+          page: z.number().int().min(1).max(2000).default(1),
+          pageSize: z.number().int().min(1).max(100).default(20),
+        })
+        .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -134,9 +134,12 @@ export const listPublicFlashCards = createServerFn({ method: "POST" })
     if (data.subjectId) q = q.eq("subject_id", data.subjectId);
     if (data.chapterId) q = q.eq("chapter_id", data.chapterId);
     if (data.level) q = q.eq("level", data.level);
-    if (vis.hidden_levels.length) q = q.not("level", "in", `(${vis.hidden_levels.map((l) => `"${l}"`).join(",")})`);
-    if (vis.hidden_subject_ids.length) q = q.not("subject_id", "in", `(${vis.hidden_subject_ids.join(",")})`);
-    if (vis.hidden_chapter_ids.length) q = q.not("chapter_id", "in", `(${vis.hidden_chapter_ids.join(",")})`);
+    if (vis.hidden_levels.length)
+      q = q.not("level", "in", `(${vis.hidden_levels.map((l) => `"${l}"`).join(",")})`);
+    if (vis.hidden_subject_ids.length)
+      q = q.not("subject_id", "in", `(${vis.hidden_subject_ids.join(",")})`);
+    if (vis.hidden_chapter_ids.length)
+      q = q.not("chapter_id", "in", `(${vis.hidden_chapter_ids.join(",")})`);
     const { data: rows, error } = await q;
     if (error) throw error;
     return rows ?? [];
@@ -233,17 +236,30 @@ export const adminDuplicateFlashCard = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
     const { data: src, error: se } = await context.supabase
-      .from("flash_cards").select(selectCols).eq("id", data.id).single();
+      .from("flash_cards")
+      .select(selectCols)
+      .eq("id", data.id)
+      .single();
     if (se) throw se;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _i, created_at: _c, updated_at: _u, view_count: _v, ...rest } = src as Record<string, unknown>;
-    const payload = { ...(rest as Record<string, unknown>), status: "draft", created_by: context.userId, front: `${(src as { front: string }).front} (copy)` };
+
+    const {
+      id: _i,
+      created_at: _c,
+      updated_at: _u,
+      view_count: _v,
+      ...rest
+    } = src as Record<string, unknown>;
+    const payload = {
+      ...(rest as Record<string, unknown>),
+      status: "draft",
+      created_by: context.userId,
+      front: `${(src as { front: string }).front} (copy)`,
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await context.supabase.from("flash_cards").insert(payload as any);
     if (error) throw error;
     return { ok: true };
   });
-
 
 export const adminBulkImportFlashCards = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

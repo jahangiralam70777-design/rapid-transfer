@@ -31,7 +31,8 @@ export function useMyNotifications(enabledOpt = true) {
   const sessionReady = useAppStore((s) => s.sessionReady);
   const authLoading = useAppStore((s) => s.authLoading);
   const user = useAppStore((s) => s.user);
-  const enabled = enabledOpt && sessionReady && !authLoading && !!user && !user.id.startsWith("demo-");
+  const enabled =
+    enabledOpt && sessionReady && !authLoading && !!user && !user.id.startsWith("demo-");
 
   const q = useQuery({
     queryKey: MY_NOTIF_KEY,
@@ -49,15 +50,11 @@ export function useMyNotifications(enabledOpt = true) {
     if (!enabled) return;
     const channelName = `my-notif-live-${Math.random().toString(36).slice(2, 10)}`;
     const ch = supabase.channel(channelName);
-    ch.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "notifications" },
-      () => qc.invalidateQueries({ queryKey: MY_NOTIF_KEY }),
+    ch.on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () =>
+      qc.invalidateQueries({ queryKey: MY_NOTIF_KEY }),
     );
-    ch.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "notification_reads" },
-      () => qc.invalidateQueries({ queryKey: MY_NOTIF_KEY }),
+    ch.on("postgres_changes", { event: "*", schema: "public", table: "notification_reads" }, () =>
+      qc.invalidateQueries({ queryKey: MY_NOTIF_KEY }),
     );
     ch.subscribe();
     return () => {

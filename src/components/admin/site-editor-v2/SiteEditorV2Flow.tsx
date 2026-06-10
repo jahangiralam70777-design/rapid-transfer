@@ -38,16 +38,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useEditorEngine,
-  makeElement,
-  makeSection,
-} from "@/stores/editor-engine";
-import type {
-  EditorElement,
-  EditorSection,
-  SaveStatus,
-} from "@/lib/editor/types";
+import { useEditorEngine, makeElement, makeSection } from "@/stores/editor-engine";
+import type { EditorElement, EditorSection, SaveStatus } from "@/lib/editor/types";
 import { diffPageState } from "@/lib/editor/diff";
 import { EditorErrorBoundary } from "@/lib/editor/safety/EditorErrorBoundary";
 import { ConflictBanner } from "@/lib/editor/safety/ConflictBanner";
@@ -75,13 +67,7 @@ const SYNC_LABEL: Record<SyncStatus, { label: string; tone: string }> = {
 // so the editor stays local-first by default and starts pushing to the
 // backend (remote-storage + realtime + conflict detection) only after the
 // admin explicitly turns Editor Mode on.
-function SyncActivator({
-  pageId,
-  onApi,
-}: {
-  pageId: string;
-  onApi: (api: EditorSyncApi) => void;
-}) {
+function SyncActivator({ pageId, onApi }: { pageId: string; onApi: (api: EditorSyncApi) => void }) {
   const api = useEditorSync(pageId);
   useEffect(() => {
     onApi(api);
@@ -152,16 +138,14 @@ export function SiteEditorV2Flow() {
     [state.sections, selectedSectionId],
   );
   const selectedElement = useMemo(
-    () =>
-      selectedSection?.elements.find((e) => e.id === selectedElementId) ?? null,
+    () => selectedSection?.elements.find((e) => e.id === selectedElementId) ?? null,
     [selectedSection, selectedElementId],
   );
 
   const status = STATUS_LABEL[saveStatus];
   const syncStatus: SyncStatus = syncApi?.status ?? "idle";
   const syncBadge = SYNC_LABEL[syncStatus];
-  const showConflictBanner =
-    !!syncApi?.conflict && !conflictDismissed && editorMode;
+  const showConflictBanner = !!syncApi?.conflict && !conflictDismissed && editorMode;
 
   async function handlePublish() {
     if (!syncApi) {
@@ -197,486 +181,465 @@ export function SiteEditorV2Flow() {
 
   return (
     <EditorErrorBoundary area="SiteEditorV2">
-    <div className="min-h-screen bg-background text-foreground">
-      {editorMode && (
-        <SyncActivator pageId="home" onApi={setSyncApi} />
-      )}
-      {/* Top toolbar */}
-      <header className="sticky top-0 z-30 border-b bg-card/80 backdrop-blur">
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/admin/site">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Site Management
-            </Link>
-          </Button>
-          <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Advanced Editor · Phase 2</span>
-            <Badge variant="secondary" className="ml-1">
-              Isolated
-            </Badge>
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Switch
-                id="editor-mode"
-                checked={editorMode}
-                onCheckedChange={setEditorMode}
-              />
-              <Label htmlFor="editor-mode" className="text-sm">
-                Editor Mode
-              </Label>
+      <div className="min-h-screen bg-background text-foreground">
+        {editorMode && <SyncActivator pageId="home" onApi={setSyncApi} />}
+        {/* Top toolbar */}
+        <header className="sticky top-0 z-30 border-b bg-card/80 backdrop-blur">
+          <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/admin/site">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Site Management
+              </Link>
+            </Button>
+            <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Advanced Editor · Phase 2</span>
+              <Badge variant="secondary" className="ml-1">
+                Isolated
+              </Badge>
             </div>
 
-            <Separator orientation="vertical" className="h-6" />
+            <div className="ml-auto flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Switch id="editor-mode" checked={editorMode} onCheckedChange={setEditorMode} />
+                <Label htmlFor="editor-mode" className="text-sm">
+                  Editor Mode
+                </Label>
+              </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={undo}
-              disabled={!editorMode || undoStack.length === 0}
-              title="Undo (⌘Z)"
-              aria-label="Undo"
-            >
-              <Undo2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={redo}
-              disabled={!editorMode || redoStack.length === 0}
-              title="Redo (⌘⇧Z)"
-              aria-label="Redo"
-            >
-              <Redo2 className="h-4 w-4" />
-            </Button>
+              <Separator orientation="vertical" className="h-6" />
 
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${status.tone}`}
-            >
-              {status.label}
-            </span>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${syncBadge.tone}`}
-              title="Backend sync status (active only in Editor Mode)"
-            >
-              {syncBadge.label}
-            </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={undo}
+                disabled={!editorMode || undoStack.length === 0}
+                title="Undo (⌘Z)"
+                aria-label="Undo"
+              >
+                <Undo2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={redo}
+                disabled={!editorMode || redoStack.length === 0}
+                title="Redo (⌘⇧Z)"
+                aria-label="Redo"
+              >
+                <Redo2 className="h-4 w-4" />
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                createSnapshot(snapshotSummary || undefined);
-                setSnapshotSummary("");
-              }}
-              disabled={!editorMode}
-            >
-              <Save className="h-4 w-4" />
-              Snapshot
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handlePublish}
-              disabled={!editorMode || !syncApi || syncApi.publishStatus === "publishing"}
-              title="Publish current draft to live site"
-            >
-              <Rocket className="h-4 w-4" />
-              {syncApi?.publishStatus === "publishing" ? "Publishing…" : "Publish"}
-            </Button>
-          </div>
-        </div>
-        {showConflictBanner && syncApi ? (
-          <div className="px-4 pb-3">
-            <ConflictBanner
-              visible
-              onReload={() => syncApi.syncNow()}
-              onDismiss={() => setConflictDismissed(true)}
-              onMerge={() => syncApi.resolveConflictWith("merge")}
-            />
-          </div>
-        ) : null}
-      </header>
+              <span className={`rounded-full px-3 py-1 text-xs font-medium ${status.tone}`}>
+                {status.label}
+              </span>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium ${syncBadge.tone}`}
+                title="Backend sync status (active only in Editor Mode)"
+              >
+                {syncBadge.label}
+              </span>
 
-      <div className="grid gap-0 lg:grid-cols-[280px_1fr_320px]">
-        {/* Left: structure tree */}
-        <aside className="border-r bg-card/40 p-3">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <ListTree className="h-4 w-4" />
-              Structure
-            </div>
-            <div className="flex items-center gap-1">
-              <Select
-                onValueChange={(t) => {
-                  dispatch(
-                    {
-                      kind: "add_section",
-                      section: makeSection(t as EditorSection["type"]),
-                      index: state.sections.length,
-                    },
-                    "add_section",
-                  );
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  createSnapshot(snapshotSummary || undefined);
+                  setSnapshotSummary("");
                 }}
                 disabled={!editorMode}
               >
-                <SelectTrigger className="h-8 w-[110px]">
-                  <SelectValue placeholder={<Plus className="h-4 w-4" />} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hero">+ Hero</SelectItem>
-                  <SelectItem value="content">+ Content</SelectItem>
-                  <SelectItem value="feature">+ Feature</SelectItem>
-                  <SelectItem value="footer">+ Footer</SelectItem>
-                </SelectContent>
-              </Select>
+                <Save className="h-4 w-4" />
+                Snapshot
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handlePublish}
+                disabled={!editorMode || !syncApi || syncApi.publishStatus === "publishing"}
+                title="Publish current draft to live site"
+              >
+                <Rocket className="h-4 w-4" />
+                {syncApi?.publishStatus === "publishing" ? "Publishing…" : "Publish"}
+              </Button>
             </div>
           </div>
+          {showConflictBanner && syncApi ? (
+            <div className="px-4 pb-3">
+              <ConflictBanner
+                visible
+                onReload={() => syncApi.syncNow()}
+                onDismiss={() => setConflictDismissed(true)}
+                onMerge={() => syncApi.resolveConflictWith("merge")}
+              />
+            </div>
+          ) : null}
+        </header>
 
-          <ScrollArea className="h-[calc(100vh-180px)] pr-2">
-            <div className="space-y-2">
-              {state.sections.map((section, sIndex) => (
-                <Card
-                  key={section.id}
-                  className={`p-2 ${
-                    selectedSectionId === section.id ? "ring-2 ring-primary" : ""
-                  }`}
+        <div className="grid gap-0 lg:grid-cols-[280px_1fr_320px]">
+          {/* Left: structure tree */}
+          <aside className="border-r bg-card/40 p-3">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <ListTree className="h-4 w-4" />
+                Structure
+              </div>
+              <div className="flex items-center gap-1">
+                <Select
+                  onValueChange={(t) => {
+                    dispatch(
+                      {
+                        kind: "add_section",
+                        section: makeSection(t as EditorSection["type"]),
+                        index: state.sections.length,
+                      },
+                      "add_section",
+                    );
+                  }}
+                  disabled={!editorMode}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <button
-                      className="flex flex-1 items-center gap-2 text-left text-sm font-medium"
-                      onClick={() => selectElement(section.id, null)}
-                    >
-                      <Badge variant="outline" className="capitalize">
-                        {section.type}
-                      </Badge>
-                      <span className="truncate">{section.name ?? section.type}</span>
-                    </button>
+                  <SelectTrigger className="h-8 w-[110px]">
+                    <SelectValue placeholder={<Plus className="h-4 w-4" />} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hero">+ Hero</SelectItem>
+                    <SelectItem value="content">+ Content</SelectItem>
+                    <SelectItem value="feature">+ Feature</SelectItem>
+                    <SelectItem value="footer">+ Footer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        disabled={!editorMode || sIndex === 0}
-                        onClick={() =>
-                          dispatch(
-                            {
-                              kind: "move_section",
-                              sectionId: section.id,
-                              from: sIndex,
-                              to: sIndex - 1,
-                            },
-                            "move_section",
-                          )
-                        }
-                        title="Move up"
-                      >
-                        <ChevronLeft className="h-3.5 w-3.5 -rotate-90" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        disabled={
-                          !editorMode || sIndex === state.sections.length - 1
-                        }
-                        onClick={() =>
-                          dispatch(
-                            {
-                              kind: "move_section",
-                              sectionId: section.id,
-                              from: sIndex,
-                              to: sIndex + 1,
-                            },
-                            "move_section",
-                          )
-                        }
-                        title="Move down"
-                      >
-                        <ChevronRight className="h-3.5 w-3.5 rotate-90" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        disabled={!editorMode}
-                        onClick={() =>
-                          dispatch(
-                            {
-                              kind: "toggle_visibility",
-                              sectionId: section.id,
-                              before: section.visible,
-                              after: !section.visible,
-                            },
-                            "toggle_visibility",
-                          )
-                        }
-                        title="Toggle visibility"
-                      >
-                        {section.visible ? (
-                          <Eye className="h-3.5 w-3.5" />
-                        ) : (
-                          <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        disabled={!editorMode}
-                        onClick={() =>
-                          dispatch(
-                            {
-                              kind: "remove_section",
-                              section,
-                              index: sIndex,
-                            },
-                            "remove_section",
-                          )
-                        }
-                        title="Delete section"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 ml-1 space-y-1">
-                    {section.elements.map((el) => (
+            <ScrollArea className="h-[calc(100vh-180px)] pr-2">
+              <div className="space-y-2">
+                {state.sections.map((section, sIndex) => (
+                  <Card
+                    key={section.id}
+                    className={`p-2 ${
+                      selectedSectionId === section.id ? "ring-2 ring-primary" : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
                       <button
-                        key={el.id}
-                        className={`flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-muted ${
-                          selectedElementId === el.id
-                            ? "bg-primary/10 text-primary"
-                            : ""
-                        }`}
-                        onClick={() => selectElement(section.id, el.id)}
+                        className="flex flex-1 items-center gap-2 text-left text-sm font-medium"
+                        onClick={() => selectElement(section.id, null)}
                       >
                         <Badge variant="outline" className="capitalize">
-                          {el.type}
+                          {section.type}
                         </Badge>
-                        <span className="truncate text-muted-foreground">
-                          {String((el.content as string) ?? "").slice(0, 28) || "—"}
-                        </span>
+                        <span className="truncate">{section.name ?? section.type}</span>
                       </button>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-full justify-start text-xs"
-                      disabled={!editorMode}
-                      onClick={() =>
-                        dispatch(
-                          {
-                            kind: "add_element",
-                            sectionId: section.id,
-                            element: makeElement("text", "New text"),
-                            index: section.elements.length,
-                          },
-                          "add_element",
-                        )
-                      }
-                    >
-                      <Plus className="h-3 w-3" /> Add element
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
-        </aside>
 
-        {/* Center: preview canvas */}
-        <main className="bg-muted/20 p-4">
-          <PreviewCanvas
-            sections={state.sections}
-            editorMode={editorMode}
-            selectedElementId={selectedElementId}
-            onSelect={(s, e) => selectElement(s, e)}
-          />
-        </main>
-
-        {/* Right: inspector & tabs */}
-        <aside className="border-l bg-card/40">
-          <Tabs defaultValue="inspector" className="flex h-full flex-col">
-            <TabsList className="m-3 grid w-auto grid-cols-4">
-              <TabsTrigger value="inspector">Inspect</TabsTrigger>
-              <TabsTrigger value="history">
-                <History className="h-3.5 w-3.5" />
-              </TabsTrigger>
-              <TabsTrigger value="diff">
-                <Scale className="h-3.5 w-3.5" />
-              </TabsTrigger>
-              <TabsTrigger value="audit">
-                <GitBranch className="h-3.5 w-3.5" />
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="inspector" className="flex-1 px-3 pb-3">
-              <ScrollArea className="h-[calc(100vh-200px)] pr-2">
-                {!editorMode && (
-                  <p className="rounded-md border border-dashed p-4 text-xs text-muted-foreground">
-                    Turn on <strong>Editor Mode</strong> to edit content. The
-                    live site is never touched until you publish.
-                  </p>
-                )}
-                {editorMode && !selectedElement && (
-                  <p className="rounded-md border border-dashed p-4 text-xs text-muted-foreground">
-                    Select an element in the structure tree or the preview to
-                    edit its content and styles.
-                  </p>
-                )}
-                {editorMode && selectedSection && selectedElement && (
-                  <ElementInspector
-                    section={selectedSection}
-                    element={selectedElement}
-                    onChange={(after) =>
-                      dispatch(
-                        {
-                          kind: "update_element",
-                          sectionId: selectedSection.id,
-                          elementId: selectedElement.id,
-                          before: selectedElement,
-                          after,
-                        },
-                        "update_element",
-                      )
-                    }
-                  />
-                )}
-
-                <Separator className="my-4" />
-                <div className="space-y-2">
-                  <Label className="text-xs">Snapshot summary (optional)</Label>
-                  <Textarea
-                    value={snapshotSummary}
-                    onChange={(e) => setSnapshotSummary(e.target.value)}
-                    placeholder="e.g. Updated hero headline"
-                    disabled={!editorMode}
-                    rows={2}
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 w-full"
-                  onClick={reset}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Reset draft (this page)
-                </Button>
-              </ScrollArea>
-            </TabsContent>
-
-            <TabsContent value="history" className="flex-1 px-3 pb-3">
-              <ScrollArea className="h-[calc(100vh-200px)] pr-2">
-                <p className="mb-2 text-xs text-muted-foreground">
-                  {snapshots.length} snapshot{snapshots.length === 1 ? "" : "s"}{" "}
-                  · most recent first
-                </p>
-                <div className="space-y-2">
-                  <AnimatePresence initial={false}>
-                    {snapshots.map((snap) => (
-                      <motion.div
-                        key={snap.versionId}
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <Card className="p-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium">
-                                {snap.summary || "Snapshot"}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(snap.timestamp).toLocaleString()}
-                              </p>
-                              <code className="text-[10px] text-muted-foreground">
-                                {snap.versionId.slice(0, 8)}
-                              </code>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => restoreSnapshot(snap.versionId)}
-                                disabled={!editorMode}
-                              >
-                                <RotateCw className="h-3 w-3" />
-                                Restore
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setCompareA(snap.versionId)}
-                              >
-                                Compare A
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setCompareB(snap.versionId)}
-                              >
-                                Compare B
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                  {snapshots.length === 0 && (
-                    <p className="rounded-md border border-dashed p-4 text-xs text-muted-foreground">
-                      No snapshots yet. Make a change in editor mode and click
-                      Snapshot.
-                    </p>
-                  )}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-
-            <TabsContent value="diff" className="flex-1 px-3 pb-3">
-              <DiffPanel
-                aId={compareA}
-                bId={compareB}
-                onClear={() => {
-                  setCompareA(null);
-                  setCompareB(null);
-                }}
-              />
-            </TabsContent>
-
-            <TabsContent value="audit" className="flex-1 px-3 pb-3">
-              <ScrollArea className="h-[calc(100vh-200px)] pr-2">
-                <p className="mb-2 text-xs text-muted-foreground">
-                  {audit.length} event{audit.length === 1 ? "" : "s"}
-                </p>
-                <div className="space-y-1">
-                  {audit.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="rounded-md border bg-card/60 p-2 text-xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{entry.action}</span>
-                        <span className="text-muted-foreground">
-                          {new Date(entry.timestamp).toLocaleTimeString()}
-                        </span>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          disabled={!editorMode || sIndex === 0}
+                          onClick={() =>
+                            dispatch(
+                              {
+                                kind: "move_section",
+                                sectionId: section.id,
+                                from: sIndex,
+                                to: sIndex - 1,
+                              },
+                              "move_section",
+                            )
+                          }
+                          title="Move up"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5 -rotate-90" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          disabled={!editorMode || sIndex === state.sections.length - 1}
+                          onClick={() =>
+                            dispatch(
+                              {
+                                kind: "move_section",
+                                sectionId: section.id,
+                                from: sIndex,
+                                to: sIndex + 1,
+                              },
+                              "move_section",
+                            )
+                          }
+                          title="Move down"
+                        >
+                          <ChevronRight className="h-3.5 w-3.5 rotate-90" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          disabled={!editorMode}
+                          onClick={() =>
+                            dispatch(
+                              {
+                                kind: "toggle_visibility",
+                                sectionId: section.id,
+                                before: section.visible,
+                                after: !section.visible,
+                              },
+                              "toggle_visibility",
+                            )
+                          }
+                          title="Toggle visibility"
+                        >
+                          {section.visible ? (
+                            <Eye className="h-3.5 w-3.5" />
+                          ) : (
+                            <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive"
+                          disabled={!editorMode}
+                          onClick={() =>
+                            dispatch(
+                              {
+                                kind: "remove_section",
+                                section,
+                                index: sIndex,
+                              },
+                              "remove_section",
+                            )
+                          }
+                          title="Delete section"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
-        </aside>
+
+                    <div className="mt-2 ml-1 space-y-1">
+                      {section.elements.map((el) => (
+                        <button
+                          key={el.id}
+                          className={`flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-muted ${
+                            selectedElementId === el.id ? "bg-primary/10 text-primary" : ""
+                          }`}
+                          onClick={() => selectElement(section.id, el.id)}
+                        >
+                          <Badge variant="outline" className="capitalize">
+                            {el.type}
+                          </Badge>
+                          <span className="truncate text-muted-foreground">
+                            {String((el.content as string) ?? "").slice(0, 28) || "—"}
+                          </span>
+                        </button>
+                      ))}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-full justify-start text-xs"
+                        disabled={!editorMode}
+                        onClick={() =>
+                          dispatch(
+                            {
+                              kind: "add_element",
+                              sectionId: section.id,
+                              element: makeElement("text", "New text"),
+                              index: section.elements.length,
+                            },
+                            "add_element",
+                          )
+                        }
+                      >
+                        <Plus className="h-3 w-3" /> Add element
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          </aside>
+
+          {/* Center: preview canvas */}
+          <main className="bg-muted/20 p-4">
+            <PreviewCanvas
+              sections={state.sections}
+              editorMode={editorMode}
+              selectedElementId={selectedElementId}
+              onSelect={(s, e) => selectElement(s, e)}
+            />
+          </main>
+
+          {/* Right: inspector & tabs */}
+          <aside className="border-l bg-card/40">
+            <Tabs defaultValue="inspector" className="flex h-full flex-col">
+              <TabsList className="m-3 grid w-auto grid-cols-4">
+                <TabsTrigger value="inspector">Inspect</TabsTrigger>
+                <TabsTrigger value="history">
+                  <History className="h-3.5 w-3.5" />
+                </TabsTrigger>
+                <TabsTrigger value="diff">
+                  <Scale className="h-3.5 w-3.5" />
+                </TabsTrigger>
+                <TabsTrigger value="audit">
+                  <GitBranch className="h-3.5 w-3.5" />
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="inspector" className="flex-1 px-3 pb-3">
+                <ScrollArea className="h-[calc(100vh-200px)] pr-2">
+                  {!editorMode && (
+                    <p className="rounded-md border border-dashed p-4 text-xs text-muted-foreground">
+                      Turn on <strong>Editor Mode</strong> to edit content. The live site is never
+                      touched until you publish.
+                    </p>
+                  )}
+                  {editorMode && !selectedElement && (
+                    <p className="rounded-md border border-dashed p-4 text-xs text-muted-foreground">
+                      Select an element in the structure tree or the preview to edit its content and
+                      styles.
+                    </p>
+                  )}
+                  {editorMode && selectedSection && selectedElement && (
+                    <ElementInspector
+                      section={selectedSection}
+                      element={selectedElement}
+                      onChange={(after) =>
+                        dispatch(
+                          {
+                            kind: "update_element",
+                            sectionId: selectedSection.id,
+                            elementId: selectedElement.id,
+                            before: selectedElement,
+                            after,
+                          },
+                          "update_element",
+                        )
+                      }
+                    />
+                  )}
+
+                  <Separator className="my-4" />
+                  <div className="space-y-2">
+                    <Label className="text-xs">Snapshot summary (optional)</Label>
+                    <Textarea
+                      value={snapshotSummary}
+                      onChange={(e) => setSnapshotSummary(e.target.value)}
+                      placeholder="e.g. Updated hero headline"
+                      disabled={!editorMode}
+                      rows={2}
+                    />
+                  </div>
+                  <Button variant="outline" size="sm" className="mt-3 w-full" onClick={reset}>
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Reset draft (this page)
+                  </Button>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="history" className="flex-1 px-3 pb-3">
+                <ScrollArea className="h-[calc(100vh-200px)] pr-2">
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    {snapshots.length} snapshot{snapshots.length === 1 ? "" : "s"} · most recent
+                    first
+                  </p>
+                  <div className="space-y-2">
+                    <AnimatePresence initial={false}>
+                      {snapshots.map((snap) => (
+                        <motion.div
+                          key={snap.versionId}
+                          initial={{ opacity: 0, y: -6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                        >
+                          <Card className="p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium">
+                                  {snap.summary || "Snapshot"}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(snap.timestamp).toLocaleString()}
+                                </p>
+                                <code className="text-[10px] text-muted-foreground">
+                                  {snap.versionId.slice(0, 8)}
+                                </code>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => restoreSnapshot(snap.versionId)}
+                                  disabled={!editorMode}
+                                >
+                                  <RotateCw className="h-3 w-3" />
+                                  Restore
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setCompareA(snap.versionId)}
+                                >
+                                  Compare A
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setCompareB(snap.versionId)}
+                                >
+                                  Compare B
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    {snapshots.length === 0 && (
+                      <p className="rounded-md border border-dashed p-4 text-xs text-muted-foreground">
+                        No snapshots yet. Make a change in editor mode and click Snapshot.
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="diff" className="flex-1 px-3 pb-3">
+                <DiffPanel
+                  aId={compareA}
+                  bId={compareB}
+                  onClear={() => {
+                    setCompareA(null);
+                    setCompareB(null);
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="audit" className="flex-1 px-3 pb-3">
+                <ScrollArea className="h-[calc(100vh-200px)] pr-2">
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    {audit.length} event{audit.length === 1 ? "" : "s"}
+                  </p>
+                  <div className="space-y-1">
+                    {audit.map((entry) => (
+                      <div key={entry.id} className="rounded-md border bg-card/60 p-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{entry.action}</span>
+                          <span className="text-muted-foreground">
+                            {new Date(entry.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </aside>
+        </div>
       </div>
-    </div>
     </EditorErrorBoundary>
   );
 }
@@ -825,11 +788,7 @@ function ElementPreview({
   if (element.type === "text") {
     const size = Number(styleObj.fontSize ?? 16);
     return (
-      <p
-        onClick={onClick}
-        className={`rounded-md px-1 ${ring}`}
-        style={{ fontSize: size }}
-      >
+      <p onClick={onClick} className={`rounded-md px-1 ${ring}`} style={{ fontSize: size }}>
         {String(element.content ?? "")}
       </p>
     );
@@ -848,12 +807,7 @@ function ElementPreview({
     return (
       <div onClick={onClick} className={`inline-block rounded-md ${ring}`}>
         {src ? (
-          <img
-            src={src}
-            alt=""
-            className="max-h-48 rounded-md"
-            loading="lazy"
-          />
+          <img src={src} alt="" className="max-h-48 rounded-md" loading="lazy" />
         ) : (
           <div className="flex h-32 w-48 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
             Image
@@ -884,8 +838,8 @@ function DiffPanel({
     return (
       <div className="p-2 text-xs text-muted-foreground">
         <p className="rounded-md border border-dashed p-4">
-          Pick two snapshots from the History tab to compare. The B side defaults
-          to the current draft when only A is selected.
+          Pick two snapshots from the History tab to compare. The B side defaults to the current
+          draft when only A is selected.
         </p>
       </div>
     );
@@ -911,16 +865,16 @@ function DiffPanel({
         {diff.sectionDiff.added.map((s) => (
           <Card key={s.id} className="border-emerald-500/30 bg-emerald-500/5 p-2">
             <p className="text-xs">
-              <span className="font-semibold text-emerald-600">+ Added</span>{" "}
-              section <strong>{s.name ?? s.type}</strong>
+              <span className="font-semibold text-emerald-600">+ Added</span> section{" "}
+              <strong>{s.name ?? s.type}</strong>
             </p>
           </Card>
         ))}
         {diff.sectionDiff.removed.map((s) => (
           <Card key={s.id} className="border-destructive/30 bg-destructive/5 p-2">
             <p className="text-xs">
-              <span className="font-semibold text-destructive">− Removed</span>{" "}
-              section <strong>{s.name ?? s.type}</strong>
+              <span className="font-semibold text-destructive">− Removed</span> section{" "}
+              <strong>{s.name ?? s.type}</strong>
             </p>
           </Card>
         ))}
@@ -931,12 +885,12 @@ function DiffPanel({
             </p>
             <ul className="ml-3 mt-1 list-disc text-[11px] text-muted-foreground">
               {m.visibilityChanged && (
-                <li>visibility: {String(m.before.visible)} → {String(m.after.visible)}</li>
+                <li>
+                  visibility: {String(m.before.visible)} → {String(m.after.visible)}
+                </li>
               )}
               {m.reordered && <li>reordered</li>}
-              {m.elementDiff.added.length > 0 && (
-                <li>+{m.elementDiff.added.length} element(s)</li>
-              )}
+              {m.elementDiff.added.length > 0 && <li>+{m.elementDiff.added.length} element(s)</li>}
               {m.elementDiff.removed.length > 0 && (
                 <li>−{m.elementDiff.removed.length} element(s)</li>
               )}

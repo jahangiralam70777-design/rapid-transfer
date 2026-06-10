@@ -25,7 +25,7 @@ let activeMode: SyncMode = "remote";
 function downgrade(reason: unknown) {
   if (activeMode === "remote") {
     activeMode = "local";
-    // eslint-disable-next-line no-console
+
     console.warn("[editor] remote sync unavailable, using local-only mode:", reason);
   }
 }
@@ -77,7 +77,11 @@ export const editorRemote = {
     }
   },
 
-  async createSnapshot(state: PageState, summary?: string, parentVersionId?: string | null): Promise<void> {
+  async createSnapshot(
+    state: PageState,
+    summary?: string,
+    parentVersionId?: string | null,
+  ): Promise<void> {
     const local: Snapshot = {
       versionId: state.versionId,
       parentVersionId: parentVersionId ?? null,
@@ -89,7 +93,9 @@ export const editorRemote = {
     editorStorage.appendSnapshot(local);
     if (activeMode === "local") return;
     try {
-      await createSnapshotFn({ data: { pageId: state.pageId, state, summary, parentVersionId: parentVersionId ?? null } });
+      await createSnapshotFn({
+        data: { pageId: state.pageId, state, summary, parentVersionId: parentVersionId ?? null },
+      });
     } catch (e) {
       downgrade(e);
     }

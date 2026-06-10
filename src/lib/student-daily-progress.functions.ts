@@ -13,43 +13,47 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
 
     const now = Date.now();
-    const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
     const startOfWeek = new Date(now - 7 * 24 * 60 * 60 * 1000);
     const startOfPrevWeek = new Date(now - 14 * 24 * 60 * 60 * 1000);
     const startOfMonth = new Date(now - 30 * 24 * 60 * 60 * 1000);
     const since60 = new Date(now - 60 * 24 * 60 * 60 * 1000).toISOString();
     const since365 = new Date(now - 365 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [attemptsR, subjectsR, chaptersR, mcqsR, wrongR, bookmarksR, profileR, answersR] = await Promise.all([
-      supabase
-        .from("exam_attempts")
-        .select(
-          "id,kind,status,subject_id,chapter_id,quiz_id,level,score,correct_count,total_count,duration_seconds,started_at,completed_at,created_at,title",
-        )
-        .eq("user_id", userId)
-        .gte("created_at", since365)
-        .order("created_at", { ascending: false })
-        .limit(4000),
-      supabase.from("subjects").select("id,name,color,level").eq("status", "published"),
-      supabase.from("chapters").select("id,name,subject_id").eq("status", "published"),
-      supabase.from("mcqs").select("id,chapter_id").eq("status", "published"),
-      supabase
-        .from("mcq_wrong_questions")
-        .select("id,mastered,retry_count,subject_id,chapter_id,last_wrong_at")
-        .eq("user_id", userId),
-      supabase
-        .from("mcq_bookmarks")
-        .select("id,subject_id,chapter_id,created_at")
-        .eq("user_id", userId),
-      supabase.from("profiles").select("level").eq("id", userId).maybeSingle(),
-      // Solved MCQ ids per chapter via attempt_answers join
-      supabase
-        .from("attempt_answers")
-        .select("mcq_id,is_correct,attempt_id,exam_attempts!inner(user_id,chapter_id,subject_id,created_at)")
-        .eq("exam_attempts.user_id", userId)
-        .gte("exam_attempts.created_at", since60)
-        .limit(5000),
-    ]);
+    const [attemptsR, subjectsR, chaptersR, mcqsR, wrongR, bookmarksR, profileR, answersR] =
+      await Promise.all([
+        supabase
+          .from("exam_attempts")
+          .select(
+            "id,kind,status,subject_id,chapter_id,quiz_id,level,score,correct_count,total_count,duration_seconds,started_at,completed_at,created_at,title",
+          )
+          .eq("user_id", userId)
+          .gte("created_at", since365)
+          .order("created_at", { ascending: false })
+          .limit(4000),
+        supabase.from("subjects").select("id,name,color,level").eq("status", "published"),
+        supabase.from("chapters").select("id,name,subject_id").eq("status", "published"),
+        supabase.from("mcqs").select("id,chapter_id").eq("status", "published"),
+        supabase
+          .from("mcq_wrong_questions")
+          .select("id,mastered,retry_count,subject_id,chapter_id,last_wrong_at")
+          .eq("user_id", userId),
+        supabase
+          .from("mcq_bookmarks")
+          .select("id,subject_id,chapter_id,created_at")
+          .eq("user_id", userId),
+        supabase.from("profiles").select("level").eq("id", userId).maybeSingle(),
+        // Solved MCQ ids per chapter via attempt_answers join
+        supabase
+          .from("attempt_answers")
+          .select(
+            "mcq_id,is_correct,attempt_id,exam_attempts!inner(user_id,chapter_id,subject_id,created_at)",
+          )
+          .eq("exam_attempts.user_id", userId)
+          .gte("exam_attempts.created_at", since60)
+          .limit(5000),
+      ]);
 
     const attempts = attemptsR.data ?? [];
     const subjects = subjectsR.data ?? [];
@@ -57,7 +61,11 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     const allMcqs = mcqsR.data ?? [];
     const wrong = wrongR.data ?? [];
     const bookmarks = bookmarksR.data ?? [];
-    const answers = (answersR.data ?? []) as Array<{ mcq_id: string; is_correct: boolean; attempt_id: string }>;
+    const answers = (answersR.data ?? []) as Array<{
+      mcq_id: string;
+      is_correct: boolean;
+      attempt_id: string;
+    }>;
     const userLevel = (profileR.data as { level?: string } | null)?.level ?? "professional";
 
     const subjectMap = new Map(subjects.map((s) => [s.id, s]));
@@ -71,14 +79,11 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     }
 
     const completed = attempts.filter((a) => a.status === "completed");
-    const ts = (a: typeof attempts[number]) =>
-      new Date(a.completed_at ?? a.created_at).getTime();
-    const inRange = (a: typeof attempts[number], from: Date) => ts(a) >= from.getTime();
+    const ts = (a: (typeof attempts)[number]) => new Date(a.completed_at ?? a.created_at).getTime();
+    const inRange = (a: (typeof attempts)[number], from: Date) => ts(a) >= from.getTime();
 
-    const sumBy = (
-      list: typeof attempts,
-      pick: (a: typeof attempts[number]) => number,
-    ) => list.reduce((s, a) => s + (pick(a) ?? 0), 0);
+    const sumBy = (list: typeof attempts, pick: (a: (typeof attempts)[number]) => number) =>
+      list.reduce((s, a) => s + (pick(a) ?? 0), 0);
 
     const todayList = completed.filter((a) => inRange(a, startOfToday));
     const weekList = completed.filter((a) => inRange(a, startOfWeek));
@@ -99,8 +104,11 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     // Weekly bars (last 7 days accuracy %)
     const weeklyBars: number[] = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
-      const next = new Date(d); next.setDate(d.getDate() + 1);
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const next = new Date(d);
+      next.setDate(d.getDate() + 1);
       const day = completed.filter((a) => {
         const t = ts(a);
         return t >= d.getTime() && t < next.getTime();
@@ -142,8 +150,11 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     // 30-day heatmap
     const heatmap: { date: string; label: string; count: number; minutes: number }[] = [];
     for (let i = 29; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
-      const next = new Date(d); next.setDate(d.getDate() + 1);
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const next = new Date(d);
+      next.setDate(d.getDate() + 1);
       const day = completed.filter((a) => {
         const t = ts(a);
         return t >= d.getTime() && t < next.getTime();
@@ -158,13 +169,16 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
 
     // Timeline
     const timeline = completed.slice(0, 12).map((a) => {
-      const subjName = a.subject_id ? subjectMap.get(a.subject_id)?.name ?? null : null;
-      const chapName = a.chapter_id ? chapterMap.get(a.chapter_id)?.name ?? null : null;
+      const subjName = a.subject_id ? (subjectMap.get(a.subject_id)?.name ?? null) : null;
+      const chapName = a.chapter_id ? (chapterMap.get(a.chapter_id)?.name ?? null) : null;
       const kindLabel =
-        a.kind === "mcq_practice" ? "MCQ practice"
-          : a.kind === "quiz" ? "Quiz"
-          : a.kind === "mock" ? "Mock test"
-          : "Custom exam";
+        a.kind === "mcq_practice"
+          ? "MCQ practice"
+          : a.kind === "quiz"
+            ? "Quiz"
+            : a.kind === "mock"
+              ? "Mock test"
+              : "Custom exam";
       return {
         id: a.id,
         kind: a.kind,
@@ -211,7 +225,10 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
       const cid = ea?.chapter_id;
       if (!cid) continue;
       let set = solvedByChapter.get(cid);
-      if (!set) { set = new Set(); solvedByChapter.set(cid, set); }
+      if (!set) {
+        set = new Set();
+        solvedByChapter.set(cid, set);
+      }
       set.add(ans.mcq_id);
       answeredByChapter.set(cid, (answeredByChapter.get(cid) ?? 0) + 1);
       if (ans.is_correct) correctByChapter.set(cid, (correctByChapter.get(cid) ?? 0) + 1);
@@ -223,10 +240,15 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     const mockDoneByChapter = new Map<string, number>();
     for (const a of completed) {
       if (!a.chapter_id) continue;
-      studyByChapter.set(a.chapter_id, (studyByChapter.get(a.chapter_id) ?? 0) + (a.duration_seconds ?? 0));
+      studyByChapter.set(
+        a.chapter_id,
+        (studyByChapter.get(a.chapter_id) ?? 0) + (a.duration_seconds ?? 0),
+      );
       lastByChapter.set(a.chapter_id, Math.max(lastByChapter.get(a.chapter_id) ?? 0, ts(a)));
-      if (a.kind === "quiz") quizDoneByChapter.set(a.chapter_id, (quizDoneByChapter.get(a.chapter_id) ?? 0) + 1);
-      if (a.kind === "mock") mockDoneByChapter.set(a.chapter_id, (mockDoneByChapter.get(a.chapter_id) ?? 0) + 1);
+      if (a.kind === "quiz")
+        quizDoneByChapter.set(a.chapter_id, (quizDoneByChapter.get(a.chapter_id) ?? 0) + 1);
+      if (a.kind === "mock")
+        mockDoneByChapter.set(a.chapter_id, (mockDoneByChapter.get(a.chapter_id) ?? 0) + 1);
     }
 
     const bookmarksByChapter = new Map<string, number>();
@@ -293,7 +315,10 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
       const pending = ch.reduce((sum, c) => sum + Math.max(0, c.totalMcqs - c.mcqsSolved), 0);
       const subjAttempts = completed; // placeholder reset below
       const subjAttemptList = monthList.filter((a) => a.subject_id === s.id);
-      const last = ch.reduce((m, c) => (c.lastAt && new Date(c.lastAt).getTime() > m ? new Date(c.lastAt).getTime() : m), 0);
+      const last = ch.reduce(
+        (m, c) => (c.lastAt && new Date(c.lastAt).getTime() > m ? new Date(c.lastAt).getTime() : m),
+        0,
+      );
       const totalAnsweredAll = ch.reduce((sum, c) => sum + c.totalAnswered, 0);
       const correctAll = ch.reduce((sum, c) => sum + c.correct, 0);
       void subjAttempts;
@@ -319,7 +344,9 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
       .sort((a, b) => b.avgScore - a.avgScore);
     const strongest = sortedBySkill[0] ?? null;
     const weakest = sortedBySkill.length ? sortedBySkill[sortedBySkill.length - 1] : null;
-    const inactive = subjectAgg.filter((s) => s.inactiveDays !== null && s.inactiveDays >= 7).slice(0, 3);
+    const inactive = subjectAgg
+      .filter((s) => s.inactiveDays !== null && s.inactiveDays >= 7)
+      .slice(0, 3);
 
     // Wrong/bookmark top
     const wrongUnresolved = wrong.filter((w) => !w.mastered).length;
@@ -369,8 +396,11 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
       accuracy: number;
     }[] = [];
     for (let i = 89; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
-      const next = new Date(d); next.setDate(d.getDate() + 1);
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const next = new Date(d);
+      next.setDate(d.getDate() + 1);
       const day = completed.filter((a) => {
         const t = ts(a);
         return t >= d.getTime() && t < next.getTime();
@@ -401,7 +431,9 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     }
     const yearHeatmap: { date: string; count: number; minutes: number; mcqs: number }[] = [];
     for (let i = 364; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
       const b = dayBucket.get(key) ?? { count: 0, minutes: 0, mcqs: 0 };
       yearHeatmap.push({ date: key, count: b.count, minutes: b.minutes, mcqs: b.mcqs });
@@ -419,7 +451,10 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
     let productiveIdx = -1;
     let productiveMax = 0;
     for (let i = 0; i < 7; i++) {
-      if (weekdayCount[i] > productiveMax) { productiveMax = weekdayCount[i]; productiveIdx = i; }
+      if (weekdayCount[i] > productiveMax) {
+        productiveMax = weekdayCount[i];
+        productiveIdx = i;
+      }
     }
     const productiveDay = productiveIdx >= 0 ? WD[productiveIdx] : null;
 
@@ -454,7 +489,9 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
       wrong: Math.max(0, totalAnswered - totalCorrect),
       answered: totalAnswered,
       accuracy: totalAnswered ? Math.round((totalCorrect / totalAnswered) * 100) : 0,
-      avgScore: completed.length ? Math.round(sumBy(completed, (a) => a.score) / completed.length) : 0,
+      avgScore: completed.length
+        ? Math.round(sumBy(completed, (a) => a.score) / completed.length)
+        : 0,
       studyMinutes: Math.round(sumBy(completed, (a) => a.duration_seconds) / 60),
       mcqs: countKind(completed, "mcq_practice"),
       quizzes: countKind(completed, "quiz"),
@@ -475,13 +512,14 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
         attempts: todayList.length,
         studyMinutes: Math.round(sumBy(todayList, (a) => a.duration_seconds) / 60),
         accuracy: accuracyOf(todayList),
-        chaptersTouched: new Set(
-          todayList.map((a) => a.chapter_id).filter(Boolean),
-        ).size,
+        chaptersTouched: new Set(todayList.map((a) => a.chapter_id).filter(Boolean)).size,
         streak,
         bestStreak,
         correct: sumBy(todayList, (a) => a.correct_count),
-        wrong: Math.max(0, sumBy(todayList, (a) => a.total_count) - sumBy(todayList, (a) => a.correct_count)),
+        wrong: Math.max(
+          0,
+          sumBy(todayList, (a) => a.total_count) - sumBy(todayList, (a) => a.correct_count),
+        ),
       },
       week: {
         attempts: weekList.length,
@@ -501,9 +539,7 @@ export const studentDailyProgress = createServerFn({ method: "GET" })
         mocks: countKind(monthList, "mock"),
         accuracy: accuracyOf(monthList),
         studyMinutes: Math.round(sumBy(monthList, (a) => a.duration_seconds) / 60),
-        activeDays: new Set(
-          monthList.map((a) => new Date(ts(a)).toISOString().slice(0, 10)),
-        ).size,
+        activeDays: new Set(monthList.map((a) => new Date(ts(a)).toISOString().slice(0, 10))).size,
       },
       totals,
       series,

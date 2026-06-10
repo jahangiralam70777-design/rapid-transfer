@@ -196,11 +196,46 @@ function FilterPanel() {
 /* ---------------- Stats ---------------- */
 function StatGrid() {
   const stats = [
-    { l: "Total MCQs", v: "126,408", d: "+1,284", i: ListChecks, tint: "text-fuchsia-300", spark: [12, 18, 14, 22, 19, 28, 24] },
-    { l: "Published", v: "118,902", d: "94.1%", i: CheckCircle2, tint: "text-emerald-300", spark: [10, 14, 20, 18, 26, 30, 34] },
-    { l: "Hidden", v: "5,234", d: "4.1%", i: EyeOff, tint: "text-slate-300", spark: [22, 18, 20, 16, 18, 14, 12] },
-    { l: "Pending Review", v: "2,272", d: "1.8%", i: Clock, tint: "text-amber-300", spark: [8, 14, 12, 18, 22, 20, 24] },
-    { l: "Recent Uploads", v: "1,284", d: "Last 7 days", i: Sparkles, tint: "text-sky-300", spark: [16, 22, 18, 28, 24, 32, 30] },
+    {
+      l: "Total MCQs",
+      v: "126,408",
+      d: "+1,284",
+      i: ListChecks,
+      tint: "text-fuchsia-300",
+      spark: [12, 18, 14, 22, 19, 28, 24],
+    },
+    {
+      l: "Published",
+      v: "118,902",
+      d: "94.1%",
+      i: CheckCircle2,
+      tint: "text-emerald-300",
+      spark: [10, 14, 20, 18, 26, 30, 34],
+    },
+    {
+      l: "Hidden",
+      v: "5,234",
+      d: "4.1%",
+      i: EyeOff,
+      tint: "text-slate-300",
+      spark: [22, 18, 20, 16, 18, 14, 12],
+    },
+    {
+      l: "Pending Review",
+      v: "2,272",
+      d: "1.8%",
+      i: Clock,
+      tint: "text-amber-300",
+      spark: [8, 14, 12, 18, 22, 20, 24],
+    },
+    {
+      l: "Recent Uploads",
+      v: "1,284",
+      d: "Last 7 days",
+      i: Sparkles,
+      tint: "text-sky-300",
+      spark: [16, 22, 18, 28, 24, 32, 30],
+    },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -211,7 +246,9 @@ function StatGrid() {
         >
           <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br from-[var(--neon-purple)]/20 to-[var(--neon-blue)]/10 blur-2xl" />
           <div className="flex items-start justify-between">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-muted/40 ${s.tint}`}>
+            <div
+              className={`flex h-9 w-9 items-center justify-center rounded-xl bg-muted/40 ${s.tint}`}
+            >
               <s.i className="h-4 w-4" />
             </div>
             <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-300">
@@ -230,7 +267,8 @@ function StatGrid() {
 function Spark({ data }: { data: number[] }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
-  const w = 100, h = 24;
+  const w = 100,
+    h = 24;
   const pts = data
     .map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / (max - min || 1)) * h}`)
     .join(" ");
@@ -243,7 +281,13 @@ function Spark({ data }: { data: number[] }) {
           <stop offset="100%" stopColor="var(--neon-blue)" />
         </linearGradient>
       </defs>
-      <polyline fill="none" stroke={`url(#${id})`} strokeWidth="1.5" strokeLinecap="round" points={pts} />
+      <polyline
+        fill="none"
+        stroke={`url(#${id})`}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        points={pts}
+      />
     </svg>
   );
 }
@@ -251,12 +295,60 @@ function Spark({ data }: { data: number[] }) {
 /* ---------------- MCQ table ---------------- */
 function McqTable() {
   const rows = [
-    { id: "MCQ-10428", q: "Which financial statement reports a company's revenues and expenses?", lvl: "Certificate", sub: "Financial Accounting", ch: "Income Statement", st: "Published", d: "Today" },
-    { id: "MCQ-10427", q: "What is the primary purpose of an external audit?", lvl: "Professional", sub: "Audit", ch: "Audit Objectives", st: "Published", d: "Today" },
-    { id: "MCQ-10426", q: "Calculate VAT payable on a BDT 50,000 taxable supply at 15%.", lvl: "Professional", sub: "Taxation", ch: "VAT", st: "Pending", d: "Yesterday" },
-    { id: "MCQ-10425", q: "Define the doctrine of separate legal entity.", lvl: "Advanced", sub: "Business Law", ch: "Company Law", st: "Hidden", d: "Yesterday" },
-    { id: "MCQ-10424", q: "Which costing method assigns overheads using activity drivers?", lvl: "Professional", sub: "Cost Accounting", ch: "ABC Costing", st: "Published", d: "2d ago" },
-    { id: "MCQ-10423", q: "What is the formula for Weighted Average Cost of Capital?", lvl: "Advanced", sub: "Corporate Finance", ch: "Capital Structure", st: "Published", d: "2d ago" },
+    {
+      id: "MCQ-10428",
+      q: "Which financial statement reports a company's revenues and expenses?",
+      lvl: "Certificate",
+      sub: "Financial Accounting",
+      ch: "Income Statement",
+      st: "Published",
+      d: "Today",
+    },
+    {
+      id: "MCQ-10427",
+      q: "What is the primary purpose of an external audit?",
+      lvl: "Professional",
+      sub: "Audit",
+      ch: "Audit Objectives",
+      st: "Published",
+      d: "Today",
+    },
+    {
+      id: "MCQ-10426",
+      q: "Calculate VAT payable on a BDT 50,000 taxable supply at 15%.",
+      lvl: "Professional",
+      sub: "Taxation",
+      ch: "VAT",
+      st: "Pending",
+      d: "Yesterday",
+    },
+    {
+      id: "MCQ-10425",
+      q: "Define the doctrine of separate legal entity.",
+      lvl: "Advanced",
+      sub: "Business Law",
+      ch: "Company Law",
+      st: "Hidden",
+      d: "Yesterday",
+    },
+    {
+      id: "MCQ-10424",
+      q: "Which costing method assigns overheads using activity drivers?",
+      lvl: "Professional",
+      sub: "Cost Accounting",
+      ch: "ABC Costing",
+      st: "Published",
+      d: "2d ago",
+    },
+    {
+      id: "MCQ-10423",
+      q: "What is the formula for Weighted Average Cost of Capital?",
+      lvl: "Advanced",
+      sub: "Corporate Finance",
+      ch: "Capital Structure",
+      st: "Published",
+      d: "2d ago",
+    },
   ];
   const stTint = (s: string) =>
     s === "Published"
@@ -277,7 +369,9 @@ function McqTable() {
         <table className="w-full min-w-[820px] text-left text-xs">
           <thead className="border-y border-border/60 bg-background/40 text-[10px] uppercase tracking-widest text-muted-foreground">
             <tr>
-              <th className="px-4 py-2.5"><input type="checkbox" className="accent-[var(--neon-purple)]" /></th>
+              <th className="px-4 py-2.5">
+                <input type="checkbox" className="accent-[var(--neon-purple)]" />
+              </th>
               <th className="px-4 py-2.5">ID</th>
               <th className="px-4 py-2.5">Question</th>
               <th className="px-4 py-2.5">Level</th>
@@ -290,8 +384,13 @@ function McqTable() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-b border-border/40 transition-colors hover:bg-background/40">
-                <td className="px-4 py-3"><input type="checkbox" className="accent-[var(--neon-purple)]" /></td>
+              <tr
+                key={r.id}
+                className="border-b border-border/40 transition-colors hover:bg-background/40"
+              >
+                <td className="px-4 py-3">
+                  <input type="checkbox" className="accent-[var(--neon-purple)]" />
+                </td>
                 <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">{r.id}</td>
                 <td className="max-w-[280px] truncate px-4 py-3 font-medium">{r.q}</td>
                 <td className="px-4 py-3">{r.lvl}</td>
@@ -347,7 +446,10 @@ function IconBtn({
         ? "hover:bg-emerald-500/10 hover:text-emerald-300"
         : "hover:bg-muted hover:text-foreground";
   return (
-    <button title={tip} className={`flex h-7 w-7 items-center justify-center rounded-md text-foreground/70 transition-colors ${t}`}>
+    <button
+      title={tip}
+      className={`flex h-7 w-7 items-center justify-center rounded-md text-foreground/70 transition-colors ${t}`}
+    >
       <Icon className="h-3.5 w-3.5" />
     </button>
   );
@@ -365,7 +467,9 @@ function BulkUploadPanel() {
           <CloudUpload className="h-6 w-6" />
         </div>
         <p className="relative text-sm font-medium">Drag &amp; drop your file here</p>
-        <p className="relative text-[11px] text-muted-foreground">or click to browse · PDF · DOCX · TXT · CSV</p>
+        <p className="relative text-[11px] text-muted-foreground">
+          or click to browse · PDF · DOCX · TXT · CSV
+        </p>
         <button className="relative bg-cta-gradient mt-1 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-glow">
           Choose File
         </button>
@@ -388,7 +492,11 @@ function ImportPreview() {
   const items = [
     { q: "Which IFRS standard governs revenue recognition?", ok: true },
     { q: "State the going concern assumption.", ok: true },
-    { q: "What is the threshold for VAT registration in Bangladesh?", ok: false, err: "Option D missing" },
+    {
+      q: "What is the threshold for VAT registration in Bangladesh?",
+      ok: false,
+      err: "Option D missing",
+    },
     { q: "Define materiality in auditing.", ok: true },
   ];
   const okCount = items.filter((i) => i.ok).length;
@@ -467,7 +575,13 @@ function SingleMcqCreator() {
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
           {["A", "B", "C", "D"].map((o, i) => (
-            <Option key={o} letter={o} value={["Oxygen", "Argon", "Hydrogen", "Nitrogen"][i]} correct={correct === o} onSelect={() => setCorrect(o)} />
+            <Option
+              key={o}
+              letter={o}
+              value={["Oxygen", "Argon", "Hydrogen", "Nitrogen"][i]}
+              correct={correct === o}
+              onSelect={() => setCorrect(o)}
+            />
           ))}
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -504,7 +618,10 @@ function SingleMcqCreator() {
         <Field label="Tags">
           <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-border/60 bg-background/40 px-3 py-2">
             {["periodic-table", "noble-gas", "class-11"].map((t) => (
-              <span key={t} className="flex items-center gap-1 rounded-full bg-[var(--neon-purple)]/15 px-2 py-0.5 text-[10px] text-fuchsia-300">
+              <span
+                key={t}
+                className="flex items-center gap-1 rounded-full bg-[var(--neon-purple)]/15 px-2 py-0.5 text-[10px] text-fuchsia-300"
+              >
                 <Tag className="h-2.5 w-2.5" /> {t}
               </span>
             ))}
@@ -569,10 +686,7 @@ function Option({
       >
         {letter}
       </span>
-      <input
-        defaultValue={value}
-        className="flex-1 bg-transparent text-sm outline-none"
-      />
+      <input defaultValue={value} className="flex-1 bg-transparent text-sm outline-none" />
       {correct && (
         <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] text-emerald-300">
           <CheckCircle2 className="h-3 w-3" /> Correct
@@ -597,7 +711,9 @@ function UploadAnalytics() {
         <BarChart3 className="h-4 w-4 text-[var(--neon-blue)]" />
         <h3 className="text-sm font-semibold">Upload Analytics</h3>
       </div>
-      <p className="mt-3 text-[10px] uppercase tracking-widest text-muted-foreground">Daily uploads</p>
+      <p className="mt-3 text-[10px] uppercase tracking-widest text-muted-foreground">
+        Daily uploads
+      </p>
       <div className="mt-2 flex h-20 items-end gap-1.5">
         {days.map((b, i) => (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
@@ -612,7 +728,9 @@ function UploadAnalytics() {
         ))}
       </div>
 
-      <p className="mt-4 text-[10px] uppercase tracking-widest text-muted-foreground">Subject-wise</p>
+      <p className="mt-4 text-[10px] uppercase tracking-widest text-muted-foreground">
+        Subject-wise
+      </p>
       <ul className="mt-2 space-y-2 text-xs">
         {subjects.map((s) => (
           <li key={s.s}>
@@ -646,11 +764,36 @@ function UploadAnalytics() {
 /* ---------------- Recent activity ---------------- */
 function RecentActivity() {
   const acts = [
-    { i: FileUp, t: "Bulk imported 240 MCQs · Taxation", time: "4m ago", c: "text-fuchsia-300 bg-fuchsia-500/15" },
-    { i: Edit3, t: "Edited MCQ-10428 · Financial Accounting", time: "12m ago", c: "text-sky-300 bg-sky-500/15" },
-    { i: Trash2, t: "Deleted 18 duplicate questions", time: "30m ago", c: "text-rose-300 bg-rose-500/15" },
-    { i: CheckCircle2, t: "Published 86 reviewed MCQs", time: "1h ago", c: "text-emerald-300 bg-emerald-500/15" },
-    { i: CloudUpload, t: "Bulk import · audit_set_12.pdf", time: "Yesterday", c: "text-violet-300 bg-violet-500/15" },
+    {
+      i: FileUp,
+      t: "Bulk imported 240 MCQs · Taxation",
+      time: "4m ago",
+      c: "text-fuchsia-300 bg-fuchsia-500/15",
+    },
+    {
+      i: Edit3,
+      t: "Edited MCQ-10428 · Financial Accounting",
+      time: "12m ago",
+      c: "text-sky-300 bg-sky-500/15",
+    },
+    {
+      i: Trash2,
+      t: "Deleted 18 duplicate questions",
+      time: "30m ago",
+      c: "text-rose-300 bg-rose-500/15",
+    },
+    {
+      i: CheckCircle2,
+      t: "Published 86 reviewed MCQs",
+      time: "1h ago",
+      c: "text-emerald-300 bg-emerald-500/15",
+    },
+    {
+      i: CloudUpload,
+      t: "Bulk import · audit_set_12.pdf",
+      time: "Yesterday",
+      c: "text-violet-300 bg-violet-500/15",
+    },
   ];
   return (
     <div className="glass shadow-card-soft rounded-2xl p-4">
@@ -660,7 +803,10 @@ function RecentActivity() {
       </div>
       <ul className="mt-3 space-y-2">
         {acts.map((a, i) => (
-          <li key={i} className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 p-2.5">
+          <li
+            key={i}
+            className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 p-2.5"
+          >
             <div className={`flex h-7 w-7 items-center justify-center rounded-md ${a.c}`}>
               <a.i className="h-3.5 w-3.5" />
             </div>
@@ -742,7 +888,10 @@ function RecentFiles() {
                     <button className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/40 px-2.5 py-1 text-[11px]">
                       <Eye className="h-3 w-3" /> Open
                     </button>
-                    <button aria-label="View next" className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-background/40">
+                    <button
+                      aria-label="View next"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-background/40"
+                    >
                       <ChevronRight className="h-3.5 w-3.5" />
                     </button>
                   </div>

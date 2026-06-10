@@ -5,11 +5,32 @@ import { supabase } from "@/integrations/supabase/client";
 import { getFlashCardVisibility, listPublicFlashCards } from "@/lib/admin-flash-cards.functions";
 
 import {
-  Sparkles, Award, Crown,
-  Atom, FlaskConical, Dna, Sigma, Languages, Cpu, BookOpen,
-  ChevronLeft, ChevronRight, ChevronDown,
-  RotateCw, Bookmark, CheckCircle2, Layers, Flame, Target, Clock, Star,
-  Brain, TrendingUp, FileText, Image as ImageIcon, Loader2,
+  Sparkles,
+  Award,
+  Crown,
+  Atom,
+  FlaskConical,
+  Dna,
+  Sigma,
+  Languages,
+  Cpu,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  RotateCw,
+  Bookmark,
+  CheckCircle2,
+  Layers,
+  Flame,
+  Target,
+  Clock,
+  Star,
+  Brain,
+  TrendingUp,
+  FileText,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3;
@@ -25,7 +46,11 @@ const levelIcon = (code: string) => {
   return Award;
 };
 const levelGradient = (i: number) =>
-  ["from-sky-500 to-indigo-500", "from-[var(--neon-purple)] to-fuchsia-500", "from-amber-400 to-rose-500"][i % 3];
+  [
+    "from-sky-500 to-indigo-500",
+    "from-[var(--neon-purple)] to-fuchsia-500",
+    "from-amber-400 to-rose-500",
+  ][i % 3];
 
 const subjectIcons = [Atom, FlaskConical, Dna, Sigma, Languages, Cpu, BookOpen];
 const subjectGradients = [
@@ -56,9 +81,21 @@ export function FlashCardsFlow() {
     queryKey: ["fc-tree"],
     queryFn: async () => {
       const [lvl, subj, chap] = await Promise.all([
-        supabase.from("levels").select("code,name,description").eq("status", "published").order("sort_order"),
-        supabase.from("subjects").select("id,name,level,description").eq("status", "published").order("sort_order"),
-        supabase.from("chapters").select("id,name,subject_id,description").eq("status", "published").order("sort_order"),
+        supabase
+          .from("levels")
+          .select("code,name,description")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("subjects")
+          .select("id,name,level,description")
+          .eq("status", "published")
+          .order("sort_order"),
+        supabase
+          .from("chapters")
+          .select("id,name,subject_id,description")
+          .eq("status", "published")
+          .order("sort_order"),
       ]);
       return {
         levels: (lvl.data ?? []) as LevelRow[],
@@ -74,7 +111,9 @@ export function FlashCardsFlow() {
     queryKey: ["fc-chapter-counts", subject?.id ?? null],
     enabled: !!subject?.id,
     queryFn: async () => {
-      const chapterIds = (tree.data?.chapters ?? []).filter((c) => c.subject_id === subject!.id).map((c) => c.id);
+      const chapterIds = (tree.data?.chapters ?? [])
+        .filter((c) => c.subject_id === subject!.id)
+        .map((c) => c.id);
       if (!chapterIds.length) return {} as Record<string, number>;
       const { data, error } = await supabase
         .from("flash_cards")
@@ -85,7 +124,8 @@ export function FlashCardsFlow() {
       if (error) throw error;
       const map: Record<string, number> = {};
       for (const id of chapterIds) map[id] = 0;
-      for (const r of (data ?? []) as { chapter_id: string }[]) map[r.chapter_id] = (map[r.chapter_id] ?? 0) + 1;
+      for (const r of (data ?? []) as { chapter_id: string }[])
+        map[r.chapter_id] = (map[r.chapter_id] ?? 0) + 1;
       return map;
     },
     staleTime: 15_000,
@@ -104,7 +144,10 @@ export function FlashCardsFlow() {
         .eq("status", "published")
         .eq("is_hidden", false)
         .eq("level", level!.code)
-        .in("subject_id", subjs.map((s) => s.id));
+        .in(
+          "subject_id",
+          subjs.map((s) => s.id),
+        );
       if (error) throw error;
       const map: Record<string, number> = {};
       for (const s of subjs) map[s.id] = 0;
@@ -120,22 +163,31 @@ export function FlashCardsFlow() {
   useEffect(() => {
     const ch = supabase
       .channel(`student-flash-cards-live-${Math.random().toString(36).slice(2, 8)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "flash_card_visibility" }, () => {
-        qc.invalidateQueries({ queryKey: ["flash-card-visibility"] });
-      })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "flash_card_visibility" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["flash-card-visibility"] });
+        },
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "flash_cards" }, () => {
         qc.invalidateQueries({ queryKey: ["public-flash-cards"] });
         qc.invalidateQueries({ queryKey: ["fc-chapter-counts"] });
         qc.invalidateQueries({ queryKey: ["fc-subject-counts"] });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "levels" }, () =>
-        qc.invalidateQueries({ queryKey: ["fc-tree"] }))
+        qc.invalidateQueries({ queryKey: ["fc-tree"] }),
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "subjects" }, () =>
-        qc.invalidateQueries({ queryKey: ["fc-tree"] }))
+        qc.invalidateQueries({ queryKey: ["fc-tree"] }),
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "chapters" }, () =>
-        qc.invalidateQueries({ queryKey: ["fc-tree"] }))
+        qc.invalidateQueries({ queryKey: ["fc-tree"] }),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const hiddenLevels = new Set(vis.data?.hidden_levels ?? []);
@@ -180,7 +232,10 @@ export function FlashCardsFlow() {
           {loadingTree ? (
             <LoadingGrid />
           ) : visibleLevels.length === 0 ? (
-            <EmptyBlock title="No levels published yet" desc="Once an admin publishes a level it will appear here." />
+            <EmptyBlock
+              title="No levels published yet"
+              desc="Once an admin publishes a level it will appear here."
+            />
           ) : (
             <Grid>
               {visibleLevels.map((l, i) => (
@@ -191,7 +246,12 @@ export function FlashCardsFlow() {
                   Icon={levelIcon(l.code)}
                   gradient={levelGradient(i)}
                   delay={i * 70}
-                  onClick={() => { setLevel(l); setSubject(null); setChapter(null); setStep(1); }}
+                  onClick={() => {
+                    setLevel(l);
+                    setSubject(null);
+                    setChapter(null);
+                    setStep(1);
+                  }}
                 />
               ))}
             </Grid>
@@ -202,7 +262,10 @@ export function FlashCardsFlow() {
       {step === 1 && (
         <>
           {visibleSubjects.length === 0 ? (
-            <EmptyBlock title="No subjects in this level" desc="Pick another level or wait for new uploads." />
+            <EmptyBlock
+              title="No subjects in this level"
+              desc="Pick another level or wait for new uploads."
+            />
           ) : (
             <Grid cols={3}>
               {visibleSubjects.map((s, i) => {
@@ -217,7 +280,11 @@ export function FlashCardsFlow() {
                     Icon={Icon}
                     gradient={grad}
                     delay={i * 60}
-                    onClick={() => { setSubject(s); setChapter(null); setStep(2); }}
+                    onClick={() => {
+                      setSubject(s);
+                      setChapter(null);
+                      setStep(2);
+                    }}
                   />
                 );
               })}
@@ -230,7 +297,10 @@ export function FlashCardsFlow() {
         <ChapterList
           chapters={visibleChapters}
           counts={cardCounts.data ?? {}}
-          onPick={(c) => { setChapter(c); setStep(3); }}
+          onPick={(c) => {
+            setChapter(c);
+            setStep(3);
+          }}
         />
       )}
 
@@ -290,8 +360,18 @@ function Pill({ icon: Icon, label, value }: { icon: any; label: string; value: s
 }
 
 function Stepper({
-  step, level, subject, chapter, setStep,
-}: { step: Step; level: string; subject: string; chapter: string; setStep: (s: Step) => void }) {
+  step,
+  level,
+  subject,
+  chapter,
+  setStep,
+}: {
+  step: Step;
+  level: string;
+  subject: string;
+  chapter: string;
+  setStep: (s: Step) => void;
+}) {
   const items = [
     { i: 0, l: "Level", v: level || "—" },
     { i: 1, l: "Subject", v: subject || "—" },
@@ -308,18 +388,26 @@ function Stepper({
             <button
               onClick={() => (done || active) && setStep(it.i as Step)}
               className={`group flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
-                active ? "bg-cta-gradient text-white shadow-glow"
-                  : done ? "bg-muted/60 text-foreground hover:bg-muted" : "text-muted-foreground"
+                active
+                  ? "bg-cta-gradient text-white shadow-glow"
+                  : done
+                    ? "bg-muted/60 text-foreground hover:bg-muted"
+                    : "text-muted-foreground"
               }`}
             >
-              <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                active ? "bg-white/20" : done ? "bg-emerald-500/20 text-emerald-400" : "bg-muted"
-              }`}>
+              <span
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  active ? "bg-white/20" : done ? "bg-emerald-500/20 text-emerald-400" : "bg-muted"
+                }`}
+              >
                 {done ? "✓" : it.i + 1}
               </span>
-              <span>{it.l}:</span><span className="opacity-80">{it.v}</span>
+              <span>{it.l}:</span>
+              <span className="opacity-80">{it.v}</span>
             </button>
-            {idx < items.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+            {idx < items.length - 1 && (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
           </div>
         );
       })}
@@ -329,7 +417,9 @@ function Stepper({
 
 function Grid({ children, cols = 3 }: { children: React.ReactNode; cols?: number }) {
   return (
-    <div className={`grid gap-4 sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : ""}`}>{children}</div>
+    <div className={`grid gap-4 sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : ""}`}>
+      {children}
+    </div>
   );
 }
 
@@ -352,15 +442,34 @@ function EmptyBlock({ title, desc }: { title: string; desc: string }) {
 }
 
 function SelectCard({
-  title, desc, Icon, gradient, onClick, delay,
-}: { title: string; desc: string; Icon: any; gradient: string; onClick: () => void; delay: number }) {
+  title,
+  desc,
+  Icon,
+  gradient,
+  onClick,
+  delay,
+}: {
+  title: string;
+  desc: string;
+  Icon: any;
+  gradient: string;
+  onClick: () => void;
+  delay: number;
+}) {
   return (
-    <button onClick={onClick} className="group relative animate-fade-in text-left"
-      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}>
-      <div className={`absolute -inset-px rounded-3xl bg-gradient-to-br ${gradient} opacity-0 blur transition-opacity duration-300 group-hover:opacity-60`} />
+    <button
+      onClick={onClick}
+      className="group relative animate-fade-in text-left"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+    >
+      <div
+        className={`absolute -inset-px rounded-3xl bg-gradient-to-br ${gradient} opacity-0 blur transition-opacity duration-300 group-hover:opacity-60`}
+      />
       <div className="glass relative h-full overflow-hidden rounded-3xl p-6 shadow-card-soft transition-transform duration-300 group-hover:-translate-y-1">
         <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-        <div className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-glow`}>
+        <div
+          className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-glow`}
+        >
           <Icon className="h-6 w-6" />
         </div>
         <h3 className="font-display mt-4 text-lg font-bold tracking-tight">{title}</h3>
@@ -374,13 +483,26 @@ function SelectCard({
 }
 
 function ChapterList({
-  chapters, counts, onPick,
-}: { chapters: ChapterRow[]; counts: Record<string, number>; onPick: (c: ChapterRow) => void }) {
+  chapters,
+  counts,
+  onPick,
+}: {
+  chapters: ChapterRow[];
+  counts: Record<string, number>;
+  onPick: (c: ChapterRow) => void;
+}) {
   const [open, setOpen] = useState<string | null>(chapters[0]?.id ?? null);
-  useEffect(() => { setOpen(chapters[0]?.id ?? null); }, [chapters]);
+  useEffect(() => {
+    setOpen(chapters[0]?.id ?? null);
+  }, [chapters]);
 
   if (chapters.length === 0) {
-    return <EmptyBlock title="No chapters published yet" desc="An admin hasn't published chapters for this subject." />;
+    return (
+      <EmptyBlock
+        title="No chapters published yet"
+        desc="An admin hasn't published chapters for this subject."
+      />
+    );
   }
 
   return (
@@ -389,11 +511,15 @@ function ChapterList({
         const isOpen = open === ch.id;
         const total = counts[ch.id] ?? 0;
         return (
-          <div key={ch.id}
+          <div
+            key={ch.id}
             className="glass overflow-hidden rounded-3xl shadow-card-soft animate-fade-in"
-            style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}>
-            <button onClick={() => setOpen(isOpen ? null : ch.id)}
-              className="flex w-full items-center justify-between gap-3 p-5">
+            style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
+          >
+            <button
+              onClick={() => setOpen(isOpen ? null : ch.id)}
+              className="flex w-full items-center justify-between gap-3 p-5"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cta-gradient text-white shadow-glow">
                   <Layers className="h-5 w-5" />
@@ -407,7 +533,9 @@ function ChapterList({
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground">{total}</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
               </div>
             </button>
             {isOpen && (
@@ -428,7 +556,8 @@ function ChapterList({
                     disabled={total === 0}
                     className="inline-flex items-center gap-2 rounded-full bg-cta-gradient px-5 py-2 text-sm font-semibold text-white shadow-glow hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {total === 0 ? "No cards yet" : "Study Cards"} <ChevronRight className="h-4 w-4" />
+                    {total === 0 ? "No cards yet" : "Study Cards"}{" "}
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -443,11 +572,19 @@ function ChapterList({
 /* ------------------------------ viewer ------------------------------ */
 
 function Viewer({
-  level, levelName, subjectId, subjectName, chapterId, chapterName,
+  level,
+  levelName,
+  subjectId,
+  subjectName,
+  chapterId,
+  chapterName,
 }: {
-  level: string; levelName: string;
-  subjectId: string; subjectName: string;
-  chapterId: string; chapterName: string;
+  level: string;
+  levelName: string;
+  subjectId: string;
+  subjectName: string;
+  chapterId: string;
+  chapterName: string;
 }) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -461,19 +598,28 @@ function Viewer({
     staleTime: 15_000,
   });
 
-  useEffect(() => { setIdx(0); setFlipped(false); }, [chapterId]);
+  useEffect(() => {
+    setIdx(0);
+    setFlipped(false);
+  }, [chapterId]);
 
   const deck = useMemo(
-    () => (live.data ?? []).map((c) => ({
-      front: c.front, back: c.back, formula: c.formula ?? "", tag: c.card_type,
-    })),
+    () =>
+      (live.data ?? []).map((c) => ({
+        front: c.front,
+        back: c.back,
+        formula: c.formula ?? "",
+        tag: c.card_type,
+      })),
     [live.data],
   );
 
   if (live.isLoading) {
-    return <div className="glass rounded-3xl p-12 shadow-card-soft flex items-center justify-center gap-2 text-sm text-muted-foreground">
-      <Loader2 className="h-4 w-4 animate-spin" /> Loading flash cards…
-    </div>;
+    return (
+      <div className="glass rounded-3xl p-12 shadow-card-soft flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading flash cards…
+      </div>
+    );
   }
 
   if (deck.length === 0) {
@@ -486,35 +632,51 @@ function Viewer({
   }
 
   const card = deck[Math.min(idx, deck.length - 1)];
-  const next = () => { setFlipped(false); setIdx((i) => Math.min(deck.length - 1, i + 1)); };
-  const prev = () => { setFlipped(false); setIdx((i) => Math.max(0, i - 1)); };
+  const next = () => {
+    setFlipped(false);
+    setIdx((i) => Math.min(deck.length - 1, i + 1));
+  };
+  const prev = () => {
+    setFlipped(false);
+    setIdx((i) => Math.max(0, i - 1));
+  };
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
       <div className="space-y-4">
         <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 shadow-card-soft">
           <div className="flex items-center gap-2 text-xs">
-            <span className="rounded-full bg-muted/60 px-2 py-0.5 font-semibold">{subjectName}</span>
+            <span className="rounded-full bg-muted/60 px-2 py-0.5 font-semibold">
+              {subjectName}
+            </span>
             <ChevronRight className="h-3 w-3 text-muted-foreground" />
             <span className="rounded-full bg-[var(--neon-blue)]/10 px-2 py-0.5 font-semibold text-[var(--neon-blue)]">
               {chapterName}
             </span>
           </div>
           <div className="text-xs text-muted-foreground">
-            Card <span className="font-display font-bold text-foreground">{String(idx + 1).padStart(2, "0")}</span> / {deck.length}
+            Card{" "}
+            <span className="font-display font-bold text-foreground">
+              {String(idx + 1).padStart(2, "0")}
+            </span>{" "}
+            / {deck.length}
           </div>
         </div>
 
         <div className="[perspective:1500px]">
-          <div className={`relative h-[420px] w-full transition-transform duration-700 [transform-style:preserve-3d] ${
-            flipped ? "[transform:rotateY(180deg)]" : ""
-          }`}>
+          <div
+            className={`relative h-[420px] w-full transition-transform duration-700 [transform-style:preserve-3d] ${
+              flipped ? "[transform:rotateY(180deg)]" : ""
+            }`}
+          >
             <Face variant={variantForIndex(idx)}>
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1 rounded-full border border-[var(--neon-purple)]/30 bg-[var(--neon-purple)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--neon-purple)]">
                   <Sparkles className="h-3 w-3" /> {card.tag}
                 </span>
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Front</span>
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Front
+                </span>
               </div>
               <div className="flex flex-1 flex-col items-center justify-center text-center">
                 <Brain className="h-10 w-10 text-[var(--neon-blue)] drop-shadow-[0_0_18px_var(--neon-blue)]" />
@@ -531,14 +693,20 @@ function Viewer({
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
                   <CheckCircle2 className="h-3 w-3" /> Explanation
                 </span>
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Back · {card.tag}</span>
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Back · {card.tag}
+                </span>
               </div>
               <div className="flex-1 overflow-y-auto py-4">
                 <p className="text-sm leading-relaxed text-foreground/90">{card.back}</p>
                 {card.formula && (
                   <div className="mt-4 rounded-2xl border border-[var(--neon-purple)]/30 bg-gradient-to-br from-[var(--neon-purple)]/10 to-[var(--neon-blue)]/10 p-4">
-                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Formula</div>
-                    <div className="font-display mt-1 text-xl font-bold text-gradient">{card.formula}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Formula
+                    </div>
+                    <div className="font-display mt-1 text-xl font-bold text-gradient">
+                      {card.formula}
+                    </div>
                   </div>
                 )}
               </div>
@@ -548,24 +716,49 @@ function Viewer({
         </div>
 
         <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-3 shadow-card-soft">
-          <button onClick={prev}
-            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-4 py-2 text-sm font-medium hover:bg-muted">
+          <button
+            onClick={prev}
+            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-4 py-2 text-sm font-medium hover:bg-muted"
+          >
             <ChevronLeft className="h-4 w-4" /> Previous
           </button>
           <div className="flex items-center gap-2">
-            <CtrlBtn active={bookmarks.has(idx)}
-              onClick={() => setBookmarks((b) => { const n = new Set(b); n.has(idx) ? n.delete(idx) : n.add(idx); return n; })}
-              Icon={Bookmark} label="Bookmark" />
-            <CtrlBtn active={learned.has(idx)}
-              onClick={() => setLearned((b) => { const n = new Set(b); n.has(idx) ? n.delete(idx) : n.add(idx); return n; })}
-              Icon={CheckCircle2} label="Learned" variant="success" />
-            <button onClick={() => setFlipped((f) => !f)}
-              className="inline-flex items-center gap-2 rounded-full bg-cta-gradient px-4 py-2 text-sm font-semibold text-white shadow-glow hover:scale-[1.02] transition-transform">
+            <CtrlBtn
+              active={bookmarks.has(idx)}
+              onClick={() =>
+                setBookmarks((b) => {
+                  const n = new Set(b);
+                  n.has(idx) ? n.delete(idx) : n.add(idx);
+                  return n;
+                })
+              }
+              Icon={Bookmark}
+              label="Bookmark"
+            />
+            <CtrlBtn
+              active={learned.has(idx)}
+              onClick={() =>
+                setLearned((b) => {
+                  const n = new Set(b);
+                  n.has(idx) ? n.delete(idx) : n.add(idx);
+                  return n;
+                })
+              }
+              Icon={CheckCircle2}
+              label="Learned"
+              variant="success"
+            />
+            <button
+              onClick={() => setFlipped((f) => !f)}
+              className="inline-flex items-center gap-2 rounded-full bg-cta-gradient px-4 py-2 text-sm font-semibold text-white shadow-glow hover:scale-[1.02] transition-transform"
+            >
               <RotateCw className="h-4 w-4" /> Flip
             </button>
           </div>
-          <button onClick={next}
-            className="inline-flex items-center gap-2 rounded-full bg-cta-gradient px-4 py-2 text-sm font-semibold text-white shadow-glow">
+          <button
+            onClick={next}
+            className="inline-flex items-center gap-2 rounded-full bg-cta-gradient px-4 py-2 text-sm font-semibold text-white shadow-glow"
+          >
             Next <ChevronRight className="h-4 w-4" />
           </button>
         </div>
@@ -573,11 +766,17 @@ function Viewer({
 
       <div className="space-y-4">
         <div className="glass rounded-3xl p-5 shadow-card-soft">
-          <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Study Progress</span>
+          <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Study Progress
+          </span>
           <div className="mt-4 space-y-3">
             <ProgRing pct={deck.length ? Math.round((learned.size / deck.length) * 100) : 0} />
             <Row label="Completed" value={`${learned.size}`} icon={CheckCircle2} />
-            <Row label="Remaining" value={`${Math.max(0, deck.length - learned.size)}`} icon={Layers} />
+            <Row
+              label="Remaining"
+              value={`${Math.max(0, deck.length - learned.size)}`}
+              icon={Layers}
+            />
             <Row label="Bookmarks" value={`${bookmarks.size}`} icon={Star} />
             <Row label="Total" value={`${deck.length}`} icon={Target} />
           </div>
@@ -585,14 +784,21 @@ function Viewer({
 
         <div className="glass rounded-3xl p-5 shadow-card-soft">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Bookmarks</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Bookmarks
+            </span>
             <Bookmark className="h-4 w-4 text-amber-400" />
           </div>
           <ul className="mt-3 space-y-2">
             {[...bookmarks].slice(0, 4).map((i) => (
-              <li key={i}
+              <li
+                key={i}
                 className="flex items-start gap-2 rounded-xl bg-muted/40 px-3 py-2 hover:bg-muted/60 cursor-pointer"
-                onClick={() => { setIdx(i); setFlipped(false); }}>
+                onClick={() => {
+                  setIdx(i);
+                  setFlipped(false);
+                }}
+              >
                 <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
                 <div>
                   <div className="text-xs font-semibold line-clamp-1">{deck[i]?.front}</div>
@@ -643,17 +849,33 @@ function Face({
             : "glass shadow-card-soft"; // classic
 
   const glowA =
-    variant === "neon" ? "bg-fuchsia-500/35" : variant === "study" ? "bg-emerald-400/25" : "bg-[var(--neon-purple)]/25";
+    variant === "neon"
+      ? "bg-fuchsia-500/35"
+      : variant === "study"
+        ? "bg-emerald-400/25"
+        : "bg-[var(--neon-purple)]/25";
   const glowB =
-    variant === "neon" ? "bg-cyan-400/30" : variant === "study" ? "bg-sky-400/20" : "bg-[var(--neon-blue)]/25";
+    variant === "neon"
+      ? "bg-cyan-400/30"
+      : variant === "study"
+        ? "bg-sky-400/20"
+        : "bg-[var(--neon-blue)]/25";
 
   return (
-    <div className={`absolute inset-0 rounded-3xl ${back ? "[transform:rotateY(180deg)]" : ""} [backface-visibility:hidden]`}>
-      <div className={`relative flex h-full flex-col overflow-hidden rounded-3xl p-6 sm:p-8 ${shell}`}>
+    <div
+      className={`absolute inset-0 rounded-3xl ${back ? "[transform:rotateY(180deg)]" : ""} [backface-visibility:hidden]`}
+    >
+      <div
+        className={`relative flex h-full flex-col overflow-hidden rounded-3xl p-6 sm:p-8 ${shell}`}
+      >
         {variant !== "minimal" && (
           <>
-            <div className={`pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full ${glowA} blur-3xl`} />
-            <div className={`pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full ${glowB} blur-3xl`} />
+            <div
+              className={`pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full ${glowA} blur-3xl`}
+            />
+            <div
+              className={`pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full ${glowB} blur-3xl`}
+            />
           </>
         )}
         {variant === "neon" && (
@@ -667,24 +889,39 @@ function Face({
 
 function FlipBtn({ onClick, back }: { onClick: () => void; back?: boolean }) {
   return (
-    <button onClick={onClick}
-      className="mt-auto inline-flex items-center justify-center gap-2 self-center rounded-full border border-[var(--neon-purple)]/40 bg-[var(--neon-purple)]/10 px-5 py-2 text-xs font-semibold text-[var(--neon-purple)] hover:bg-[var(--neon-purple)]/20">
+    <button
+      onClick={onClick}
+      className="mt-auto inline-flex items-center justify-center gap-2 self-center rounded-full border border-[var(--neon-purple)]/40 bg-[var(--neon-purple)]/10 px-5 py-2 text-xs font-semibold text-[var(--neon-purple)] hover:bg-[var(--neon-purple)]/20"
+    >
       <RotateCw className="h-3.5 w-3.5" /> {back ? "Back to question" : "Flip card"}
     </button>
   );
 }
 
 function CtrlBtn({
-  active, onClick, Icon, label, variant = "default",
-}: { active: boolean; onClick: () => void; Icon: any; label: string; variant?: "default" | "success" }) {
-  const activeStyle = variant === "success"
-    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-    : "bg-amber-400/20 text-amber-400 border-amber-400/40";
+  active,
+  onClick,
+  Icon,
+  label,
+  variant = "default",
+}: {
+  active: boolean;
+  onClick: () => void;
+  Icon: any;
+  label: string;
+  variant?: "default" | "success";
+}) {
+  const activeStyle =
+    variant === "success"
+      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+      : "bg-amber-400/20 text-amber-400 border-amber-400/40";
   return (
-    <button onClick={onClick}
+    <button
+      onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition ${
         active ? activeStyle : "border-border/60 bg-muted/40 text-foreground/80 hover:bg-muted"
-      }`}>
+      }`}
+    >
       <Icon className={`h-3.5 w-3.5 ${active && variant === "default" ? "fill-amber-400" : ""}`} />
       {label}
     </button>
@@ -717,8 +954,17 @@ function ProgRing({ pct }: { pct: number }) {
             </linearGradient>
           </defs>
           <circle cx="44" cy="44" r={r} stroke="hsl(var(--muted))" strokeWidth="8" fill="none" />
-          <circle cx="44" cy="44" r={r} stroke="url(#ringSmall)" strokeWidth="8" strokeLinecap="round" fill="none"
-            strokeDasharray={`${d} ${c}`} className="transition-all duration-700" />
+          <circle
+            cx="44"
+            cy="44"
+            r={r}
+            stroke="url(#ringSmall)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${d} ${c}`}
+            className="transition-all duration-700"
+          />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="font-display text-lg font-bold text-gradient">{pct}%</div>
@@ -726,7 +972,9 @@ function ProgRing({ pct }: { pct: number }) {
       </div>
       <div>
         <div className="text-xs font-semibold">Mastery</div>
-        <div className="text-[11px] text-muted-foreground">Keep going — small daily wins compound.</div>
+        <div className="text-[11px] text-muted-foreground">
+          Keep going — small daily wins compound.
+        </div>
       </div>
     </div>
   );

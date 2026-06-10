@@ -44,17 +44,13 @@ export function SingleSessionGuard() {
       } catch {
         /* noop */
       }
-      toast.error(
-        "You have been logged in from another device.",
-        { duration: 6000 },
-      );
+      toast.error("You have been logged in from another device.", { duration: 6000 });
       try {
         navigate({ to: "/login", replace: true });
       } catch {
         if (typeof window !== "undefined") window.location.replace("/login");
       }
     });
-
 
     return () => handle.stop();
   }, [user?.id, navigate]);

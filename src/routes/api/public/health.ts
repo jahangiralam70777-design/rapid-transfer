@@ -6,16 +6,13 @@ export const Route = createFileRoute("/api/public/health")({
   server: {
     handlers: {
       GET: async () => {
-        return new Response(
-          JSON.stringify({ status: "ok", ts: Date.now() }),
-          {
-            status: 200,
-            headers: {
-              "content-type": "application/json",
-              "cache-control": "no-store",
-            },
+        return new Response(JSON.stringify({ status: "ok", ts: Date.now() }), {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+            "cache-control": "no-store",
           },
-        );
+        });
       },
     },
   },

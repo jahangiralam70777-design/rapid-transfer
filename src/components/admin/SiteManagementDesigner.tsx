@@ -69,12 +69,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 // -------------------------------------------------------------------
@@ -104,11 +99,46 @@ interface SectionNode {
 
 const INITIAL_PAGES: PageEntry[] = [
   { id: "home", name: "Home", path: "/", status: "published", version: 27, updatedAt: "2m ago" },
-  { id: "about", name: "About Us", path: "/about", status: "draft", version: 12, updatedAt: "1h ago" },
-  { id: "courses", name: "Courses", path: "/courses", status: "published", version: 19, updatedAt: "yesterday" },
-  { id: "features", name: "Features", path: "/features", status: "draft", version: 4, updatedAt: "3d ago" },
-  { id: "blogs", name: "Blogs", path: "/blogs", status: "published", version: 31, updatedAt: "1w ago" },
-  { id: "contact", name: "Contact", path: "/contact", status: "published", version: 8, updatedAt: "2w ago" },
+  {
+    id: "about",
+    name: "About Us",
+    path: "/about",
+    status: "draft",
+    version: 12,
+    updatedAt: "1h ago",
+  },
+  {
+    id: "courses",
+    name: "Courses",
+    path: "/courses",
+    status: "published",
+    version: 19,
+    updatedAt: "yesterday",
+  },
+  {
+    id: "features",
+    name: "Features",
+    path: "/features",
+    status: "draft",
+    version: 4,
+    updatedAt: "3d ago",
+  },
+  {
+    id: "blogs",
+    name: "Blogs",
+    path: "/blogs",
+    status: "published",
+    version: 31,
+    updatedAt: "1w ago",
+  },
+  {
+    id: "contact",
+    name: "Contact",
+    path: "/contact",
+    status: "published",
+    version: 8,
+    updatedAt: "2w ago",
+  },
   { id: "faq", name: "FAQ", path: "/faq", status: "draft", version: 2, updatedAt: "1mo ago" },
 ];
 
@@ -212,12 +242,14 @@ export default function SiteManagementDesigner() {
     return `${path}${separator}site-preview=1`;
   }, [activePage?.path]);
   const filteredPages = useMemo(
-    () =>
-      pages.filter((p) => p.name.toLowerCase().includes(pageSearch.toLowerCase())),
+    () => pages.filter((p) => p.name.toLowerCase().includes(pageSearch.toLowerCase())),
     [pages, pageSearch],
   );
 
-  const selectedSection = useMemo(() => findSection(sections, selectedSectionId), [sections, selectedSectionId]);
+  const selectedSection = useMemo(
+    () => findSection(sections, selectedSectionId),
+    [sections, selectedSectionId],
+  );
 
   // Inject the chosen theme into the preview iframe each time it loads or toggles.
   useEffect(() => {
@@ -245,7 +277,11 @@ export default function SiteManagementDesigner() {
       const idx = prev.findIndex((s) => s.id === id);
       if (idx < 0) return prev;
       const orig = prev[idx];
-      const clone: SectionNode = { ...orig, id: `${orig.id}-copy-${Date.now()}`, name: `${orig.name} (Copy)` };
+      const clone: SectionNode = {
+        ...orig,
+        id: `${orig.id}-copy-${Date.now()}`,
+        name: `${orig.name} (Copy)`,
+      };
       const next = [...prev];
       next.splice(idx + 1, 0, clone);
       return next;
@@ -363,14 +399,9 @@ export default function SiteManagementDesigner() {
               onRefresh={() => setIframeKey((k) => k + 1)}
               path={activePage?.path ?? "/"}
             />
-        <div className="flex-1 min-h-0 overflow-auto p-4 2xl:p-6">
-          <div className="mx-auto flex w-full justify-center">
-                <PreviewFrame
-                  key={iframeKey}
-                  ref={iframeRef}
-                  device={device}
-                  src={previewSrc}
-                />
+            <div className="flex-1 min-h-0 overflow-auto p-4 2xl:p-6">
+              <div className="mx-auto flex w-full justify-center">
+                <PreviewFrame key={iframeKey} ref={iframeRef} device={device} src={previewSrc} />
               </div>
               {selectedSection ? (
                 <FloatingToolbar
@@ -409,10 +440,18 @@ export default function SiteManagementDesigner() {
                   </span>
                 </div>
                 <div className="h-44 overflow-hidden">
-                  <TabsContent value="history" className="m-0 h-full"><HistoryPanel /></TabsContent>
-                  <TabsContent value="diff" className="m-0 h-full"><DiffPanel /></TabsContent>
-                  <TabsContent value="activity" className="m-0 h-full"><ActivityPanel /></TabsContent>
-                  <TabsContent value="comments" className="m-0 h-full"><CommentsPanel /></TabsContent>
+                  <TabsContent value="history" className="m-0 h-full">
+                    <HistoryPanel />
+                  </TabsContent>
+                  <TabsContent value="diff" className="m-0 h-full">
+                    <DiffPanel />
+                  </TabsContent>
+                  <TabsContent value="activity" className="m-0 h-full">
+                    <ActivityPanel />
+                  </TabsContent>
+                  <TabsContent value="comments" className="m-0 h-full">
+                    <CommentsPanel />
+                  </TabsContent>
                 </div>
               </Tabs>
             </div>
@@ -457,26 +496,35 @@ function TopBar({
         </div>
         <div>
           <h1 className="text-sm font-semibold leading-tight">Site Designer</h1>
-          <p className="text-[10px] text-muted-foreground leading-tight">{pageName} · Version {version}</p>
+          <p className="text-[10px] text-muted-foreground leading-tight">
+            {pageName} · Version {version}
+          </p>
         </div>
       </div>
       <div className="mx-2 h-6 w-px bg-border" />
       <div className="flex items-center gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Undo"><Undo2 className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Undo">
+              <Undo2 className="h-4 w-4" />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>Undo (⌘Z)</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Redo"><Redo2 className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Redo">
+              <Redo2 className="h-4 w-4" />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>Redo (⌘⇧Z)</TooltipContent>
         </Tooltip>
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <Badge variant="outline" className="gap-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+        <Badge
+          variant="outline"
+          className="gap-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+        >
           <CheckCircle2 className="h-3 w-3" /> Safe publish pipeline
         </Badge>
         <div className="flex -space-x-1.5">
@@ -498,7 +546,11 @@ function TopBar({
         <Button size="sm" variant="outline" className="gap-1.5">
           <Eye className="h-3.5 w-3.5" /> Preview
         </Button>
-        <Button size="sm" className="gap-1.5 bg-gradient-to-br from-primary to-primary/80" onClick={onPublish}>
+        <Button
+          size="sm"
+          className="gap-1.5 bg-gradient-to-br from-primary to-primary/80"
+          onClick={onPublish}
+        >
           <Rocket className="h-3.5 w-3.5" /> Publish
         </Button>
       </div>
@@ -511,7 +563,9 @@ function StatusDot({ status }: { status: PageStatus }) {
     <span
       className={cn(
         "h-1.5 w-1.5 rounded-full",
-        status === "published" ? "bg-emerald-500 shadow-[0_0_6px_theme(colors.emerald.500)]" : "bg-amber-500",
+        status === "published"
+          ? "bg-emerald-500 shadow-[0_0_6px_theme(colors.emerald.500)]"
+          : "bg-amber-500",
       )}
     />
   );
@@ -565,15 +619,28 @@ function SectionRow({
           <MoreHorizontal className="h-3 w-3 rotate-90" />
         </span>
         {hasChildren ? (
-          <button onClick={onToggleExpanded} className="h-5 w-5 grid place-items-center text-muted-foreground hover:text-foreground">
+          <button
+            onClick={onToggleExpanded}
+            className="h-5 w-5 grid place-items-center text-muted-foreground hover:text-foreground"
+          >
             {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
         ) : (
           <span className="w-5" />
         )}
         <button onClick={onSelect} className="flex-1 min-w-0 flex items-center gap-1.5 text-left">
-          <Icon className={cn("h-3.5 w-3.5", section.visible ? "text-primary" : "text-muted-foreground/60")} />
-          <span className={cn("truncate font-medium", !section.visible && "text-muted-foreground line-through")}>
+          <Icon
+            className={cn(
+              "h-3.5 w-3.5",
+              section.visible ? "text-primary" : "text-muted-foreground/60",
+            )}
+          />
+          <span
+            className={cn(
+              "truncate font-medium",
+              !section.visible && "text-muted-foreground line-through",
+            )}
+          >
             {section.name}
           </span>
           {section.locked ? <Lock className="h-3 w-3 text-muted-foreground" /> : null}
@@ -582,8 +649,12 @@ function SectionRow({
           <IconBtn onClick={onToggleVisibility} title={section.visible ? "Hide" : "Show"}>
             {section.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
           </IconBtn>
-          <IconBtn onClick={onDuplicate} title="Duplicate"><Copy className="h-3 w-3" /></IconBtn>
-          <IconBtn onClick={onDelete} title="Delete"><Trash2 className="h-3 w-3" /></IconBtn>
+          <IconBtn onClick={onDuplicate} title="Duplicate">
+            <Copy className="h-3 w-3" />
+          </IconBtn>
+          <IconBtn onClick={onDelete} title="Delete">
+            <Trash2 className="h-3 w-3" />
+          </IconBtn>
         </div>
       </div>
       {hasChildren && expanded ? (
@@ -608,7 +679,15 @@ function SectionRow({
   );
 }
 
-function IconBtn({ children, onClick, title }: { children: React.ReactNode; onClick: () => void; title: string }) {
+function IconBtn({
+  children,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  title: string;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -645,9 +724,19 @@ function PreviewToolbar({
   return (
     <div className="h-12 shrink-0 border-b border-border/60 bg-card/50 backdrop-blur flex items-center px-4 gap-3">
       <div className="flex items-center rounded-md border border-border/60 bg-background/60 p-0.5">
-        <DeviceBtn active={device === "desktop"} onClick={() => setDevice("desktop")} title="Desktop"><Monitor className="h-3.5 w-3.5" /></DeviceBtn>
-        <DeviceBtn active={device === "tablet"} onClick={() => setDevice("tablet")} title="Tablet"><Tablet className="h-3.5 w-3.5" /></DeviceBtn>
-        <DeviceBtn active={device === "mobile"} onClick={() => setDevice("mobile")} title="Mobile"><Smartphone className="h-3.5 w-3.5" /></DeviceBtn>
+        <DeviceBtn
+          active={device === "desktop"}
+          onClick={() => setDevice("desktop")}
+          title="Desktop"
+        >
+          <Monitor className="h-3.5 w-3.5" />
+        </DeviceBtn>
+        <DeviceBtn active={device === "tablet"} onClick={() => setDevice("tablet")} title="Tablet">
+          <Tablet className="h-3.5 w-3.5" />
+        </DeviceBtn>
+        <DeviceBtn active={device === "mobile"} onClick={() => setDevice("mobile")} title="Mobile">
+          <Smartphone className="h-3.5 w-3.5" />
+        </DeviceBtn>
       </div>
       <div className="text-xs text-muted-foreground font-mono px-2 py-1 rounded border border-border/60 bg-background/60">
         {path}
@@ -660,15 +749,37 @@ function PreviewToolbar({
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </Button>
         <div className="flex items-center rounded-md border border-border/60 bg-background/60 p-0.5">
-          <DeviceBtn active={previewTheme === "light"} onClick={() => setPreviewTheme("light")} title="Light"><Sun className="h-3.5 w-3.5" /></DeviceBtn>
-          <DeviceBtn active={previewTheme === "dark"} onClick={() => setPreviewTheme("dark")} title="Dark"><Moon className="h-3.5 w-3.5" /></DeviceBtn>
+          <DeviceBtn
+            active={previewTheme === "light"}
+            onClick={() => setPreviewTheme("light")}
+            title="Light"
+          >
+            <Sun className="h-3.5 w-3.5" />
+          </DeviceBtn>
+          <DeviceBtn
+            active={previewTheme === "dark"}
+            onClick={() => setPreviewTheme("dark")}
+            title="Dark"
+          >
+            <Moon className="h-3.5 w-3.5" />
+          </DeviceBtn>
         </div>
       </div>
     </div>
   );
 }
 
-function DeviceBtn({ active, onClick, children, title }: { active: boolean; onClick: () => void; children: React.ReactNode; title: string }) {
+function DeviceBtn({
+  active,
+  onClick,
+  children,
+  title,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  title: string;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -676,7 +787,9 @@ function DeviceBtn({ active, onClick, children, title }: { active: boolean; onCl
           onClick={onClick}
           className={cn(
             "h-7 w-7 rounded grid place-items-center transition-colors",
-            active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+            active
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {children}
@@ -696,13 +809,19 @@ const PreviewFrame = (() => {
     return (
       <div
         className="relative rounded-xl border border-border/60 bg-background shadow-2xl shadow-primary/5 ring-1 ring-border/40 overflow-hidden transition-all"
-          style={{ width: "100%", maxWidth: w, height: device === "desktop" ? 760 : device === "tablet" ? 1024 : 720 }}
+        style={{
+          width: "100%",
+          maxWidth: w,
+          height: device === "desktop" ? 760 : device === "tablet" ? 1024 : 720,
+        }}
       >
         <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-muted/80 to-muted/40 border-b border-border/60 flex items-center px-2 gap-1.5 z-10">
           <span className="h-2 w-2 rounded-full bg-rose-400/80" />
           <span className="h-2 w-2 rounded-full bg-amber-400/80" />
           <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-          <span className="ml-2 text-[10px] text-muted-foreground font-mono truncate">{src.replace(/[?&]site-preview=1$/, "")}</span>
+          <span className="ml-2 text-[10px] text-muted-foreground font-mono truncate">
+            {src.replace(/[?&]site-preview=1$/, "")}
+          </span>
         </div>
         <iframe
           ref={ref}
@@ -747,14 +866,24 @@ function FloatingToolbar({
       <div className="flex items-center gap-1 rounded-full border border-border/60 bg-card/95 backdrop-blur-xl px-2 py-1.5 shadow-2xl shadow-primary/10">
         <div className="px-2 text-xs font-medium">{sectionName}</div>
         <Separator orientation="vertical" className="h-5" />
-        <FloatBtn onClick={() => {}} title="Edit"><Pencil className="h-3.5 w-3.5" /></FloatBtn>
-        <FloatBtn onClick={onUp} title="Move up"><ArrowUp className="h-3.5 w-3.5" /></FloatBtn>
-        <FloatBtn onClick={onDown} title="Move down"><ArrowDown className="h-3.5 w-3.5" /></FloatBtn>
+        <FloatBtn onClick={() => {}} title="Edit">
+          <Pencil className="h-3.5 w-3.5" />
+        </FloatBtn>
+        <FloatBtn onClick={onUp} title="Move up">
+          <ArrowUp className="h-3.5 w-3.5" />
+        </FloatBtn>
+        <FloatBtn onClick={onDown} title="Move down">
+          <ArrowDown className="h-3.5 w-3.5" />
+        </FloatBtn>
         <FloatBtn onClick={onToggle} title={visible ? "Hide" : "Show"}>
           {visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
         </FloatBtn>
-        <FloatBtn onClick={onDuplicate} title="Duplicate"><Copy className="h-3.5 w-3.5" /></FloatBtn>
-        <FloatBtn onClick={onDelete} title="Delete"><Trash2 className="h-3.5 w-3.5 text-rose-500" /></FloatBtn>
+        <FloatBtn onClick={onDuplicate} title="Duplicate">
+          <Copy className="h-3.5 w-3.5" />
+        </FloatBtn>
+        <FloatBtn onClick={onDelete} title="Delete">
+          <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+        </FloatBtn>
         <Separator orientation="vertical" className="h-5" />
         <a
           href={livePath}
@@ -769,11 +898,22 @@ function FloatingToolbar({
   );
 }
 
-function FloatBtn({ children, onClick, title }: { children: React.ReactNode; onClick: () => void; title: string }) {
+function FloatBtn({
+  children,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  title: string;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button onClick={onClick} className="h-7 w-7 rounded-full grid place-items-center text-muted-foreground hover:text-foreground hover:bg-muted">
+        <button
+          onClick={onClick}
+          className="h-7 w-7 rounded-full grid place-items-center text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
           {children}
         </button>
       </TooltipTrigger>
@@ -801,15 +941,23 @@ function Inspector({ section }: { section: SectionNode | null }) {
       <div className="p-4 border-b border-border/60">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Inspector</h2>
-          <Badge variant="outline" className="text-[10px] capitalize">{section.type}</Badge>
+          <Badge variant="outline" className="text-[10px] capitalize">
+            {section.type}
+          </Badge>
         </div>
         <p className="text-[11px] text-muted-foreground mt-0.5">{section.name}</p>
       </div>
       <Tabs defaultValue="design" className="flex-1 flex flex-col min-h-0">
         <TabsList className="mx-3 mt-3 grid grid-cols-3 bg-muted/40">
-          <TabsTrigger value="design" className="text-xs">Design</TabsTrigger>
-          <TabsTrigger value="layout" className="text-xs">Layout</TabsTrigger>
-          <TabsTrigger value="advanced" className="text-xs">Advanced</TabsTrigger>
+          <TabsTrigger value="design" className="text-xs">
+            Design
+          </TabsTrigger>
+          <TabsTrigger value="layout" className="text-xs">
+            Layout
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="text-xs">
+            Advanced
+          </TabsTrigger>
         </TabsList>
         <ScrollArea className="flex-1 mt-3">
           <TabsContent value="design" className="m-0 px-4 pb-6 space-y-5">
@@ -818,9 +966,15 @@ function Inspector({ section }: { section: SectionNode | null }) {
             </Field>
             <Field label="Background">
               <div className="flex items-center gap-2">
-                <input type="color" defaultValue="#0f172a" className="h-8 w-10 rounded border border-border/60 bg-transparent" />
+                <input
+                  type="color"
+                  defaultValue="#0f172a"
+                  className="h-8 w-10 rounded border border-border/60 bg-transparent"
+                />
                 <Select defaultValue="solid">
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="solid">Solid</SelectItem>
                     <SelectItem value="gradient">Gradient</SelectItem>
@@ -836,7 +990,9 @@ function Inspector({ section }: { section: SectionNode | null }) {
             </Field>
             <Field label="Animation">
               <Select defaultValue="fade-up">
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   <SelectItem value="fade-up">Fade up</SelectItem>
@@ -859,7 +1015,9 @@ function Inspector({ section }: { section: SectionNode | null }) {
             </Field>
             <Field label="Max width">
               <Select defaultValue="xl">
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="md">Medium</SelectItem>
                   <SelectItem value="lg">Large</SelectItem>
@@ -932,18 +1090,28 @@ function HistoryPanel() {
       <ul className="divide-y divide-border/50">
         {VERSIONS.map((v) => (
           <li key={v.id} className="flex items-center gap-3 px-4 py-2.5 text-xs">
-            <div className={cn(
-              "h-7 w-7 rounded-full grid place-items-center text-[10px] font-semibold",
-              v.current ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-            )}>v{v.number}</div>
+            <div
+              className={cn(
+                "h-7 w-7 rounded-full grid place-items-center text-[10px] font-semibold",
+                v.current ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+              )}
+            >
+              v{v.number}
+            </div>
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate">{v.label}</div>
-              <div className="text-[10px] text-muted-foreground">{v.author} · {v.time}</div>
+              <div className="text-[10px] text-muted-foreground">
+                {v.author} · {v.time}
+              </div>
             </div>
             {v.current ? (
-              <Badge variant="outline" className="text-[10px]">Current</Badge>
+              <Badge variant="outline" className="text-[10px]">
+                Current
+              </Badge>
             ) : (
-              <Button size="sm" variant="ghost" className="h-7 text-[11px]">Restore</Button>
+              <Button size="sm" variant="ghost" className="h-7 text-[11px]">
+                Restore
+              </Button>
             )}
           </li>
         ))}
@@ -956,25 +1124,32 @@ function DiffPanel() {
   return (
     <div className="grid h-full grid-cols-2 divide-x divide-border/50">
       <ScrollArea className="h-full">
-        <div className="p-3 text-[10px] uppercase tracking-wider text-muted-foreground">Version 26</div>
+        <div className="p-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+          Version 26
+        </div>
         <pre className="px-3 pb-3 text-[11px] font-mono leading-relaxed text-muted-foreground whitespace-pre-wrap">
-{`hero.title  "Build faster."
+          {`hero.title  "Build faster."
 hero.cta    "Start free"
 features[3] visible: true
 cta.color   #4F46E5`}
         </pre>
       </ScrollArea>
       <ScrollArea className="h-full">
-        <div className="p-3 text-[10px] uppercase tracking-wider text-muted-foreground">Version 27 (current)</div>
+        <div className="p-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+          Version 27 (current)
+        </div>
         <ul className="px-3 pb-3 space-y-1.5 text-[11px] font-mono">
           {DIFF_ROWS.map((r) => (
             <li
               key={r.label}
               className={cn(
                 "rounded px-2 py-1.5 border",
-                r.kind === "added" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-                r.kind === "removed" && "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 line-through",
-                r.kind === "modified" && "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                r.kind === "added" &&
+                  "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                r.kind === "removed" &&
+                  "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 line-through",
+                r.kind === "modified" &&
+                  "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
               )}
             >
               [{r.kind}] {r.label}
@@ -996,7 +1171,10 @@ function ActivityPanel() {
               {a.who[0]}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="truncate"><span className="font-medium">{a.who}</span> <span className="text-muted-foreground">{a.what}</span></div>
+              <div className="truncate">
+                <span className="font-medium">{a.who}</span>{" "}
+                <span className="text-muted-foreground">{a.what}</span>
+              </div>
               <div className="text-[10px] text-muted-foreground">{a.when}</div>
             </div>
           </li>
@@ -1014,9 +1192,13 @@ function CommentsPanel() {
           <li key={i} className="px-4 py-3 text-xs space-y-1.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-muted grid place-items-center text-[10px] font-semibold">{c.author[0]}</div>
+                <div className="h-6 w-6 rounded-full bg-muted grid place-items-center text-[10px] font-semibold">
+                  {c.author[0]}
+                </div>
                 <span className="font-medium">{c.author}</span>
-                <Badge variant="outline" className="text-[9px]">{c.section}</Badge>
+                <Badge variant="outline" className="text-[9px]">
+                  {c.section}
+                </Badge>
               </div>
               <span className="text-[10px] text-muted-foreground">{c.when}</span>
             </div>
@@ -1080,11 +1262,14 @@ function PublishDialog({
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Snapshot will be created
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Live site rolls forward atomically
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Live site rolls forward
+            atomically
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           {step !== "publish" ? (
             <Button onClick={() => setStep(step === "draft" ? "review" : "publish")}>
               Continue
@@ -1105,7 +1290,11 @@ function PublishDialog({
 
 // =========================== helpers ===========================
 
-function mapSections(list: SectionNode[], id: string, fn: (s: SectionNode) => SectionNode): SectionNode[] {
+function mapSections(
+  list: SectionNode[],
+  id: string,
+  fn: (s: SectionNode) => SectionNode,
+): SectionNode[] {
   return list.map((s) => (s.id === id ? fn(s) : s));
 }
 function findSection(list: SectionNode[], id: string | null): SectionNode | null {

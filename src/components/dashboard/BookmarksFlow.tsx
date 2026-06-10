@@ -8,7 +8,6 @@ import { listBookmarkedMcqs, toggleMcqBookmark } from "@/lib/mcq-review.function
 import { listSubjects, listChapters } from "@/lib/learning.functions";
 import { useLevels } from "@/hooks/use-levels";
 
-
 export function BookmarksFlow() {
   const [level, setLevel] = useState<string | null>(null);
   const [subjectId, setSubjectId] = useState<string | null>(null);
@@ -98,9 +97,10 @@ export function BookmarksFlow() {
           >
             <option value="">All levels</option>
             {levelsList.map((l) => (
-              <option key={l.code} value={l.code}>{l.name}</option>
+              <option key={l.code} value={l.code}>
+                {l.name}
+              </option>
             ))}
-
           </select>
           <select
             value={subjectId ?? ""}
@@ -112,7 +112,9 @@ export function BookmarksFlow() {
           >
             <option value="">All subjects</option>
             {(subjectsQ.data ?? []).map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
             ))}
           </select>
           <select
@@ -123,7 +125,9 @@ export function BookmarksFlow() {
           >
             <option value="">All chapters</option>
             {(chaptersQ.data ?? []).map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
         </div>
@@ -163,7 +167,9 @@ export function BookmarksFlow() {
                       onClick={() => setOpenId(open ? null : m.id)}
                       className="glass rounded-lg px-2 py-1 text-xs"
                     >
-                      <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+                      />
                     </button>
                     <button
                       onClick={() => removeBookmark(m.id)}
@@ -189,14 +195,17 @@ export function BookmarksFlow() {
                             <span className="mr-2 font-display font-bold">{o.k}.</span>
                             {o.t}
                             {isCorrect && (
-                              <span className="ml-2 text-[10px] font-bold text-emerald-400">CORRECT</span>
+                              <span className="ml-2 text-[10px] font-bold text-emerald-400">
+                                CORRECT
+                              </span>
                             )}
                           </div>
                         );
                       })}
                       {m.explanation && (
                         <div className="rounded-xl border border-dashed border-border bg-background/30 p-3 text-xs text-muted-foreground sm:col-span-2">
-                          <b className="text-foreground">Explanation: </b>{m.explanation}
+                          <b className="text-foreground">Explanation: </b>
+                          {m.explanation}
                         </div>
                       )}
                     </div>

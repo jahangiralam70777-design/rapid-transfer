@@ -3,11 +3,14 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  adminUpdateSettingDraft,
-  adminPublishSetting,
-} from "@/lib/site-management.functions";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { adminUpdateSettingDraft, adminPublishSetting } from "@/lib/site-management.functions";
 import {
   EditorShell,
   Field,
@@ -101,7 +104,8 @@ export function ThemeEditor({ row }: { row: SettingRow }) {
   const initial = { ...THEME_DEFAULT, ...(row.draft_value as Partial<ThemeDraft>) };
   const { value, setField } = useDraft<ThemeDraft>(initial, row.key);
   const { save, publish } = useSettingMutations(row.key);
-  const dirty = !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
+  const dirty =
+    !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
 
   return (
     <EditorShell
@@ -115,35 +119,67 @@ export function ThemeEditor({ row }: { row: SettingRow }) {
       publishedAt={row.published_at}
     >
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Brand colors</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Brand colors
+        </p>
         <TwoCol>
-          <ColorField label="Primary" value={value.brand_primary} onChange={(v) => setField("brand_primary", v)} />
-          <ColorField label="Secondary" value={value.brand_secondary} onChange={(v) => setField("brand_secondary", v)} />
-          <ColorField label="Accent" value={value.brand_accent} onChange={(v) => setField("brand_accent", v)} />
-          <ColorField label="Background" value={value.background} onChange={(v) => setField("background", v)} />
-          <ColorField label="Foreground (text)" value={value.foreground} onChange={(v) => setField("foreground", v)} />
+          <ColorField
+            label="Primary"
+            value={value.brand_primary}
+            onChange={(v) => setField("brand_primary", v)}
+          />
+          <ColorField
+            label="Secondary"
+            value={value.brand_secondary}
+            onChange={(v) => setField("brand_secondary", v)}
+          />
+          <ColorField
+            label="Accent"
+            value={value.brand_accent}
+            onChange={(v) => setField("brand_accent", v)}
+          />
+          <ColorField
+            label="Background"
+            value={value.background}
+            onChange={(v) => setField("background", v)}
+          />
+          <ColorField
+            label="Foreground (text)"
+            value={value.foreground}
+            onChange={(v) => setField("foreground", v)}
+          />
         </TwoCol>
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Typography</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Typography
+        </p>
         <TwoCol>
           <Field label="Display font (headings)">
             <Select value={value.font_display} onValueChange={(v) => setField("font_display", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {FONT_OPTIONS.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Body font">
             <Select value={value.font_body} onValueChange={(v) => setField("font_body", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {FONT_OPTIONS.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -152,7 +188,9 @@ export function ThemeEditor({ row }: { row: SettingRow }) {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Shape</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Shape
+        </p>
         <TwoCol>
           <Field label={`Corner radius: ${value.radius}px`}>
             <Slider
@@ -165,10 +203,14 @@ export function ThemeEditor({ row }: { row: SettingRow }) {
           </Field>
           <Field label="Button style">
             <Select value={value.button_style} onValueChange={(v) => setField("button_style", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {BUTTON_STYLES.map((b) => (
-                  <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+                  <SelectItem key={b.value} value={b.value}>
+                    {b.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -177,9 +219,14 @@ export function ThemeEditor({ row }: { row: SettingRow }) {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">CTA gradient</p>
-        <Field label="Gradient CSS" hint='e.g. linear-gradient(135deg, #6366f1, #8b5cf6)'>
-          <Input value={value.gradient_cta} onChange={(e) => setField("gradient_cta", e.target.value)} />
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          CTA gradient
+        </p>
+        <Field label="Gradient CSS" hint="e.g. linear-gradient(135deg, #6366f1, #8b5cf6)">
+          <Input
+            value={value.gradient_cta}
+            onChange={(e) => setField("gradient_cta", e.target.value)}
+          />
         </Field>
         <div
           className="mt-2 h-12 rounded-xl shadow-inner"
@@ -196,7 +243,9 @@ export function ThemeEditor({ row }: { row: SettingRow }) {
 function ThemePreview({ value }: { value: ThemeDraft }) {
   return (
     <div className="rounded-2xl border border-border bg-card/40 p-4">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Live preview</p>
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        Live preview
+      </p>
       <div
         className="rounded-xl p-6"
         style={{
@@ -220,7 +269,12 @@ function ThemePreview({ value }: { value: ThemeDraft }) {
             style={{
               background: value.gradient_cta,
               color: "white",
-              borderRadius: value.button_style === "pill" ? "9999px" : value.button_style === "square" ? "4px" : `${value.radius}px`,
+              borderRadius:
+                value.button_style === "pill"
+                  ? "9999px"
+                  : value.button_style === "square"
+                    ? "4px"
+                    : `${value.radius}px`,
               padding: "8px 16px",
               fontFamily: value.font_body,
             }}
@@ -232,7 +286,12 @@ function ThemePreview({ value }: { value: ThemeDraft }) {
               background: "transparent",
               color: value.brand_primary,
               border: `1px solid ${value.brand_primary}`,
-              borderRadius: value.button_style === "pill" ? "9999px" : value.button_style === "square" ? "4px" : `${value.radius}px`,
+              borderRadius:
+                value.button_style === "pill"
+                  ? "9999px"
+                  : value.button_style === "square"
+                    ? "4px"
+                    : `${value.radius}px`,
               padding: "8px 16px",
               fontFamily: value.font_body,
             }}
@@ -269,7 +328,8 @@ export function NavbarEditor({ row }: { row: SettingRow }) {
   const initial = { ...NAVBAR_DEFAULT, ...(row.draft_value as Partial<NavbarDraft>) };
   const { value, setField, setValue } = useDraft<NavbarDraft>(initial, row.key);
   const { save, publish } = useSettingMutations(row.key);
-  const dirty = !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
+  const dirty =
+    !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
 
   return (
     <EditorShell
@@ -282,13 +342,23 @@ export function NavbarEditor({ row }: { row: SettingRow }) {
       onPublish={() => publish.mutate()}
       publishedAt={row.published_at}
     >
-      <MediaPickerButton label="Logo" value={value.logo_url} onChange={(url) => setField("logo_url", url)} />
+      <MediaPickerButton
+        label="Logo"
+        value={value.logo_url}
+        onChange={(url) => setField("logo_url", url)}
+      />
       <TwoCol>
         <Field label="Brand text (first part)">
-          <Input value={value.brand_primary} onChange={(e) => setField("brand_primary", e.target.value)} />
+          <Input
+            value={value.brand_primary}
+            onChange={(e) => setField("brand_primary", e.target.value)}
+          />
         </Field>
         <Field label="Brand text (second part)">
-          <Input value={value.brand_secondary} onChange={(e) => setField("brand_secondary", e.target.value)} />
+          <Input
+            value={value.brand_secondary}
+            onChange={(e) => setField("brand_secondary", e.target.value)}
+          />
         </Field>
       </TwoCol>
       <Field label="Tagline (optional)">
@@ -298,8 +368,18 @@ export function NavbarEditor({ row }: { row: SettingRow }) {
       <div className="rounded-xl border border-border p-3">
         <p className="mb-2 text-xs font-semibold">Header CTA button</p>
         <TwoCol>
-          <Field label="Text"><Input value={value.cta.label} onChange={(e) => setField("cta", { ...value.cta, label: e.target.value })} /></Field>
-          <Field label="Link"><Input value={value.cta.href} onChange={(e) => setField("cta", { ...value.cta, href: e.target.value })} /></Field>
+          <Field label="Text">
+            <Input
+              value={value.cta.label}
+              onChange={(e) => setField("cta", { ...value.cta, label: e.target.value })}
+            />
+          </Field>
+          <Field label="Link">
+            <Input
+              value={value.cta.href}
+              onChange={(e) => setField("cta", { ...value.cta, href: e.target.value })}
+            />
+          </Field>
         </TwoCol>
       </div>
 
@@ -313,8 +393,12 @@ export function NavbarEditor({ row }: { row: SettingRow }) {
           max={10}
           renderItem={(item, update) => (
             <TwoCol>
-              <Field label="Label"><Input value={item.label} onChange={(e) => update({ label: e.target.value })} /></Field>
-              <Field label="Link"><Input value={item.href} onChange={(e) => update({ href: e.target.value })} /></Field>
+              <Field label="Label">
+                <Input value={item.label} onChange={(e) => update({ label: e.target.value })} />
+              </Field>
+              <Field label="Link">
+                <Input value={item.href} onChange={(e) => update({ href: e.target.value })} />
+              </Field>
             </TwoCol>
           )}
         />
@@ -366,13 +450,22 @@ const FOOTER_DEFAULT: FooterDraft = {
   social: [],
 };
 
-const SOCIAL_PLATFORMS = ["facebook", "twitter", "instagram", "linkedin", "youtube", "github", "tiktok"];
+const SOCIAL_PLATFORMS = [
+  "facebook",
+  "twitter",
+  "instagram",
+  "linkedin",
+  "youtube",
+  "github",
+  "tiktok",
+];
 
 export function FooterEditor({ row }: { row: SettingRow }) {
   const initial = { ...FOOTER_DEFAULT, ...(row.draft_value as Partial<FooterDraft>) };
   const { value, setField, setValue } = useDraft<FooterDraft>(initial, row.key);
   const { save, publish } = useSettingMutations(row.key);
-  const dirty = !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
+  const dirty =
+    !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
 
   return (
     <EditorShell
@@ -386,45 +479,105 @@ export function FooterEditor({ row }: { row: SettingRow }) {
       publishedAt={row.published_at}
     >
       <div className="rounded-xl border border-border p-3">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Brand</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Brand
+        </p>
         <TwoCol>
           <Field label="Brand name (first part)">
-            <Input value={value.brand_primary} onChange={(e) => setField("brand_primary", e.target.value)} />
+            <Input
+              value={value.brand_primary}
+              onChange={(e) => setField("brand_primary", e.target.value)}
+            />
           </Field>
           <Field label="Brand name (second part)">
-            <Input value={value.brand_secondary} onChange={(e) => setField("brand_secondary", e.target.value)} />
+            <Input
+              value={value.brand_secondary}
+              onChange={(e) => setField("brand_secondary", e.target.value)}
+            />
           </Field>
         </TwoCol>
         <Field label="Brand eyebrow (small uppercase line)">
-          <Input value={value.brand_eyebrow} onChange={(e) => setField("brand_eyebrow", e.target.value)} />
+          <Input
+            value={value.brand_eyebrow}
+            onChange={(e) => setField("brand_eyebrow", e.target.value)}
+          />
         </Field>
         <Field label="Brand description">
-          <Textarea rows={2} value={value.brand_description} onChange={(e) => setField("brand_description", e.target.value)} />
+          <Textarea
+            rows={2}
+            value={value.brand_description}
+            onChange={(e) => setField("brand_description", e.target.value)}
+          />
         </Field>
       </div>
 
       <div className="rounded-xl border border-border p-3">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contact strip</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Contact strip
+        </p>
         <TwoCol>
-          <Field label="Support label"><Input value={value.contact.support_label} onChange={(e) => setField("contact", { ...value.contact, support_label: e.target.value })} /></Field>
-          <Field label="Support email"><Input value={value.contact.support_email} onChange={(e) => setField("contact", { ...value.contact, support_email: e.target.value })} /></Field>
-          <Field label="Sales label"><Input value={value.contact.sales_label} onChange={(e) => setField("contact", { ...value.contact, sales_label: e.target.value })} /></Field>
-          <Field label="Sales email"><Input value={value.contact.sales_email} onChange={(e) => setField("contact", { ...value.contact, sales_email: e.target.value })} /></Field>
-          <Field label="HQ label"><Input value={value.contact.hq_label} onChange={(e) => setField("contact", { ...value.contact, hq_label: e.target.value })} /></Field>
-          <Field label="HQ value"><Input value={value.contact.hq_value} onChange={(e) => setField("contact", { ...value.contact, hq_value: e.target.value })} /></Field>
+          <Field label="Support label">
+            <Input
+              value={value.contact.support_label}
+              onChange={(e) =>
+                setField("contact", { ...value.contact, support_label: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="Support email">
+            <Input
+              value={value.contact.support_email}
+              onChange={(e) =>
+                setField("contact", { ...value.contact, support_email: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="Sales label">
+            <Input
+              value={value.contact.sales_label}
+              onChange={(e) =>
+                setField("contact", { ...value.contact, sales_label: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="Sales email">
+            <Input
+              value={value.contact.sales_email}
+              onChange={(e) =>
+                setField("contact", { ...value.contact, sales_email: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="HQ label">
+            <Input
+              value={value.contact.hq_label}
+              onChange={(e) => setField("contact", { ...value.contact, hq_label: e.target.value })}
+            />
+          </Field>
+          <Field label="HQ value">
+            <Input
+              value={value.contact.hq_value}
+              onChange={(e) => setField("contact", { ...value.contact, hq_value: e.target.value })}
+            />
+          </Field>
         </TwoCol>
       </div>
 
       <Field label="Tagline (small line on right of bottom row)">
-        <Textarea rows={2} value={value.tagline} onChange={(e) => setField("tagline", e.target.value)} />
+        <Textarea
+          rows={2}
+          value={value.tagline}
+          onChange={(e) => setField("tagline", e.target.value)}
+        />
       </Field>
       <Field label="Copyright line">
         <Input value={value.copyright} onChange={(e) => setField("copyright", e.target.value)} />
       </Field>
 
-
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Footer columns</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Footer columns
+        </p>
         <Repeater
           items={value.columns}
           onChange={(columns) => setValue({ ...value, columns })}
@@ -436,7 +589,9 @@ export function FooterEditor({ row }: { row: SettingRow }) {
               <Field label="Column title">
                 <Input value={col.title} onChange={(e) => updateCol({ title: e.target.value })} />
               </Field>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Links</p>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                Links
+              </p>
               <Repeater
                 items={col.links}
                 onChange={(links) => updateCol({ links })}
@@ -445,8 +600,18 @@ export function FooterEditor({ row }: { row: SettingRow }) {
                 max={10}
                 renderItem={(l, updateLink) => (
                   <TwoCol>
-                    <Field label="Label"><Input value={l.label} onChange={(e) => updateLink({ label: e.target.value })} /></Field>
-                    <Field label="Link"><Input value={l.href} onChange={(e) => updateLink({ href: e.target.value })} /></Field>
+                    <Field label="Label">
+                      <Input
+                        value={l.label}
+                        onChange={(e) => updateLink({ label: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Link">
+                      <Input
+                        value={l.href}
+                        onChange={(e) => updateLink({ href: e.target.value })}
+                      />
+                    </Field>
                   </TwoCol>
                 )}
               />
@@ -456,7 +621,9 @@ export function FooterEditor({ row }: { row: SettingRow }) {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Social links</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Social links
+        </p>
         <Repeater
           items={value.social}
           onChange={(social) => setValue({ ...value, social })}
@@ -467,15 +634,21 @@ export function FooterEditor({ row }: { row: SettingRow }) {
             <TwoCol>
               <Field label="Platform">
                 <Select value={item.platform} onValueChange={(v) => update({ platform: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {SOCIAL_PLATFORMS.map((p) => (
-                      <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>
+                      <SelectItem key={p} value={p} className="capitalize">
+                        {p}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="URL"><Input value={item.href} onChange={(e) => update({ href: e.target.value })} /></Field>
+              <Field label="URL">
+                <Input value={item.href} onChange={(e) => update({ href: e.target.value })} />
+              </Field>
             </TwoCol>
           )}
         />
@@ -499,7 +672,8 @@ export function ContactEditor({ row }: { row: SettingRow }) {
   const initial = { ...CONTACT_DEFAULT, ...(row.draft_value as Partial<ContactDraft>) };
   const { value, setField } = useDraft<ContactDraft>(initial, row.key);
   const { save, publish } = useSettingMutations(row.key);
-  const dirty = !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
+  const dirty =
+    !deepEqual(value, row.draft_value) || !deepEqual(row.draft_value, row.published_value);
 
   return (
     <EditorShell
@@ -514,14 +688,22 @@ export function ContactEditor({ row }: { row: SettingRow }) {
     >
       <TwoCol>
         <Field label="Email">
-          <Input type="email" value={value.email} onChange={(e) => setField("email", e.target.value)} />
+          <Input
+            type="email"
+            value={value.email}
+            onChange={(e) => setField("email", e.target.value)}
+          />
         </Field>
         <Field label="Phone">
           <Input value={value.phone} onChange={(e) => setField("phone", e.target.value)} />
         </Field>
       </TwoCol>
       <Field label="Address">
-        <Textarea rows={2} value={value.address} onChange={(e) => setField("address", e.target.value)} />
+        <Textarea
+          rows={2}
+          value={value.address}
+          onChange={(e) => setField("address", e.target.value)}
+        />
       </Field>
       <Field label="Hours">
         <Input value={value.hours} onChange={(e) => setField("hours", e.target.value)} />

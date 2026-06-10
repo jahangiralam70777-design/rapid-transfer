@@ -154,7 +154,13 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (event === "SIGNED_OUT") {
           clearLocalSessionId();
           persistAuthSnapshot(null);
-          set({ user: null, sessionReady: true, authLoading: false, authError: null, authVersion: bumpAuthVersion() });
+          set({
+            user: null,
+            sessionReady: true,
+            authLoading: false,
+            authError: null,
+            authVersion: bumpAuthVersion(),
+          });
           emitAuthSync();
           return;
         }
@@ -177,7 +183,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         // Skip refetch for token refreshes / user-updates when we already
         // have the same user loaded — avoids the double session fetch.
         if (
-          (event === "TOKEN_REFRESHED" || event === "USER_UPDATED" || event === "INITIAL_SESSION" || event === "SIGNED_IN") &&
+          (event === "TOKEN_REFRESHED" ||
+            event === "USER_UPDATED" ||
+            event === "INITIAL_SESSION" ||
+            event === "SIGNED_IN") &&
           current &&
           current.id === session.user.id
         ) {
@@ -203,7 +212,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       storageSubscribed = true;
       window.addEventListener("storage", (event) => {
         const key = event instanceof StorageEvent ? event.key : null;
-        if (key && key !== "edumaster.demo_session" && !(key.startsWith("sb-") && key.endsWith("-auth-token"))) return;
+        if (
+          key &&
+          key !== "edumaster.demo_session" &&
+          !(key.startsWith("sb-") && key.endsWith("-auth-token"))
+        )
+          return;
         void useAppStore.getState().refreshAuth({ force: true });
       });
     }
@@ -212,13 +226,25 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   login: (user) => {
     persistAuthSnapshot(user);
-    set({ user, sessionReady: true, authLoading: false, authError: null, authVersion: bumpAuthVersion() });
+    set({
+      user,
+      sessionReady: true,
+      authLoading: false,
+      authError: null,
+      authVersion: bumpAuthVersion(),
+    });
     emitAuthSync();
   },
   syncAuthSession: (session, user) => {
     const resolvedUser = user ?? (session ? toAuthUser(session) : null);
     persistAuthSnapshot(resolvedUser);
-    set({ user: resolvedUser, sessionReady: true, authLoading: false, authError: null, authVersion: bumpAuthVersion() });
+    set({
+      user: resolvedUser,
+      sessionReady: true,
+      authLoading: false,
+      authError: null,
+      authVersion: bumpAuthVersion(),
+    });
     emitAuthSync();
     return resolvedUser;
   },
@@ -233,9 +259,19 @@ export const useAppStore = create<AppState>((set, get) => ({
           console.warn("[auth] getSession error", error);
           const msg = (error.message ?? "").toLowerCase();
           if (msg.includes("refresh") || msg.includes("token")) {
-            try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+            try {
+              await supabase.auth.signOut({ scope: "local" });
+            } catch {
+              /* noop */
+            }
             if (runId === refreshEpoch) {
-              set({ user: null, sessionReady: true, authLoading: false, authError: null, authVersion: bumpAuthVersion() });
+              set({
+                user: null,
+                sessionReady: true,
+                authLoading: false,
+                authError: null,
+                authVersion: bumpAuthVersion(),
+              });
             }
             return null;
           }
@@ -246,13 +282,22 @@ export const useAppStore = create<AppState>((set, get) => ({
           persistAuthSnapshot(null);
           clearLocalSessionId();
           if (runId === refreshEpoch) {
-            set({ user: null, sessionReady: true, authLoading: false, authError: null, authVersion: bumpAuthVersion() });
+            set({
+              user: null,
+              sessionReady: true,
+              authLoading: false,
+              authError: null,
+              authVersion: bumpAuthVersion(),
+            });
           }
           return null;
         }
 
         const user = (await fetchSessionUser(data.session)) ?? demoUser;
-        console.debug("[auth] refreshAuth resolved", { hasSession: !!data.session, hasUser: !!user });
+        console.debug("[auth] refreshAuth resolved", {
+          hasSession: !!data.session,
+          hasUser: !!user,
+        });
         if (runId === refreshEpoch) {
           if (user) persistAuthSnapshot(user);
           set((state) => ({
@@ -268,7 +313,12 @@ export const useAppStore = create<AppState>((set, get) => ({
         const message = error instanceof Error ? error.message : "Could not restore session";
         console.warn("[auth] refreshAuth failed", message);
         if (runId === refreshEpoch) {
-          set((state) => ({ user: state.user, sessionReady: true, authLoading: false, authError: message }));
+          set((state) => ({
+            user: state.user,
+            sessionReady: true,
+            authLoading: false,
+            authError: message,
+          }));
         }
         return null;
       } finally {
@@ -283,11 +333,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     await signOut();
     persistAuthSnapshot(null);
     clearSessionTimers();
-    set({ user: null, sessionReady: true, authLoading: false, authError: null, authVersion: bumpAuthVersion(), quizRuntime: { active: false, score: 0, answered: 0 } });
+    set({
+      user: null,
+      sessionReady: true,
+      authLoading: false,
+      authError: null,
+      authVersion: bumpAuthVersion(),
+      quizRuntime: { active: false, score: 0, answered: 0 },
+    });
   },
   toggleTheme: () => {
     if (typeof document !== "undefined") {
-      const theme: ThemeMode = document.documentElement.classList.contains("dark") ? "light" : "dark";
+      const theme: ThemeMode = document.documentElement.classList.contains("dark")
+        ? "light"
+        : "dark";
       applyThemeClass(theme);
       persistTheme(theme);
       if (get().theme !== theme) set({ theme });

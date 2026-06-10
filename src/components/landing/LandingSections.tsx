@@ -246,7 +246,8 @@ export function WhyChooseUs() {
             </GradientHeading>
           </div>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Built around how ICAB Certificate Level students actually study — practice, mock, revise, repeat.
+            Built around how ICAB Certificate Level students actually study — practice, mock,
+            revise, repeat.
           </p>
         </div>
 
@@ -276,7 +277,14 @@ export type PlatformStat = {
 export const DEFAULT_STATS: PlatformStat[] = [
   { key: "students", value: 2000, suffix: "K+", divisor: 1000, label: "CA Students", icon: Users },
   { key: "mcqs", value: 5000, suffix: "K+", divisor: 1000, label: "MCQs", icon: ClipboardList },
-  { key: "success", value: 500, suffix: "+", divisor: 1, label: "Success Tracking", icon: Sparkles },
+  {
+    key: "success",
+    value: 500,
+    suffix: "+",
+    divisor: 1,
+    label: "Success Tracking",
+    icon: Sparkles,
+  },
   { key: "mocks", value: 1000, suffix: "K+", divisor: 1000, label: "Mock Attempts", icon: Trophy },
 ];
 
@@ -291,10 +299,9 @@ export function formatStatValue(s: PlatformStat): string {
 // hasn't configured fall back to defaults so the UI is never broken.
 // eslint-disable-next-line react-refresh/only-export-components
 export function usePlatformStats(): PlatformStat[] {
-  const section = useSection<{ items: Array<{ label?: string; value?: string }> }>(
-    "stats",
-    { items: [] },
-  );
+  const section = useSection<{ items: Array<{ label?: string; value?: string }> }>("stats", {
+    items: [],
+  });
   if (!section.items || section.items.length === 0) return DEFAULT_STATS;
   return DEFAULT_STATS.map((d, i) => {
     const item = section.items[i];
@@ -322,7 +329,6 @@ function parseStatValue(s: string): { value: number; suffix: string; divisor: nu
   const suffix = `${unit}${plus}`;
   return { value, suffix, divisor };
 }
-
 
 function useCountUp(target: number, run: boolean, duration = 1400) {
   const [n, setN] = useState(0);
@@ -388,7 +394,7 @@ export function LiveStats() {
           io.disconnect();
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0.25 },
     );
     io.observe(ref.current);
     return () => io.disconnect();
@@ -424,8 +430,7 @@ export function LiveStats() {
               background:
                 "conic-gradient(from 0deg, transparent, var(--neon-purple) 25%, transparent 50%, var(--neon-blue) 75%, transparent)",
               mask: "linear-gradient(black,black) content-box,linear-gradient(black,black)",
-              WebkitMask:
-                "linear-gradient(black,black) content-box,linear-gradient(black,black)",
+              WebkitMask: "linear-gradient(black,black) content-box,linear-gradient(black,black)",
               padding: 1,
               WebkitMaskComposite: "xor",
               maskComposite: "exclude",
@@ -678,7 +683,9 @@ export function TopRankers() {
                 )}
                 <article
                   className={`group relative overflow-hidden rounded-3xl border border-border bg-card/60 p-6 text-center backdrop-blur-xl transition-transform duration-500 hover:rotate-[0.5deg] ${
-                    isFirst ? "shadow-[0_40px_100px_-30px_rgba(251,191,36,0.5)]" : "shadow-[0_20px_60px_-25px_var(--neon-purple)]"
+                    isFirst
+                      ? "shadow-[0_40px_100px_-30px_rgba(251,191,36,0.5)]"
+                      : "shadow-[0_20px_60px_-25px_var(--neon-purple)]"
                   }`}
                   style={{
                     boxShadow: `0 30px 80px -25px ${r.glow}`,
@@ -710,11 +717,15 @@ export function TopRankers() {
 
                   <div className="my-5 grid grid-cols-3 gap-2 text-xs">
                     <div className="rounded-xl border border-border bg-background/40 p-2">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">XP</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        XP
+                      </p>
                       <p className="font-display text-sm font-semibold">{r.xp}</p>
                     </div>
                     <div className="rounded-xl border border-border bg-background/40 p-2">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Acc</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Acc
+                      </p>
                       <p className="font-display text-sm font-semibold">{r.acc}</p>
                     </div>
                     <div className="rounded-xl border border-border bg-background/40 p-2">
@@ -733,7 +744,9 @@ export function TopRankers() {
                       />
                     ))}
                     {r.medals > 5 && (
-                      <span className="ml-1 text-[10px] text-muted-foreground">+{r.medals - 5}</span>
+                      <span className="ml-1 text-[10px] text-muted-foreground">
+                        +{r.medals - 5}
+                      </span>
                     )}
                   </div>
 
@@ -814,11 +827,7 @@ function PhoneMock() {
               >
                 <span
                   className={`h-2 w-2 rounded-full ${
-                    i === 0
-                      ? "bg-emerald-400"
-                      : i === 1
-                        ? "bg-amber-300"
-                        : "bg-[var(--neon-blue)]"
+                    i === 0 ? "bg-emerald-400" : i === 1 ? "bg-amber-300" : "bg-[var(--neon-blue)]"
                   }`}
                 />
                 <span className="flex-1">{t}</span>
@@ -923,7 +932,7 @@ export function AppPromo() {
                             fill="#0b0820"
                           />
                         ) : null;
-                      })
+                      }),
                     )}
                   </svg>
                 </div>
@@ -985,7 +994,15 @@ const BENEFITS = [
   },
 ];
 
-function BenefitItem({ item, open, onToggle }: { item: (typeof BENEFITS)[number]; open: boolean; onToggle: () => void }) {
+function BenefitItem({
+  item,
+  open,
+  onToggle,
+}: {
+  item: (typeof BENEFITS)[number];
+  open: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div
       className={`group overflow-hidden rounded-2xl border bg-card/60 backdrop-blur-xl transition-all ${
@@ -1089,7 +1106,8 @@ export function FinalCta() {
               today.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sm text-white/70 sm:text-base">
-              Practice smarter, mock with precision, become a Chartered Accountant faster. Your ICAB readiness starts on the next click.
+              Practice smarter, mock with precision, become a Chartered Accountant faster. Your ICAB
+              readiness starts on the next click.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -1098,7 +1116,8 @@ export function FinalCta() {
                 className="group inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 font-semibold text-white shadow-[0_20px_50px_-10px_var(--neon-purple)] transition hover:-translate-y-0.5 hover:shadow-[0_25px_60px_-10px_var(--neon-blue)]"
                 style={{ background: "var(--gradient-cta)" }}
               >
-                Get started free <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                Get started free{" "}
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/dashboard"
@@ -1148,7 +1167,14 @@ type FooterContent = {
   brand_description: string;
   tagline: string;
   copyright: string;
-  contact: { support_label: string; support_email: string; sales_label: string; sales_email: string; hq_label: string; hq_value: string };
+  contact: {
+    support_label: string;
+    support_email: string;
+    sales_label: string;
+    sales_email: string;
+    hq_label: string;
+    hq_value: string;
+  };
   columns: FooterColumn[];
   social: FooterSocial[];
 };
@@ -1226,7 +1252,12 @@ function FooterNavLink({ link }: { link: FooterLink }) {
   }
   if (/^(https?:|mailto:|tel:)/i.test(href)) {
     return (
-      <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer noopener" className={cls}>
+      <a
+        href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel="noreferrer noopener"
+        className={cls}
+      >
         {link.label}
       </a>
     );
@@ -1257,12 +1288,17 @@ export function Footer() {
                 </div>
                 <div className="leading-tight">
                   <p className="font-display text-base font-semibold">
-                    <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-text)" }}>
+                    <span
+                      className="bg-clip-text text-transparent"
+                      style={{ backgroundImage: "var(--gradient-text)" }}
+                    >
                       {f.brand_primary} {f.brand_secondary}
                     </span>
                   </p>
                   {f.brand_eyebrow ? (
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{f.brand_eyebrow}</p>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {f.brand_eyebrow}
+                    </p>
                   ) : null}
                 </div>
               </Link>
@@ -1309,19 +1345,31 @@ export function Footer() {
 
           <div className="mt-10 grid gap-4 border-t border-border pt-6 sm:grid-cols-3">
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{contact.support_label}</p>
-              <a href={`mailto:${contact.support_email}`} className="text-sm font-medium text-foreground/90 hover:text-foreground">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {contact.support_label}
+              </p>
+              <a
+                href={`mailto:${contact.support_email}`}
+                className="text-sm font-medium text-foreground/90 hover:text-foreground"
+              >
                 {contact.support_email}
               </a>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{contact.sales_label}</p>
-              <a href={`mailto:${contact.sales_email}`} className="text-sm font-medium text-foreground/90 hover:text-foreground">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {contact.sales_label}
+              </p>
+              <a
+                href={`mailto:${contact.sales_email}`}
+                className="text-sm font-medium text-foreground/90 hover:text-foreground"
+              >
                 {contact.sales_email}
               </a>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{contact.hq_label}</p>
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {contact.hq_label}
+              </p>
               <p className="text-sm font-medium">{contact.hq_value}</p>
             </div>
           </div>
@@ -1337,7 +1385,6 @@ export function Footer() {
     </footer>
   );
 }
-
 
 export function BackToTop() {
   const [show, setShow] = useState(false);

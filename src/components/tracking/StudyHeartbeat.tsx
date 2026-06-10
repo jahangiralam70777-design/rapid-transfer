@@ -20,14 +20,19 @@ export function StudyHeartbeat() {
       if (cancelled) return;
       if (document.visibilityState !== "visible") return;
       try {
-        await ping({ data: { module: moduleKey, delta_seconds: Math.min(120, Math.max(0, delta)) } });
+        await ping({
+          data: { module: moduleKey, delta_seconds: Math.min(120, Math.max(0, delta)) },
+        });
       } catch {
         /* silently swallow — analytics is best-effort */
       }
     };
 
     // initial beat after 20s on the page
-    const seed = window.setTimeout(() => { lastBeat.current = Date.now(); void tick(20); }, 20_000);
+    const seed = window.setTimeout(() => {
+      lastBeat.current = Date.now();
+      void tick(20);
+    }, 20_000);
     const interval = window.setInterval(() => {
       const now = Date.now();
       const delta = lastBeat.current ? Math.round((now - lastBeat.current) / 1000) : 60;

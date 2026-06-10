@@ -30,7 +30,10 @@ export const getMockLeaderboard = createServerFn({ method: "POST" })
         .select("id,display_name,avatar_url")
         .in("id", userIds);
       names = new Map(
-        (profs ?? []).map((p) => [p.id, { name: p.display_name ?? "Learner", avatar: p.avatar_url }]),
+        (profs ?? []).map((p) => [
+          p.id,
+          { name: p.display_name ?? "Learner", avatar: p.avatar_url },
+        ]),
       );
     }
     return (rows ?? []).map((r) => ({

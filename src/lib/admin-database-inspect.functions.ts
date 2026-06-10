@@ -36,16 +36,16 @@ const REDACTED = "•••••• (redacted)";
 function redactRow<T extends Record<string, unknown>>(row: T): T {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(row)) {
-    out[k] = SENSITIVE_COLUMN_PATTERNS.some((re) => re.test(k)) && v !== null && v !== undefined
-      ? REDACTED
-      : v;
+    out[k] =
+      SENSITIVE_COLUMN_PATTERNS.some((re) => re.test(k)) && v !== null && v !== undefined
+        ? REDACTED
+        : v;
   }
   return out as T;
 }
 
 const IDENT = /^[a-zA-Z_][a-zA-Z0-9_]{0,62}$/;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertTableExists(supabase: any, table: string): Promise<void> {
   if (!IDENT.test(table)) throw new Error("Invalid table name");
@@ -83,10 +83,27 @@ export type TableMetadata = {
     ordinal_position: number;
     is_pk: boolean;
   }>;
-  foreign_keys: Array<{ constraint_name: string; columns: string[]; foreign_table: string; foreign_columns: string[] }>;
-  referenced_by: Array<{ constraint_name: string; from_table: string; from_columns: string[]; columns: string[] }>;
+  foreign_keys: Array<{
+    constraint_name: string;
+    columns: string[];
+    foreign_table: string;
+    foreign_columns: string[];
+  }>;
+  referenced_by: Array<{
+    constraint_name: string;
+    from_table: string;
+    from_columns: string[];
+    columns: string[];
+  }>;
   indexes: Array<{ name: string; definition: string }>;
-  policies: Array<{ name: string; command: string; roles: string[]; permissive: string; using: string | null; with_check: string | null }>;
+  policies: Array<{
+    name: string;
+    command: string;
+    roles: string[];
+    permissive: string;
+    using: string | null;
+    with_check: string | null;
+  }>;
 };
 
 export const adminGetTableMetadata = createServerFn({ method: "POST" })
@@ -96,7 +113,9 @@ export const adminGetTableMetadata = createServerFn({ method: "POST" })
     await assertPermission(context.supabase, context.userId, "manage_system");
     await assertTableExists(context.supabase, data.table);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: meta, error } = await (context.supabase as any).rpc("admin_table_metadata", { _table: data.table });
+    const { data: meta, error } = await (context.supabase as any).rpc("admin_table_metadata", {
+      _table: data.table,
+    });
     if (error) throw new Error(error.message);
     return meta as TableMetadata;
   });
@@ -139,7 +158,17 @@ export const adminListTableRows = createServerFn({ method: "POST" })
       const term = sanitizeSearchTerm(search.trim());
       if (term) {
         const pattern = `%${term}%`;
-        const candidates = ["name", "title", "email", "label", "key", "slug", "display_name", "question", "description"];
+        const candidates = [
+          "name",
+          "title",
+          "email",
+          "label",
+          "key",
+          "slug",
+          "display_name",
+          "question",
+          "description",
+        ];
         const filters = candidates.map((c) => `${c}.ilike.${pattern}`).join(",");
         query = query.or(filters);
       }
@@ -149,7 +178,10 @@ export const adminListTableRows = createServerFn({ method: "POST" })
     let res = await ordered.range(from, to);
     if (res.error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      res = await (context.supabase as any).from(table).select("*", { count: "exact" }).range(from, to);
+      res = await (context.supabase as any)
+        .from(table)
+        .select("*", { count: "exact" })
+        .range(from, to);
     }
     if (res.error) throw new Error(res.error.message);
     const rows = (res.data ?? []) as unknown as TableRow[];
@@ -169,7 +201,9 @@ export const adminDeleteTableRow = createServerFn({ method: "POST" })
   .inputValidator((input) => deleteInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_system", "db.delete_row", {
-      table: data.table, id: data.id, id_column: data.idColumn,
+      table: data.table,
+      id: data.id,
+      id_column: data.idColumn,
     });
     await assertTableExists(context.supabase, data.table);
     if (PROTECTED_WRITE_TABLES.has(data.table)) {
@@ -178,7 +212,9 @@ export const adminDeleteTableRow = createServerFn({ method: "POST" })
     if (!IDENT.test(data.idColumn)) throw new Error("Invalid id column");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (context.supabase as any)
-      .from(data.table).delete().eq(data.idColumn, data.id);
+      .from(data.table)
+      .delete()
+      .eq(data.idColumn, data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -193,9 +229,17 @@ export const adminBulkDeleteTableRows = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => bulkDeleteInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_system", "db.bulk_delete_rows", {
-      table: data.table, id_count: data.ids.length, id_column: data.idColumn,
-    });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_system",
+      "db.bulk_delete_rows",
+      {
+        table: data.table,
+        id_count: data.ids.length,
+        id_column: data.idColumn,
+      },
+    );
     await assertTableExists(context.supabase, data.table);
     if (PROTECTED_WRITE_TABLES.has(data.table)) {
       throw new Error(`Bulk delete is disabled on protected table "${data.table}".`);
@@ -203,7 +247,9 @@ export const adminBulkDeleteTableRows = createServerFn({ method: "POST" })
     if (!IDENT.test(data.idColumn)) throw new Error("Invalid id column");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error, count } = await (context.supabase as any)
-      .from(data.table).delete({ count: "exact" }).in(data.idColumn, data.ids);
+      .from(data.table)
+      .delete({ count: "exact" })
+      .in(data.idColumn, data.ids);
     if (error) throw new Error(error.message);
     return { ok: true, deleted: count ?? data.ids.length };
   });
@@ -219,9 +265,13 @@ export const adminUpsertTableRow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => writeInput.parse(input))
   .handler(async ({ data, context }) => {
-    await assertPermission(context.supabase, context.userId, "manage_system",
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_system",
       data.id ? "db.update_row" : "db.insert_row",
-      { table: data.table, id: data.id ?? null, columns: Object.keys(data.values) });
+      { table: data.table, id: data.id ?? null, columns: Object.keys(data.values) },
+    );
     await assertTableExists(context.supabase, data.table);
     if (PROTECTED_WRITE_TABLES.has(data.table)) {
       throw new Error(`Writes are disabled on protected table "${data.table}".`);
@@ -233,11 +283,20 @@ export const adminUpsertTableRow = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
     if (data.id) {
-      const { data: out, error } = await sb.from(data.table).update(data.values).eq(data.idColumn, data.id).select().maybeSingle();
+      const { data: out, error } = await sb
+        .from(data.table)
+        .update(data.values)
+        .eq(data.idColumn, data.id)
+        .select()
+        .maybeSingle();
       if (error) throw new Error(error.message);
       return { ok: true, row: out };
     }
-    const { data: out, error } = await sb.from(data.table).insert(data.values).select().maybeSingle();
+    const { data: out, error } = await sb
+      .from(data.table)
+      .insert(data.values)
+      .select()
+      .maybeSingle();
     if (error) throw new Error(error.message);
     return { ok: true, row: out };
   });
@@ -261,14 +320,42 @@ export const adminUpsertTableRow = createServerFn({ method: "POST" })
  * Fails closed: any violation throws before the RPC is invoked.
  */
 const FORBIDDEN_SQL_KEYWORDS = [
-  "INSERT", "UPDATE", "DELETE", "MERGE", "UPSERT",
-  "DROP", "ALTER", "CREATE", "TRUNCATE", "RENAME",
-  "GRANT", "REVOKE", "COMMENT", "REINDEX", "REFRESH",
-  "VACUUM", "ANALYZE", "CLUSTER", "LOCK",
-  "COPY", "CALL", "DO", "EXECUTE", "PREPARE", "DEALLOCATE",
-  "LISTEN", "NOTIFY", "UNLISTEN",
-  "SET", "RESET", "SHOW",
-  "BEGIN", "COMMIT", "ROLLBACK", "SAVEPOINT", "START",
+  "INSERT",
+  "UPDATE",
+  "DELETE",
+  "MERGE",
+  "UPSERT",
+  "DROP",
+  "ALTER",
+  "CREATE",
+  "TRUNCATE",
+  "RENAME",
+  "GRANT",
+  "REVOKE",
+  "COMMENT",
+  "REINDEX",
+  "REFRESH",
+  "VACUUM",
+  "ANALYZE",
+  "CLUSTER",
+  "LOCK",
+  "COPY",
+  "CALL",
+  "DO",
+  "EXECUTE",
+  "PREPARE",
+  "DEALLOCATE",
+  "LISTEN",
+  "NOTIFY",
+  "UNLISTEN",
+  "SET",
+  "RESET",
+  "SHOW",
+  "BEGIN",
+  "COMMIT",
+  "ROLLBACK",
+  "SAVEPOINT",
+  "START",
   "INTO",
 ];
 const FORBIDDEN_SQL_RE = new RegExp(`\\b(${FORBIDDEN_SQL_KEYWORDS.join("|")})\\b`, "i");
@@ -300,33 +387,55 @@ function assertSelectOnly(rawSql: string): string {
 export const adminRunSelectQuery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ sql: z.string().min(1).max(5000), maxRows: z.number().int().min(1).max(1000).default(200) }).parse(input),
+    z
+      .object({
+        sql: z.string().min(1).max(5000),
+        maxRows: z.number().int().min(1).max(1000).default(200),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     // Defense-in-depth: validate before we even check permission so
     // a forbidden statement never reaches the audit log as "attempted".
     const safeSql = assertSelectOnly(data.sql);
-    await assertPermission(context.supabase, context.userId, "manage_system", "db.run_select_query", {
-      sql_preview: safeSql.slice(0, 200), max_rows: data.maxRows,
-    });
+    await assertPermission(
+      context.supabase,
+      context.userId,
+      "manage_system",
+      "db.run_select_query",
+      {
+        sql_preview: safeSql.slice(0, 200),
+        max_rows: data.maxRows,
+      },
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: out, error } = await (context.supabase as any).rpc("admin_run_select_query", {
-      _sql: safeSql, _max_rows: data.maxRows,
+      _sql: safeSql,
+      _max_rows: data.maxRows,
     });
     if (error) throw new Error(error.message);
-    return out as unknown as { rows: Array<Record<string, string | number | boolean | null>>; limit: number };
+    return out as unknown as {
+      rows: Array<Record<string, string | number | boolean | null>>;
+      limit: number;
+    };
   });
 
 export const adminGlobalSearch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ term: z.string().min(2).max(200), limit: z.number().int().min(1).max(200).default(50) }).parse(input),
+    z
+      .object({
+        term: z.string().min(2).max(200),
+        limit: z.number().int().min(1).max(200).default(50),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_system");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: rows, error } = await (context.supabase as any).rpc("admin_global_search", {
-      _term: data.term, _limit: data.limit,
+      _term: data.term,
+      _limit: data.limit,
     });
     if (error) throw new Error(error.message);
     return (rows ?? []) as Array<{ table_name: string; id: string; snippet: string }>;

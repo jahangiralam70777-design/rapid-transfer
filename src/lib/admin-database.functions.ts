@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertPermission } from "@/lib/admin-permissions";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DatabaseManagerStats = {
   users: {
     total: number;
@@ -109,10 +108,14 @@ export const adminGetDatabaseStats = createServerFn({ method: "POST" })
 
     // MCQ by subject / chapter
     const subjMap = new Map<string, { name: string; color: string | null }>(
-      ((subjects.data ?? []) as Array<{ id: string; name: string; color: string | null }>).map((s) => [s.id, { name: s.name, color: s.color }]),
+      ((subjects.data ?? []) as Array<{ id: string; name: string; color: string | null }>).map(
+        (s) => [s.id, { name: s.name, color: s.color }],
+      ),
     );
     const chapMap = new Map<string, { name: string; subject_id: string }>(
-      ((chapters.data ?? []) as Array<{ id: string; name: string; subject_id: string }>).map((c) => [c.id, { name: c.name, subject_id: c.subject_id }]),
+      ((chapters.data ?? []) as Array<{ id: string; name: string; subject_id: string }>).map(
+        (c) => [c.id, { name: c.name, subject_id: c.subject_id }],
+      ),
     );
     const mcqRows = (mcqsForSubj.data ?? []) as unknown as Array<{ chapter_id: string | null }>;
     const bySubj = new Map<string, number>();
@@ -124,14 +127,18 @@ export const adminGetDatabaseStats = createServerFn({ method: "POST" })
       if (ch?.subject_id) bySubj.set(ch.subject_id, (bySubj.get(ch.subject_id) ?? 0) + 1);
     }
     const mcqBySubject = Array.from(bySubj.entries())
-      .map(([sid, count]) => ({ name: subjMap.get(sid)?.name ?? "Unknown", count, color: subjMap.get(sid)?.color ?? null }))
+      .map(([sid, count]) => ({
+        name: subjMap.get(sid)?.name ?? "Unknown",
+        count,
+        color: subjMap.get(sid)?.color ?? null,
+      }))
       .sort((a, b) => b.count - a.count);
     const mcqByChapter = Array.from(byChap.entries())
       .map(([cid, count]) => {
         const ch = chapMap.get(cid);
         return {
           name: ch?.name ?? "Unknown",
-          subject: ch ? subjMap.get(ch.subject_id)?.name ?? "" : "",
+          subject: ch ? (subjMap.get(ch.subject_id)?.name ?? "") : "",
           count,
         };
       })
@@ -139,7 +146,13 @@ export const adminGetDatabaseStats = createServerFn({ method: "POST" })
       .slice(0, 15);
 
     // Storage
-    const tableRows = ((tableSizesRes.data ?? []) as Array<{ table_name: string; size_bytes: number; row_estimate: number }>).map((r) => ({
+    const tableRows = (
+      (tableSizesRes.data ?? []) as Array<{
+        table_name: string;
+        size_bytes: number;
+        row_estimate: number;
+      }>
+    ).map((r) => ({
       table: r.table_name,
       sizeBytes: Number(r.size_bytes),
       rows: Number(r.row_estimate),
@@ -147,7 +160,14 @@ export const adminGetDatabaseStats = createServerFn({ method: "POST" })
     const dbSizeBytes = Number(dbSizeRes.data ?? 0);
 
     // Daily growth (30 days)
-    const days: Array<{ date: string; start: number; end: number; users: number; mcqs: number; attempts: number }> = [];
+    const days: Array<{
+      date: string;
+      start: number;
+      end: number;
+      users: number;
+      mcqs: number;
+      attempts: number;
+    }> = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
@@ -172,10 +192,18 @@ export const adminGetDatabaseStats = createServerFn({ method: "POST" })
         }
       }
     };
-    for (const r of (profilesRecent.data ?? []) as Array<{ created_at: string }>) bucket(r.created_at, "users");
-    for (const r of (mcqsRecent.data ?? []) as Array<{ created_at: string }>) bucket(r.created_at, "mcqs");
-    for (const r of (attemptsRecent.data ?? []) as Array<{ created_at: string }>) bucket(r.created_at, "attempts");
-    const growthDaily = days.map(({ date, users, mcqs, attempts }) => ({ date, users, mcqs, attempts }));
+    for (const r of (profilesRecent.data ?? []) as Array<{ created_at: string }>)
+      bucket(r.created_at, "users");
+    for (const r of (mcqsRecent.data ?? []) as Array<{ created_at: string }>)
+      bucket(r.created_at, "mcqs");
+    for (const r of (attemptsRecent.data ?? []) as Array<{ created_at: string }>)
+      bucket(r.created_at, "attempts");
+    const growthDaily = days.map(({ date, users, mcqs, attempts }) => ({
+      date,
+      users,
+      mcqs,
+      attempts,
+    }));
 
     // Peak hour (from last-7d attempts data we already have)
     const hourCounts = new Array(24).fill(0) as number[];
@@ -184,7 +212,8 @@ export const adminGetDatabaseStats = createServerFn({ method: "POST" })
       if (now.getTime() - t.getTime() < 7 * day) hourCounts[t.getHours()] += 1;
     }
     const peakHourIdx = hourCounts.reduce((best, v, i) => (v > hourCounts[best] ? i : best), 0);
-    const peakHour = hourCounts[peakHourIdx] > 0 ? { hour: peakHourIdx, attempts: hourCounts[peakHourIdx] } : null;
+    const peakHour =
+      hourCounts[peakHourIdx] > 0 ? { hour: peakHourIdx, attempts: hourCounts[peakHourIdx] } : null;
 
     // Most active module
     const moduleVals: Array<[string, number]> = [

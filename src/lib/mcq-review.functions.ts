@@ -170,13 +170,21 @@ type McqRow = {
 };
 
 async function hydrateMcqs(
-  supabase: { from: (t: string) => { select: (s: string) => { in: (c: string, v: string[]) => Promise<{ data: McqRow[] | null; error: unknown }> } } },
+  supabase: {
+    from: (t: string) => {
+      select: (s: string) => {
+        in: (c: string, v: string[]) => Promise<{ data: McqRow[] | null; error: unknown }>;
+      };
+    };
+  },
   ids: string[],
 ) {
   if (!ids.length) return new Map<string, McqRow>();
   const { data } = await supabase
     .from("mcqs")
-    .select("id,chapter_id,question,option_a,option_b,option_c,option_d,correct_option,explanation,difficulty")
+    .select(
+      "id,chapter_id,question,option_a,option_b,option_c,option_d,correct_option,explanation,difficulty",
+    )
     .in("id", ids);
   return new Map(((data as McqRow[] | null) ?? []).map((m) => [m.id, m]));
 }
@@ -233,7 +241,9 @@ export const listWrongMcqs = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     let q = supabase
       .from("mcq_wrong_questions")
-      .select("mcq_id,chapter_id,subject_id,level,last_chosen_option,correct_option,retry_count,mastered,last_wrong_at")
+      .select(
+        "mcq_id,chapter_id,subject_id,level,last_chosen_option,correct_option,retry_count,mastered,last_wrong_at",
+      )
       .eq("user_id", userId)
       .order("last_wrong_at", { ascending: false })
       .limit(500);

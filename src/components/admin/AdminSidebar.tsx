@@ -62,7 +62,10 @@ export function AdminSidebar() {
         </ul>
       </nav>
 
-      <button onClick={handleLogout} className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive">
+      <button
+        onClick={handleLogout}
+        className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive"
+      >
         <LogOut className="h-4 w-4" />
         Logout
       </button>
@@ -70,14 +73,27 @@ export function AdminSidebar() {
   );
   return (
     <>
-      <button type="button" onClick={() => setSidebarOpen(true)} className="glass fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl lg:hidden" aria-label="Open admin menu">
+      <button
+        type="button"
+        onClick={() => setSidebarOpen(true)}
+        className="glass fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl lg:hidden"
+        aria-label="Open admin menu"
+      >
         <Menu className="h-4 w-4" />
       </button>
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <button aria-label="Close menu" className="absolute inset-0 bg-background/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <button
+            aria-label="Close menu"
+            className="absolute inset-0 bg-background/70 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
           <aside className="glass shadow-card-soft pointer-events-auto relative z-10 flex h-full w-72 max-w-[85vw] flex-col p-4">
-            <button aria-label="Close menu" onClick={() => setSidebarOpen(false)} className="absolute right-3 top-3 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <button
+              aria-label="Close menu"
+              onClick={() => setSidebarOpen(false)}
+              className="absolute right-3 top-3 rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
             <SidebarContent mobile />

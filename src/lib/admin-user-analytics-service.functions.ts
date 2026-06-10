@@ -6,16 +6,21 @@ import { assertPermission } from "@/lib/admin-permissions";
 const rangeEnum = z.enum(["24h", "7d", "30d", "lifetime"]);
 const metricEnum = z.enum(["active", "usage", "devices", "heatmap"]);
 
-const input = z.object({
-  metric: metricEnum,
-  range: rangeEnum.default("7d"),
-}).partial({ range: true });
+const input = z
+  .object({
+    metric: metricEnum,
+    range: rangeEnum.default("7d"),
+  })
+  .partial({ range: true });
 
 function rangeWindow(range: z.infer<typeof rangeEnum>) {
   const now = Date.now();
-  if (range === "24h") return { sinceMs: now - 24 * 3600_000, bucketMs: 3600_000, bucketLabel: "hour" as const };
-  if (range === "7d") return { sinceMs: now - 7 * 86_400_000, bucketMs: 86_400_000, bucketLabel: "day" as const };
-  if (range === "30d") return { sinceMs: now - 30 * 86_400_000, bucketMs: 86_400_000, bucketLabel: "day" as const };
+  if (range === "24h")
+    return { sinceMs: now - 24 * 3600_000, bucketMs: 3600_000, bucketLabel: "hour" as const };
+  if (range === "7d")
+    return { sinceMs: now - 7 * 86_400_000, bucketMs: 86_400_000, bucketLabel: "day" as const };
+  if (range === "30d")
+    return { sinceMs: now - 30 * 86_400_000, bucketMs: 86_400_000, bucketLabel: "day" as const };
   // lifetime — last 12 weeks bucketed by week
   return { sinceMs: now - 84 * 86_400_000, bucketMs: 7 * 86_400_000, bucketLabel: "week" as const };
 }
@@ -52,12 +57,22 @@ export const adminUserAnalyticsMetric = createServerFn({ method: "POST" })
 
       const nowMs = Date.now();
       const buckets = Math.max(1, Math.ceil((nowMs - sinceMs) / bucketMs));
-      const series: Array<{ label: string; t: string; activeUsers: number; logins: number; usageSeconds: number }> = [];
+      const series: Array<{
+        label: string;
+        t: string;
+        activeUsers: number;
+        logins: number;
+        usageSeconds: number;
+      }> = [];
       const usersByBucket: Set<string>[] = Array.from({ length: buckets }, () => new Set());
       const loginsByBucket = new Array(buckets).fill(0);
       const usageByBucket = new Array(buckets).fill(0);
 
-      for (const r of (rows ?? []) as Array<{ user_id: string; login_at: string; duration_seconds: number | null }>) {
+      for (const r of (rows ?? []) as Array<{
+        user_id: string;
+        login_at: string;
+        duration_seconds: number | null;
+      }>) {
         const t = new Date(r.login_at).getTime();
         const idx = Math.min(buckets - 1, Math.max(0, Math.floor((t - sinceMs) / bucketMs)));
         usersByBucket[idx].add(r.user_id);
@@ -67,11 +82,12 @@ export const adminUserAnalyticsMetric = createServerFn({ method: "POST" })
 
       for (let i = 0; i < buckets; i++) {
         const t = new Date(sinceMs + i * bucketMs);
-        const label = bucketLabel === "hour"
-          ? t.toLocaleTimeString(undefined, { hour: "2-digit" })
-          : bucketLabel === "day"
-            ? t.toLocaleDateString(undefined, { month: "short", day: "numeric" })
-            : `Wk ${t.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+        const label =
+          bucketLabel === "hour"
+            ? t.toLocaleTimeString(undefined, { hour: "2-digit" })
+            : bucketLabel === "day"
+              ? t.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+              : `Wk ${t.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
         series.push({
           label,
           t: t.toISOString(),
@@ -105,10 +121,15 @@ export const adminUserAnalyticsMetric = createServerFn({ method: "POST" })
         .limit(20_000);
       if (error) throw error;
       const counts = new Map<string, { count: number; users: Set<string> }>();
-      for (const r of (rows ?? []) as Array<{ user_id: string; user_agent: string | null; device: string | null }>) {
-        const label = (r.device && /mobile|tablet|desktop/i.test(r.device)
-          ? (r.device[0].toUpperCase() + r.device.slice(1).toLowerCase())
-          : deviceOf(r.user_agent));
+      for (const r of (rows ?? []) as Array<{
+        user_id: string;
+        user_agent: string | null;
+        device: string | null;
+      }>) {
+        const label =
+          r.device && /mobile|tablet|desktop/i.test(r.device)
+            ? r.device[0].toUpperCase() + r.device.slice(1).toLowerCase()
+            : deviceOf(r.user_agent);
         const cur = counts.get(label) ?? { count: 0, users: new Set<string>() };
         cur.count += 1;
         cur.users.add(r.user_id);
@@ -143,5 +164,13 @@ export const adminUserAnalyticsMetric = createServerFn({ method: "POST" })
       cells[day * 24 + t.getHours()] += 1;
     }
     const max = Math.max(1, ...cells);
-    return { metric: "heatmap" as const, range, days, hours: 24, cells, max, total: (rows ?? []).length };
+    return {
+      metric: "heatmap" as const,
+      range,
+      days,
+      hours: 24,
+      cells,
+      max,
+      total: (rows ?? []).length,
+    };
   });

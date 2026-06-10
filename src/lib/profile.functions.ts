@@ -27,10 +27,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
   .inputValidator((d) => updateSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("profiles")
-      .update(data)
-      .eq("id", userId);
+    const { error } = await supabase.from("profiles").update(data).eq("id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

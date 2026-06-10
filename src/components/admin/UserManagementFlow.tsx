@@ -4,31 +4,78 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import {
-  Search, Users, UserPlus, UserX, Crown, ShieldCheck, Activity,
-  TrendingUp, Filter, Loader2, X, Save, Edit3, Eye,
-  Sparkles, CircleDot, CheckCircle2, Pause, Play,
-  Trash2, RotateCcw, Clock, LogIn, Monitor, AlertTriangle, BarChart3,
-  Plus, Download, MoreHorizontal, ArrowUp, ArrowDown, Mail, ShieldAlert,
-  KeyRound, BadgeCheck, Smartphone,
+  Search,
+  Users,
+  UserPlus,
+  UserX,
+  Crown,
+  ShieldCheck,
+  Activity,
+  TrendingUp,
+  Filter,
+  Loader2,
+  X,
+  Save,
+  Edit3,
+  Eye,
+  Sparkles,
+  CircleDot,
+  CheckCircle2,
+  Pause,
+  Play,
+  Trash2,
+  RotateCcw,
+  Clock,
+  LogIn,
+  Monitor,
+  AlertTriangle,
+  BarChart3,
+  Plus,
+  Download,
+  MoreHorizontal,
+  ArrowUp,
+  ArrowDown,
+  Mail,
+  ShieldAlert,
+  KeyRound,
+  BadgeCheck,
+  Smartphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  adminListUsers, adminUserStats, adminSetUserStatus, adminSetUserRole, adminUpdateUserProfile,
-  adminReferralStats, adminUserAnalytics, adminTopUsers, adminUserSessions,
-  adminSoftDeleteUser, adminRestoreUser, adminHardDeleteUser,
-  adminCreateStudent, adminVerifyUser,
+  adminListUsers,
+  adminUserStats,
+  adminSetUserStatus,
+  adminSetUserRole,
+  adminUpdateUserProfile,
+  adminReferralStats,
+  adminUserAnalytics,
+  adminTopUsers,
+  adminUserSessions,
+  adminSoftDeleteUser,
+  adminRestoreUser,
+  adminHardDeleteUser,
+  adminCreateStudent,
+  adminVerifyUser,
 } from "@/lib/admin-users.functions";
 import {
-  adminLoginHistory, adminDeviceBreakdown, adminLoginHeatmap,
-  adminRoleBreakdown, adminSecuritySummary, adminSendPasswordReset,
+  adminLoginHistory,
+  adminDeviceBreakdown,
+  adminLoginHeatmap,
+  adminRoleBreakdown,
+  adminSecuritySummary,
+  adminSendPasswordReset,
   adminUserTrends,
 } from "@/lib/admin-users-extra.functions";
 import { adminActivityFeed } from "@/lib/admin-analytics.functions";
 import { LiveMonitoringPanel } from "@/components/admin/LiveMonitoringPanel";
 import {
-  listRolePermissions, toggleRolePermission,
-  ALL_ROLES, ALL_PERMISSIONS, type RbacRole,
+  listRolePermissions,
+  toggleRolePermission,
+  ALL_ROLES,
+  ALL_PERMISSIONS,
+  type RbacRole,
 } from "@/lib/admin-role-permissions.functions";
 import { adminListLevels } from "@/lib/admin-mcq.functions";
 import { Button } from "@/components/ui/button";
@@ -38,10 +85,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 type User = {
@@ -103,7 +159,11 @@ function parseDevice(ua: string | null | undefined) {
   else if (/Chrome\//.test(s)) browser = "Chrome";
   else if (/Safari\//.test(s)) browser = "Safari";
   else if (/Firefox\//.test(s)) browser = "Firefox";
-  const device = /Mobile|Android|iPhone/.test(s) ? "Mobile" : /iPad|Tablet/.test(s) ? "Tablet" : "Desktop";
+  const device = /Mobile|Android|iPhone/.test(s)
+    ? "Mobile"
+    : /iPad|Tablet/.test(s)
+      ? "Tablet"
+      : "Desktop";
   return `${browser} · ${device}`;
 }
 
@@ -133,7 +193,9 @@ export function UserManagementFlow() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<User | null>(null);
   const [viewing, setViewing] = useState<User | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<{ user: User; mode: "soft" | "hard" } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ user: User; mode: "soft" | "hard" } | null>(
+    null,
+  );
 
   // realtime
   useEffect(() => {
@@ -155,14 +217,31 @@ export function UserManagementFlow() {
         qc.invalidateQueries({ queryKey: ["admin-top-users"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const stats = useQuery({ queryKey: ["admin-user-stats"], queryFn: () => statsFn() });
-  const analytics = useQuery({ queryKey: ["admin-user-analytics"], queryFn: () => analyticsFn(), staleTime: 15_000 });
-  const topMost = useQuery({ queryKey: ["admin-top-users", "most"], queryFn: () => topFn({ data: { order: "most", limit: 10 } }), staleTime: 30_000 });
-  const topLeast = useQuery({ queryKey: ["admin-top-users", "least"], queryFn: () => topFn({ data: { order: "least", limit: 10 } }), staleTime: 30_000 });
-  const referralStats = useQuery({ queryKey: ["admin-referral-stats"], queryFn: () => referralFn() });
+  const analytics = useQuery({
+    queryKey: ["admin-user-analytics"],
+    queryFn: () => analyticsFn(),
+    staleTime: 15_000,
+  });
+  const topMost = useQuery({
+    queryKey: ["admin-top-users", "most"],
+    queryFn: () => topFn({ data: { order: "most", limit: 10 } }),
+    staleTime: 30_000,
+  });
+  const topLeast = useQuery({
+    queryKey: ["admin-top-users", "least"],
+    queryFn: () => topFn({ data: { order: "least", limit: 10 } }),
+    staleTime: 30_000,
+  });
+  const referralStats = useQuery({
+    queryKey: ["admin-referral-stats"],
+    queryFn: () => referralFn(),
+  });
   const levels = useQuery({ queryKey: ["admin-levels"], queryFn: () => levelsFn() });
 
   const devicesFn = useServerFn(adminDeviceBreakdown);
@@ -172,26 +251,58 @@ export function UserManagementFlow() {
   const securityFn = useServerFn(adminSecuritySummary);
   const feedFn = useServerFn(adminActivityFeed);
 
-  const devices = useQuery({ queryKey: ["admin-devices"], queryFn: () => devicesFn({ data: { rangeHours: 24 * 7 } }), staleTime: 60_000 });
-  const heatmap = useQuery({ queryKey: ["admin-heatmap"], queryFn: () => heatmapFn({ data: { days: 7 } }), staleTime: 60_000 });
-  const loginHistory = useQuery({ queryKey: ["admin-login-history"], queryFn: () => loginHistoryFn({ data: { limit: 100, rangeHours: 24 * 14 } }), staleTime: 30_000 });
-  const roleBreakdown = useQuery({ queryKey: ["admin-role-breakdown"], queryFn: () => rolesFn(), staleTime: 60_000 });
-  const security = useQuery({ queryKey: ["admin-security-summary"], queryFn: () => securityFn({ data: { rangeHours: 24 * 7 } }), staleTime: 30_000 });
-  const activityFeed = useQuery({ queryKey: ["admin-activity-feed"], queryFn: () => feedFn({ data: { rangeHours: 24, limit: 60 } }), staleTime: 15_000 });
+  const devices = useQuery({
+    queryKey: ["admin-devices"],
+    queryFn: () => devicesFn({ data: { rangeHours: 24 * 7 } }),
+    staleTime: 60_000,
+  });
+  const heatmap = useQuery({
+    queryKey: ["admin-heatmap"],
+    queryFn: () => heatmapFn({ data: { days: 7 } }),
+    staleTime: 60_000,
+  });
+  const loginHistory = useQuery({
+    queryKey: ["admin-login-history"],
+    queryFn: () => loginHistoryFn({ data: { limit: 100, rangeHours: 24 * 14 } }),
+    staleTime: 30_000,
+  });
+  const roleBreakdown = useQuery({
+    queryKey: ["admin-role-breakdown"],
+    queryFn: () => rolesFn(),
+    staleTime: 60_000,
+  });
+  const security = useQuery({
+    queryKey: ["admin-security-summary"],
+    queryFn: () => securityFn({ data: { rangeHours: 24 * 7 } }),
+    staleTime: 30_000,
+  });
+  const activityFeed = useQuery({
+    queryKey: ["admin-activity-feed"],
+    queryFn: () => feedFn({ data: { rangeHours: 24, limit: 60 } }),
+    staleTime: 15_000,
+  });
   const debouncedSearch = useDebouncedValue(search, 300);
   const list = useQuery({
-    queryKey: ["admin-users", { search: debouncedSearch, role, status, level, referralFilter, dateRange, page }],
-    queryFn: () => listFn({
-      data: {
-        search: debouncedSearch || undefined,
-        role: role === "all" ? undefined : (role as "admin" | "moderator" | "student"),
-        status: status === "all" ? undefined : (status as "active" | "suspended" | "pending" | "deleted"),
-        level: level === "all" ? undefined : level,
-        referralSource: referralFilter === "all" ? undefined : referralFilter,
-        dateRange: dateRange === "lifetime" ? undefined : (dateRange as "24h" | "7d" | "30d"),
-        page, pageSize: 25,
-      },
-    }),
+    queryKey: [
+      "admin-users",
+      { search: debouncedSearch, role, status, level, referralFilter, dateRange, page },
+    ],
+    queryFn: () =>
+      listFn({
+        data: {
+          search: debouncedSearch || undefined,
+          role: role === "all" ? undefined : (role as "admin" | "moderator" | "student"),
+          status:
+            status === "all"
+              ? undefined
+              : (status as "active" | "suspended" | "pending" | "deleted"),
+          level: level === "all" ? undefined : level,
+          referralSource: referralFilter === "all" ? undefined : referralFilter,
+          dateRange: dateRange === "lifetime" ? undefined : (dateRange as "24h" | "7d" | "30d"),
+          page,
+          pageSize: 25,
+        },
+      }),
     placeholderData: keepPreviousData,
     staleTime: 10_000,
   });
@@ -205,25 +316,39 @@ export function UserManagementFlow() {
 
   const statusM = useMutation({
     mutationFn: (v: { id: string; status: User["status"] }) => statusFn({ data: v }),
-    onSuccess: (_d, v) => { toast.success(`User ${v.status}`); invalidate(); },
+    onSuccess: (_d, v) => {
+      toast.success(`User ${v.status}`);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const softDeleteM = useMutation({
     mutationFn: (id: string) => softDeleteFn({ data: { id } }),
-    onSuccess: () => { toast.success("User removed (archived)"); invalidate(); setConfirmDelete(null); },
+    onSuccess: () => {
+      toast.success("User removed (archived)");
+      invalidate();
+      setConfirmDelete(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const restoreM = useMutation({
     mutationFn: (id: string) => restoreFn({ data: { id } }),
-    onSuccess: () => { toast.success("User restored"); invalidate(); },
+    onSuccess: () => {
+      toast.success("User restored");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const hardDeleteM = useMutation({
     mutationFn: (v: { id: string; confirmName: string }) => hardDeleteFn({ data: v }),
-    onSuccess: () => { toast.success("User permanently deleted"); invalidate(); setConfirmDelete(null); },
+    onSuccess: () => {
+      toast.success("User permanently deleted");
+      invalidate();
+      setConfirmDelete(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -231,24 +356,38 @@ export function UserManagementFlow() {
   const rows = [...rawRows].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
     if (sortKey === "name") return a.display_name.localeCompare(b.display_name) * dir;
-    if (sortKey === "status") return (a.deleted_at ? "deleted" : a.status).localeCompare(b.deleted_at ? "deleted" : b.status) * dir;
-    if (sortKey === "last_active") return ((new Date(a.last_login_at ?? 0).getTime()) - (new Date(b.last_login_at ?? 0).getTime())) * dir;
-    return ((new Date(a.created_at).getTime()) - (new Date(b.created_at).getTime())) * dir;
+    if (sortKey === "status")
+      return (
+        (a.deleted_at ? "deleted" : a.status).localeCompare(b.deleted_at ? "deleted" : b.status) *
+        dir
+      );
+    if (sortKey === "last_active")
+      return (
+        (new Date(a.last_login_at ?? 0).getTime() - new Date(b.last_login_at ?? 0).getTime()) * dir
+      );
+    return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
   });
   const total = list.data?.count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / 25));
   const a = analytics.data;
   const s = stats.data;
 
-  const [tab, setTab] = useState<"overview" | "analytics" | "roles" | "activity" | "logins" | "security" | "permissions">("overview");
+  const [tab, setTab] = useState<
+    "overview" | "analytics" | "roles" | "activity" | "logins" | "security" | "permissions"
+  >("overview");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sortKey, setSortKey] = useState<"name" | "joined" | "status" | "last_active">("joined");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const toggleSort = (k: typeof sortKey) => {
     if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(k); setSortDir("asc"); }
+    else {
+      setSortKey(k);
+      setSortDir("asc");
+    }
   };
-  useEffect(() => { setSelected(new Set()); }, [page, debouncedSearch, role, status, level, referralFilter, dateRange]);
+  useEffect(() => {
+    setSelected(new Set());
+  }, [page, debouncedSearch, role, status, level, referralFilter, dateRange]);
   const allOnPageSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
     const next = new Set(selected);
@@ -258,7 +397,8 @@ export function UserManagementFlow() {
   };
   const toggleOne = (id: string) => {
     const next = new Set(selected);
-    if (next.has(id)) next.delete(id); else next.add(id);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
     setSelected(next);
   };
 
@@ -268,7 +408,11 @@ export function UserManagementFlow() {
       for (const id of ids) await statusFn({ data: { id, status: newStatus } });
       return ids.length;
     },
-    onSuccess: (n, st) => { toast.success(`${n} user${n === 1 ? "" : "s"} marked ${st}`); invalidate(); setSelected(new Set()); },
+    onSuccess: (n, st) => {
+      toast.success(`${n} user${n === 1 ? "" : "s"} marked ${st}`);
+      invalidate();
+      setSelected(new Set());
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -278,20 +422,32 @@ export function UserManagementFlow() {
       for (const id of ids) await softDeleteFn({ data: { id } });
       return ids.length;
     },
-    onSuccess: (n) => { toast.success(`${n} user${n === 1 ? "" : "s"} archived`); invalidate(); setSelected(new Set()); },
+    onSuccess: (n) => {
+      toast.success(`${n} user${n === 1 ? "" : "s"} archived`);
+      invalidate();
+      setSelected(new Set());
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const verifyM = useMutation({
     mutationFn: (id: string) => verifyFn({ data: { id } }),
-    onSuccess: () => { toast.success("User verified"); invalidate(); },
+    onSuccess: () => {
+      toast.success("User verified");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const resetPwM = useMutation({
-    mutationFn: (id: string) => resetPwFn({
-      data: { id, redirectTo: typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined },
-    }),
+    mutationFn: (id: string) =>
+      resetPwFn({
+        data: {
+          id,
+          redirectTo:
+            typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined,
+        },
+      }),
     onSuccess: (r) => toast.success(`Password reset email sent${r?.email ? ` to ${r.email}` : ""}`),
     onError: (e: Error) => toast.error(e.message),
   });
@@ -302,24 +458,46 @@ export function UserManagementFlow() {
       for (const id of ids) await verifyFn({ data: { id } });
       return ids.length;
     },
-    onSuccess: (n) => { toast.success(`${n} user${n === 1 ? "" : "s"} verified`); invalidate(); setSelected(new Set()); },
+    onSuccess: (n) => {
+      toast.success(`${n} user${n === 1 ? "" : "s"} verified`);
+      invalidate();
+      setSelected(new Set());
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const exportCsv = (scope: "page" | "selected" | "all") => {
-    const source: User[] = scope === "selected"
-      ? rows.filter((r) => selected.has(r.id))
-      : rows; // 'all' currently exports current page; backend export not yet available
-    if (source.length === 0) { toast.error("Nothing to export"); return; }
-    const header = ["id", "name", "level", "roles", "status", "last_login", "total_logins", "usage_seconds", "joined"];
+    const source: User[] = scope === "selected" ? rows.filter((r) => selected.has(r.id)) : rows; // 'all' currently exports current page; backend export not yet available
+    if (source.length === 0) {
+      toast.error("Nothing to export");
+      return;
+    }
+    const header = [
+      "id",
+      "name",
+      "level",
+      "roles",
+      "status",
+      "last_login",
+      "total_logins",
+      "usage_seconds",
+      "joined",
+    ];
     const csv = [
       header.join(","),
-      ...source.map((u) => [
-        u.id, JSON.stringify(u.display_name), u.level, JSON.stringify(u.roles.join("|")),
-        u.deleted_at ? "deleted" : u.status, u.last_login_at ?? "",
-        u.total_login_count ?? 0, u.total_usage_seconds ?? 0,
-        u.created_at,
-      ].join(",")),
+      ...source.map((u) =>
+        [
+          u.id,
+          JSON.stringify(u.display_name),
+          u.level,
+          JSON.stringify(u.roles.join("|")),
+          u.deleted_at ? "deleted" : u.status,
+          u.last_login_at ?? "",
+          u.total_login_count ?? 0,
+          u.total_usage_seconds ?? 0,
+          u.created_at,
+        ].join(","),
+      ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a");
@@ -332,7 +510,11 @@ export function UserManagementFlow() {
 
   // Real period-over-period trends (last 7d vs prior 7d) from timestamped events
   const trendsFn = useServerFn(adminUserTrends);
-  const trends = useQuery({ queryKey: ["admin-user-trends", 7], queryFn: () => trendsFn({ data: { days: 7 } }), staleTime: 60_000 });
+  const trends = useQuery({
+    queryKey: ["admin-user-trends", 7],
+    queryFn: () => trendsFn({ data: { days: 7 } }),
+    staleTime: 60_000,
+  });
   const t = trends.data;
   const totalUsers = s?.total ?? 0;
   const verifiedCount = (s as { verified?: number } | undefined)?.verified ?? 0;
@@ -342,12 +524,54 @@ export function UserManagementFlow() {
     return `${sign}${n}% vs prev 7d`;
   };
   const kpis = [
-    { l: "Total Users", v: totalUsers, i: Users, tone: "from-violet-500/30 to-fuchsia-500/20 text-violet-400", sub: `${fmtTrend(t?.new_users.pct)} · ${t?.new_users.current ?? 0} new`, filter: {} as Record<string, unknown> },
-    { l: "Active Users", v: s?.active ?? 0, i: Activity, tone: "from-emerald-500/30 to-cyan-500/20 text-emerald-400", sub: fmtTrend(t?.active.pct), filter: { status: "active" } },
-    { l: "Pending Users", v: s?.pending ?? 0, i: TrendingUp, tone: "from-amber-500/30 to-orange-500/20 text-amber-400", sub: `${(a?.active_24h ?? 0).toLocaleString()} active 24h`, filter: { status: "pending" } },
-    { l: "Suspended Users", v: s?.suspended ?? 0, i: UserX, tone: "from-rose-500/30 to-red-500/20 text-rose-400", sub: `${fmtTrend(t?.suspended_actions.pct)} actions`, filter: { status: "suspended" } },
-    { l: "Administrators", v: s?.admins ?? 0, i: Crown, tone: "from-blue-500/30 to-indigo-500/20 text-blue-400", sub: `${totalUsers > 0 ? Math.round(((s?.admins ?? 0) / totalUsers) * 100) : 0}% of total`, filter: { role: "admin" } },
-    { l: "Verified Users", v: verifiedCount, i: BadgeCheck, tone: "from-purple-500/30 to-pink-500/20 text-purple-400", sub: `${fmtTrend(t?.verifications.pct)} verified`, filter: { verified: true } },
+    {
+      l: "Total Users",
+      v: totalUsers,
+      i: Users,
+      tone: "from-violet-500/30 to-fuchsia-500/20 text-violet-400",
+      sub: `${fmtTrend(t?.new_users.pct)} · ${t?.new_users.current ?? 0} new`,
+      filter: {} as Record<string, unknown>,
+    },
+    {
+      l: "Active Users",
+      v: s?.active ?? 0,
+      i: Activity,
+      tone: "from-emerald-500/30 to-cyan-500/20 text-emerald-400",
+      sub: fmtTrend(t?.active.pct),
+      filter: { status: "active" },
+    },
+    {
+      l: "Pending Users",
+      v: s?.pending ?? 0,
+      i: TrendingUp,
+      tone: "from-amber-500/30 to-orange-500/20 text-amber-400",
+      sub: `${(a?.active_24h ?? 0).toLocaleString()} active 24h`,
+      filter: { status: "pending" },
+    },
+    {
+      l: "Suspended Users",
+      v: s?.suspended ?? 0,
+      i: UserX,
+      tone: "from-rose-500/30 to-red-500/20 text-rose-400",
+      sub: `${fmtTrend(t?.suspended_actions.pct)} actions`,
+      filter: { status: "suspended" },
+    },
+    {
+      l: "Administrators",
+      v: s?.admins ?? 0,
+      i: Crown,
+      tone: "from-blue-500/30 to-indigo-500/20 text-blue-400",
+      sub: `${totalUsers > 0 ? Math.round(((s?.admins ?? 0) / totalUsers) * 100) : 0}% of total`,
+      filter: { role: "admin" },
+    },
+    {
+      l: "Verified Users",
+      v: verifiedCount,
+      i: BadgeCheck,
+      tone: "from-purple-500/30 to-pink-500/20 text-purple-400",
+      sub: `${fmtTrend(t?.verifications.pct)} verified`,
+      filter: { verified: true },
+    },
   ];
 
   const TABS = [
@@ -372,7 +596,10 @@ export function UserManagementFlow() {
               <Sparkles className="mr-1 h-3 w-3" /> Identity Control
             </Badge>
             <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-              User <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-blue-400 bg-clip-text text-transparent">Management</span>
+              User{" "}
+              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-blue-400 bg-clip-text text-transparent">
+                Management
+              </span>
             </h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
               Manage students, roles, permissions and account status in real-time.
@@ -385,7 +612,13 @@ export function UserManagementFlow() {
             >
               <Plus className="mr-1 h-4 w-4" /> Add New Student
             </Button>
-            <Button variant="outline" size="icon" className="rounded-xl" title="More" aria-label="More options">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-xl"
+              title="More"
+              aria-label="More options"
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </div>
@@ -403,7 +636,9 @@ export function UserManagementFlow() {
             aria-label={`View ${l}`}
           >
             <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tone}`} />
-            <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone}`}>
+            <div
+              className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone}`}
+            >
               <Icon className="h-4 w-4" />
             </div>
             <p className="text-[11px] font-medium text-muted-foreground">{l}</p>
@@ -427,7 +662,9 @@ export function UserManagementFlow() {
               }`}
             >
               {t.l}
-              {tab === t.k && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />}
+              {tab === t.k && (
+                <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+              )}
             </button>
           ))}
         </div>
@@ -438,19 +675,59 @@ export function UserManagementFlow() {
         <>
           <LiveMonitoringPanel />
           <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
-          {[
-            { l: "Active 24h", v: (a?.active_24h ?? 0).toLocaleString(), sub: "Unique users", c: "text-emerald-400", to: "/admin/users/analytics" as const, search: { metric: "active" as const, range: "24h" as const } },
-            { l: "Active 7d", v: (a?.active_7d ?? 0).toLocaleString(), sub: "Unique users", c: "text-violet-400", to: "/admin/users/analytics" as const, search: { metric: "active" as const, range: "7d" as const } },
-            { l: "Usage 7d", v: fmtDuration(a?.usage_7d ?? 0), sub: "Total time", c: "text-blue-400", to: "/admin/users/analytics" as const, search: { metric: "usage" as const, range: "7d" as const } },
-            { l: "Login by Device", v: "View", sub: "Mobile · Tablet · Desktop", c: "text-fuchsia-400", to: "/admin/users/analytics" as const, search: { metric: "devices" as const, range: "7d" as const } },
-            { l: "Activity Heatmap", v: "View", sub: "Hourly intensity", c: "text-amber-400", to: "/admin/users/analytics" as const, search: { metric: "heatmap" as const, range: "7d" as const } },
-          ].map((x) => (
-            <Link key={x.l} to={x.to} search={x.search} className="glass shadow-card-soft block rounded-2xl p-4 transition hover:scale-[1.02] hover:bg-white/5">
-              <p className="text-[11px] text-muted-foreground">{x.l}</p>
-              <p className="text-[10px] text-muted-foreground">{x.sub}</p>
-              <p className={`mt-2 font-display text-xl font-bold ${x.c}`}>{x.v}</p>
-            </Link>
-          ))}
+            {[
+              {
+                l: "Active 24h",
+                v: (a?.active_24h ?? 0).toLocaleString(),
+                sub: "Unique users",
+                c: "text-emerald-400",
+                to: "/admin/users/analytics" as const,
+                search: { metric: "active" as const, range: "24h" as const },
+              },
+              {
+                l: "Active 7d",
+                v: (a?.active_7d ?? 0).toLocaleString(),
+                sub: "Unique users",
+                c: "text-violet-400",
+                to: "/admin/users/analytics" as const,
+                search: { metric: "active" as const, range: "7d" as const },
+              },
+              {
+                l: "Usage 7d",
+                v: fmtDuration(a?.usage_7d ?? 0),
+                sub: "Total time",
+                c: "text-blue-400",
+                to: "/admin/users/analytics" as const,
+                search: { metric: "usage" as const, range: "7d" as const },
+              },
+              {
+                l: "Login by Device",
+                v: "View",
+                sub: "Mobile · Tablet · Desktop",
+                c: "text-fuchsia-400",
+                to: "/admin/users/analytics" as const,
+                search: { metric: "devices" as const, range: "7d" as const },
+              },
+              {
+                l: "Activity Heatmap",
+                v: "View",
+                sub: "Hourly intensity",
+                c: "text-amber-400",
+                to: "/admin/users/analytics" as const,
+                search: { metric: "heatmap" as const, range: "7d" as const },
+              },
+            ].map((x) => (
+              <Link
+                key={x.l}
+                to={x.to}
+                search={x.search}
+                className="glass shadow-card-soft block rounded-2xl p-4 transition hover:scale-[1.02] hover:bg-white/5"
+              >
+                <p className="text-[11px] text-muted-foreground">{x.l}</p>
+                <p className="text-[10px] text-muted-foreground">{x.sub}</p>
+                <p className={`mt-2 font-display text-xl font-bold ${x.c}`}>{x.v}</p>
+              </Link>
+            ))}
           </section>
         </>
       )}
@@ -478,13 +755,24 @@ export function UserManagementFlow() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="Search users by name, email or ID…"
               className="h-9 rounded-xl pl-9"
             />
           </div>
-          <Select value={role} onValueChange={(v) => { setRole(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-32 rounded-xl"><SelectValue placeholder="All Roles" /></SelectTrigger>
+          <Select
+            value={role}
+            onValueChange={(v) => {
+              setRole(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-32 rounded-xl">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
               <SelectItem value="student">Student</SelectItem>
@@ -492,8 +780,16 @@ export function UserManagementFlow() {
               <SelectItem value="admin">Admin</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-32 rounded-xl"><SelectValue placeholder="Any Status" /></SelectTrigger>
+          <Select
+            value={status}
+            onValueChange={(v) => {
+              setStatus(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-32 rounded-xl">
+              <SelectValue placeholder="Any Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
@@ -502,26 +798,56 @@ export function UserManagementFlow() {
               <SelectItem value="deleted">Deleted (archived)</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={level} onValueChange={(v) => { setLevel(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-32 rounded-xl"><SelectValue placeholder="All Levels" /></SelectTrigger>
+          <Select
+            value={level}
+            onValueChange={(v) => {
+              setLevel(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-32 rounded-xl">
+              <SelectValue placeholder="All Levels" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Levels</SelectItem>
-              {((levels.data as Array<{ code: string; name: string }> | undefined) ?? []).map((l) => (
-                <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
-              ))}
+              {((levels.data as Array<{ code: string; name: string }> | undefined) ?? []).map(
+                (l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.name}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
-          <Select value={referralFilter} onValueChange={(v) => { setReferralFilter(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-36 rounded-xl"><SelectValue placeholder="All Sources" /></SelectTrigger>
+          <Select
+            value={referralFilter}
+            onValueChange={(v) => {
+              setReferralFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-36 rounded-xl">
+              <SelectValue placeholder="All Sources" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Sources</SelectItem>
               {REFERRAL_OPTIONS.map((r) => (
-                <SelectItem key={r} value={r}>{r}</SelectItem>
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={dateRange} onValueChange={(v) => { setDateRange(v); setPage(1); }}>
-            <SelectTrigger className="h-9 w-32 rounded-xl"><SelectValue placeholder="Date Range" /></SelectTrigger>
+          <Select
+            value={dateRange}
+            onValueChange={(v) => {
+              setDateRange(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-32 rounded-xl">
+              <SelectValue placeholder="Date Range" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="lifetime">Lifetime</SelectItem>
               <SelectItem value="24h">Active 24h</SelectItem>
@@ -530,7 +856,8 @@ export function UserManagementFlow() {
             </SelectContent>
           </Select>
           <Badge variant="outline" className="ml-auto rounded-full text-[10px]">
-            <Filter className="mr-1 h-3 w-3" />{total.toLocaleString()} users
+            <Filter className="mr-1 h-3 w-3" />
+            {total.toLocaleString()} users
           </Badge>
         </div>
       </section>
@@ -538,33 +865,72 @@ export function UserManagementFlow() {
       {/* Bulk action bar */}
       <section className="glass shadow-card-soft flex flex-wrap items-center justify-between gap-2 rounded-2xl p-3">
         <p className="text-xs text-muted-foreground">
-          {selected.size > 0
-            ? <><span className="font-semibold text-foreground">{selected.size}</span> selected</>
-            : <><span className="font-semibold text-foreground">{total.toLocaleString()}</span> users found</>}
+          {selected.size > 0 ? (
+            <>
+              <span className="font-semibold text-foreground">{selected.size}</span> selected
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-foreground">{total.toLocaleString()}</span> users
+              found
+            </>
+          )}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
           {selected.size > 0 && (
             <>
-              <Button size="sm" variant="outline" className="rounded-xl" disabled={bulkStatus.isPending}
-                onClick={() => bulkStatus.mutate("active")}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                disabled={bulkStatus.isPending}
+                onClick={() => bulkStatus.mutate("active")}
+              >
                 <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-emerald-400" /> Activate
               </Button>
-              <Button size="sm" variant="outline" className="rounded-xl" disabled={bulkStatus.isPending}
-                onClick={() => bulkStatus.mutate("suspended")}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                disabled={bulkStatus.isPending}
+                onClick={() => bulkStatus.mutate("suspended")}
+              >
                 <Pause className="mr-1 h-3.5 w-3.5 text-amber-400" /> Suspend
               </Button>
-              <Button size="sm" variant="outline" className="rounded-xl" disabled={bulkVerify.isPending}
-                onClick={() => bulkVerify.mutate()}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                disabled={bulkVerify.isPending}
+                onClick={() => bulkVerify.mutate()}
+              >
                 <BadgeCheck className="mr-1 h-3.5 w-3.5 text-emerald-400" /> Verify
               </Button>
-              <Button size="sm" variant="outline" className="rounded-xl" disabled={bulkArchive.isPending}
-                onClick={() => { if (confirm(`Archive ${selected.size} users?`)) bulkArchive.mutate(); }}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                disabled={bulkArchive.isPending}
+                onClick={() => {
+                  if (confirm(`Archive ${selected.size} users?`)) bulkArchive.mutate();
+                }}
+              >
                 <UserX className="mr-1 h-3.5 w-3.5 text-rose-400" /> Archive
               </Button>
-              <Button size="sm" variant="outline" className="rounded-xl" onClick={() => exportCsv("selected")}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => exportCsv("selected")}
+              >
                 <Download className="mr-1 h-3.5 w-3.5" /> Export selected
               </Button>
-              <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => setSelected(new Set())}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="rounded-xl"
+                onClick={() => setSelected(new Set())}
+              >
                 <X className="mr-1 h-3.5 w-3.5" /> Clear
               </Button>
             </>
@@ -581,7 +947,11 @@ export function UserManagementFlow() {
               >
                 <Sparkles className="mr-1 h-3.5 w-3.5" /> Select page
               </Button>
-              <Button size="sm" className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white" onClick={() => exportCsv("page")}>
+              <Button
+                size="sm"
+                className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white"
+                onClick={() => exportCsv("page")}
+              >
                 <Download className="mr-1 h-3.5 w-3.5" /> Export
               </Button>
             </>
@@ -596,12 +966,15 @@ export function UserManagementFlow() {
           <div className="flex items-center justify-between border-b border-border/40 px-4 py-3">
             <div>
               <h3 className="font-display text-sm font-bold tracking-tight">All Users</h3>
-              <p className="text-[11px] text-muted-foreground">Page {page} of {totalPages} · live sync</p>
+              <p className="text-[11px] text-muted-foreground">
+                Page {page} of {totalPages} · live sync
+              </p>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-glow">
                 <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/60" />
-              </span> Realtime
+              </span>{" "}
+              Realtime
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -637,11 +1010,23 @@ export function UserManagementFlow() {
                     ].map((h) => (
                       <th key={h.label} className="whitespace-nowrap px-3 py-2 font-medium">
                         {h.key ? (
-                          <button type="button" onClick={() => toggleSort(h.key!)} className="inline-flex items-center gap-1 hover:text-foreground">
+                          <button
+                            type="button"
+                            onClick={() => toggleSort(h.key!)}
+                            className="inline-flex items-center gap-1 hover:text-foreground"
+                          >
                             {h.label}
-                            {sortKey === h.key ? (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : null}
+                            {sortKey === h.key ? (
+                              sortDir === "asc" ? (
+                                <ArrowUp className="h-3 w-3" />
+                              ) : (
+                                <ArrowDown className="h-3 w-3" />
+                              )
+                            ) : null}
                           </button>
-                        ) : h.label}
+                        ) : (
+                          h.label
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -653,96 +1038,148 @@ export function UserManagementFlow() {
                     const displayStatus = isDeleted ? "deleted" : u.status;
                     const checked = selected.has(u.id);
                     return (
-                    <tr key={u.id} className={`border-t border-border/30 transition hover:bg-background/40 ${isDeleted ? "opacity-60" : ""} ${checked ? "bg-violet-500/5" : ""}`}>
-                      <td className="px-3 py-3">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleOne(u.id)}
-                          className="h-3.5 w-3.5 rounded border-border accent-violet-500"
-                        />
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[11px] font-bold text-white shadow-glow">
-                            {u.display_name.slice(0, 2).toUpperCase()}
+                      <tr
+                        key={u.id}
+                        className={`border-t border-border/30 transition hover:bg-background/40 ${isDeleted ? "opacity-60" : ""} ${checked ? "bg-violet-500/5" : ""}`}
+                      >
+                        <td className="px-3 py-3">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleOne(u.id)}
+                            className="h-3.5 w-3.5 rounded border-border accent-violet-500"
+                          />
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[11px] font-bold text-white shadow-glow">
+                              {u.display_name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="flex items-center gap-1 truncate text-sm font-medium">
+                                {u.display_name}
+                                {isAdmin && <Crown className="h-3 w-3 text-amber-400" />}
+                              </p>
+                              <p className="font-mono text-[10px] text-muted-foreground">
+                                {u.id.slice(0, 8)}…
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="flex items-center gap-1 truncate text-sm font-medium">
-                              {u.display_name}
-                              {isAdmin && <Crown className="h-3 w-3 text-amber-400" />}
-                            </p>
-                            <p className="font-mono text-[10px] text-muted-foreground">{u.id.slice(0, 8)}…</p>
+                        </td>
+                        <td className="px-3 py-3 text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <span className="truncate max-w-[200px]">{u.email ?? "—"}</span>
+                            {u.email_verified && (
+                              <BadgeCheck
+                                className="h-3 w-3 text-emerald-400"
+                                aria-label="Verified"
+                              />
+                            )}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-3 text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate max-w-[200px]">{u.email ?? "—"}</span>
-                          {u.email_verified && <BadgeCheck className="h-3 w-3 text-emerald-400" aria-label="Verified" />}
-                        </div>
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {u.roles.length === 0 && <span className="text-[10px] text-muted-foreground">student</span>}
-                          {u.roles.map((r) => (
-                            <Badge key={r} variant="outline" className="rounded-full text-[10px] capitalize">{r}</Badge>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-3 py-3 text-muted-foreground capitalize">{u.level}</td>
-                      <td className="px-3 py-3">
-                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] capitalize ${STATUS_TONE[displayStatus]}`}>
-                          <CircleDot className="mr-1 h-2 w-2" />{displayStatus}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 text-muted-foreground whitespace-nowrap">{fmtDateTime(u.last_login_at)}</td>
-                      <td className="px-3 py-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-1">
-                          <IconBtn title="View details" onClick={() => setViewing(u)}><Eye className="h-3.5 w-3.5" /></IconBtn>
-                          <IconBtn title="Edit profile" onClick={() => setEditing(u)}><Edit3 className="h-3.5 w-3.5" /></IconBtn>
-                          {!u.email_verified && (
-                            <IconBtn title="Verify user (email)" disabled={verifyM.isPending} onClick={() => verifyM.mutate(u.id)}>
-                              <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" />
-                            </IconBtn>
-                          )}
-                          <IconBtn title="Send password reset email" disabled={resetPwM.isPending || !u.email}
-                            onClick={() => { if (confirm(`Email password reset link to ${u.email}?`)) resetPwM.mutate(u.id); }}>
-                            <KeyRound className="h-3.5 w-3.5 text-sky-400" />
-                          </IconBtn>
-                          {!isDeleted && u.status === "suspended" ? (
-                            <IconBtn title="Reactivate" onClick={() => statusM.mutate({ id: u.id, status: "active" })}>
-                              <Play className="h-3.5 w-3.5 text-emerald-400" />
-                            </IconBtn>
-                          ) : !isDeleted ? (
-                            <IconBtn title="Suspend" onClick={() => { if (confirm(`Suspend ${u.display_name}?`)) statusM.mutate({ id: u.id, status: "suspended" }); }}>
-                              <Pause className="h-3.5 w-3.5 text-amber-400" />
-                            </IconBtn>
-                          ) : null}
-                          {isDeleted ? (
-                            <IconBtn title="Restore user" onClick={() => restoreM.mutate(u.id)}>
-                              <RotateCcw className="h-3.5 w-3.5 text-emerald-400" />
-                            </IconBtn>
-                          ) : (
-                            <IconBtn
-                              title={isAdmin ? "Demote admin first" : "Remove (archive)"}
-                              disabled={isAdmin}
-                              onClick={() => setConfirmDelete({ user: u, mode: "soft" })}
-                            >
-                              <UserX className={`h-3.5 w-3.5 ${isAdmin ? "text-muted-foreground" : "text-amber-400"}`} />
-                            </IconBtn>
-                          )}
-                          <IconBtn
-                            title={isAdmin ? "Demote admin first" : "Permanent delete"}
-                            disabled={isAdmin}
-                            onClick={() => setConfirmDelete({ user: u, mode: "hard" })}
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            {u.roles.length === 0 && (
+                              <span className="text-[10px] text-muted-foreground">student</span>
+                            )}
+                            {u.roles.map((r) => (
+                              <Badge
+                                key={r}
+                                variant="outline"
+                                className="rounded-full text-[10px] capitalize"
+                              >
+                                {r}
+                              </Badge>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-muted-foreground capitalize">{u.level}</td>
+                        <td className="px-3 py-3">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] capitalize ${STATUS_TONE[displayStatus]}`}
                           >
-                            <Trash2 className={`h-3.5 w-3.5 ${isAdmin ? "text-muted-foreground" : "text-rose-400"}`} />
-                          </IconBtn>
-                        </div>
-                      </td>
-                    </tr>
+                            <CircleDot className="mr-1 h-2 w-2" />
+                            {displayStatus}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-muted-foreground whitespace-nowrap">
+                          {fmtDateTime(u.last_login_at)}
+                        </td>
+                        <td className="px-3 py-3 text-muted-foreground">
+                          {new Date(u.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-1">
+                            <IconBtn title="View details" onClick={() => setViewing(u)}>
+                              <Eye className="h-3.5 w-3.5" />
+                            </IconBtn>
+                            <IconBtn title="Edit profile" onClick={() => setEditing(u)}>
+                              <Edit3 className="h-3.5 w-3.5" />
+                            </IconBtn>
+                            {!u.email_verified && (
+                              <IconBtn
+                                title="Verify user (email)"
+                                disabled={verifyM.isPending}
+                                onClick={() => verifyM.mutate(u.id)}
+                              >
+                                <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" />
+                              </IconBtn>
+                            )}
+                            <IconBtn
+                              title="Send password reset email"
+                              disabled={resetPwM.isPending || !u.email}
+                              onClick={() => {
+                                if (confirm(`Email password reset link to ${u.email}?`))
+                                  resetPwM.mutate(u.id);
+                              }}
+                            >
+                              <KeyRound className="h-3.5 w-3.5 text-sky-400" />
+                            </IconBtn>
+                            {!isDeleted && u.status === "suspended" ? (
+                              <IconBtn
+                                title="Reactivate"
+                                onClick={() => statusM.mutate({ id: u.id, status: "active" })}
+                              >
+                                <Play className="h-3.5 w-3.5 text-emerald-400" />
+                              </IconBtn>
+                            ) : !isDeleted ? (
+                              <IconBtn
+                                title="Suspend"
+                                onClick={() => {
+                                  if (confirm(`Suspend ${u.display_name}?`))
+                                    statusM.mutate({ id: u.id, status: "suspended" });
+                                }}
+                              >
+                                <Pause className="h-3.5 w-3.5 text-amber-400" />
+                              </IconBtn>
+                            ) : null}
+                            {isDeleted ? (
+                              <IconBtn title="Restore user" onClick={() => restoreM.mutate(u.id)}>
+                                <RotateCcw className="h-3.5 w-3.5 text-emerald-400" />
+                              </IconBtn>
+                            ) : (
+                              <IconBtn
+                                title={isAdmin ? "Demote admin first" : "Remove (archive)"}
+                                disabled={isAdmin}
+                                onClick={() => setConfirmDelete({ user: u, mode: "soft" })}
+                              >
+                                <UserX
+                                  className={`h-3.5 w-3.5 ${isAdmin ? "text-muted-foreground" : "text-amber-400"}`}
+                                />
+                              </IconBtn>
+                            )}
+                            <IconBtn
+                              title={isAdmin ? "Demote admin first" : "Permanent delete"}
+                              disabled={isAdmin}
+                              onClick={() => setConfirmDelete({ user: u, mode: "hard" })}
+                            >
+                              <Trash2
+                                className={`h-3.5 w-3.5 ${isAdmin ? "text-muted-foreground" : "text-rose-400"}`}
+                              />
+                            </IconBtn>
+                          </div>
+                        </td>
+                      </tr>
                     );
                   })}
                 </tbody>
@@ -751,10 +1188,29 @@ export function UserManagementFlow() {
           </div>
           {total > 0 && (
             <div className="flex items-center justify-between border-t border-border/40 px-4 py-3 text-xs text-muted-foreground">
-              <span>Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total.toLocaleString()}</span>
+              <span>
+                Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of{" "}
+                {total.toLocaleString()}
+              </span>
               <div className="flex gap-1">
-                <Button size="sm" variant="outline" className="rounded-lg" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
-                <Button size="sm" variant="outline" className="rounded-lg" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-lg"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Prev
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-lg"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </Button>
               </div>
             </div>
           )}
@@ -765,7 +1221,9 @@ export function UserManagementFlow() {
           <div className="glass shadow-card-soft rounded-2xl p-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="font-display text-sm font-bold tracking-tight">Real-time Activity</h3>
+                <h3 className="font-display text-sm font-bold tracking-tight">
+                  Real-time Activity
+                </h3>
                 <p className="text-[10px] text-muted-foreground">Last 7 days</p>
               </div>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-glow">
@@ -773,37 +1231,57 @@ export function UserManagementFlow() {
               </span>
             </div>
             <ul className="space-y-2 text-xs">
-            {(activityFeed.data ?? []).slice(0, 8).map((ev) => {
-              const label = (ev as { display_name?: string | null }).display_name ?? "System";
-              const action = ev.event_type === "click" ? `Clicked ${ev.element_label ?? "element"}`
-                : ev.event_type === "page_view" ? `Viewed ${ev.page_path ?? "/"}`
-                : ev.event_type === "login" ? "Logged in"
-                : ev.event_type === "submit" ? `Submitted ${ev.element_label ?? "form"}`
-                : ev.event_type === "crud" ? `${ev.target_kind ?? "Record"} ${ev.module ?? "updated"}`
-                : ev.event_type === "admin_action" ? `Admin: ${ev.element_label ?? ev.module ?? "action"}`
-                : ev.event_type;
-              return (
-                <li key={ev.id} className="flex items-start gap-2.5 rounded-xl border border-border/30 bg-background/40 p-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[10px] font-bold text-white">
-                    {label.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[11px] font-medium">{label}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">{action}</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {new Date(ev.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+              {(activityFeed.data ?? []).slice(0, 8).map((ev) => {
+                const label = (ev as { display_name?: string | null }).display_name ?? "System";
+                const action =
+                  ev.event_type === "click"
+                    ? `Clicked ${ev.element_label ?? "element"}`
+                    : ev.event_type === "page_view"
+                      ? `Viewed ${ev.page_path ?? "/"}`
+                      : ev.event_type === "login"
+                        ? "Logged in"
+                        : ev.event_type === "submit"
+                          ? `Submitted ${ev.element_label ?? "form"}`
+                          : ev.event_type === "crud"
+                            ? `${ev.target_kind ?? "Record"} ${ev.module ?? "updated"}`
+                            : ev.event_type === "admin_action"
+                              ? `Admin: ${ev.element_label ?? ev.module ?? "action"}`
+                              : ev.event_type;
+                return (
+                  <li
+                    key={ev.id}
+                    className="flex items-start gap-2.5 rounded-xl border border-border/30 bg-background/40 p-2.5"
+                  >
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[10px] font-bold text-white">
+                      {label.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-medium">{label}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">{action}</p>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {new Date(ev.created_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </li>
+                );
+              })}
+              {(activityFeed.data ?? []).length === 0 && (
+                <li className="rounded-xl border border-dashed border-border/40 p-3 text-center text-[11px] text-muted-foreground">
+                  No activity recorded yet.
                 </li>
-              );
-            })}
-            {(activityFeed.data ?? []).length === 0 && (
-              <li className="rounded-xl border border-dashed border-border/40 p-3 text-center text-[11px] text-muted-foreground">
-                No activity recorded yet.
-              </li>
-            )}
+              )}
             </ul>
-            <Button variant="ghost" size="sm" className="mt-3 w-full rounded-xl text-[11px]" onClick={() => setTab("activity")}>View All Activity</Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-3 w-full rounded-xl text-[11px]"
+              onClick={() => setTab("activity")}
+            >
+              View All Activity
+            </Button>
           </div>
 
           <div className="glass shadow-card-soft rounded-2xl p-4">
@@ -837,14 +1315,19 @@ export function UserManagementFlow() {
             <h3 className="mb-3 font-display text-sm font-bold tracking-tight">Top Active Users</h3>
             <ul className="space-y-1.5 text-xs">
               {(topMost.data ?? []).slice(0, 5).map((u) => (
-                <li key={u.user_id} className="flex items-center justify-between rounded-lg border border-border/30 bg-background/40 px-2 py-1.5">
+                <li
+                  key={u.user_id}
+                  className="flex items-center justify-between rounded-lg border border-border/30 bg-background/40 px-2 py-1.5"
+                >
                   <span className="flex items-center gap-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[9px] font-bold text-white">
                       {u.display_name.slice(0, 1).toUpperCase()}
                     </span>
                     <span className="truncate text-[11px]">{u.display_name}</span>
                   </span>
-                  <span className="font-mono text-[10px] text-violet-400">{u.total_login_count} sess</span>
+                  <span className="font-mono text-[10px] text-violet-400">
+                    {u.total_login_count} sess
+                  </span>
                 </li>
               ))}
             </ul>
@@ -854,7 +1337,11 @@ export function UserManagementFlow() {
 
       {/* Bottom analytics row */}
       <section className="grid gap-3 lg:grid-cols-3">
-        <Link to="/admin/users/analytics" search={{ metric: "devices", range: "7d" }} className="glass shadow-card-soft block rounded-2xl p-4 transition hover:bg-white/5">
+        <Link
+          to="/admin/users/analytics"
+          search={{ metric: "devices", range: "7d" }}
+          className="glass shadow-card-soft block rounded-2xl p-4 transition hover:bg-white/5"
+        >
           <div className="mb-3 flex items-center gap-2">
             <Smartphone className="h-4 w-4 text-violet-400" />
             <h3 className="font-display text-sm font-bold tracking-tight">Login by Device</h3>
@@ -862,23 +1349,40 @@ export function UserManagementFlow() {
           <div className="space-y-2">
             {(devices.data?.devices ?? []).length === 0 ? (
               <p className="text-[11px] text-muted-foreground">No login data yet.</p>
-            ) : (devices.data?.devices ?? []).map((d, i) => {
-              const colors = ["from-violet-500 to-fuchsia-500", "from-blue-500 to-cyan-500", "from-emerald-500 to-teal-500", "from-amber-500 to-orange-500"];
-              return (
-                <div key={d.label}>
-                  <div className="mb-1 flex items-center justify-between text-[11px]">
-                    <span>{d.label}</span><span className="text-muted-foreground">{d.percent}% · {d.count}</span>
+            ) : (
+              (devices.data?.devices ?? []).map((d, i) => {
+                const colors = [
+                  "from-violet-500 to-fuchsia-500",
+                  "from-blue-500 to-cyan-500",
+                  "from-emerald-500 to-teal-500",
+                  "from-amber-500 to-orange-500",
+                ];
+                return (
+                  <div key={d.label}>
+                    <div className="mb-1 flex items-center justify-between text-[11px]">
+                      <span>{d.label}</span>
+                      <span className="text-muted-foreground">
+                        {d.percent}% · {d.count}
+                      </span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-background/40">
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${colors[i % colors.length]}`}
+                        style={{ width: `${d.percent}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-background/40">
-                    <div className={`h-full rounded-full bg-gradient-to-r ${colors[i % colors.length]}`} style={{ width: `${d.percent}%` }} />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </Link>
 
-        <Link to="/admin/users/analytics" search={{ metric: "heatmap", range: "7d" }} className="glass shadow-card-soft block rounded-2xl p-4 transition hover:bg-white/5">
+        <Link
+          to="/admin/users/analytics"
+          search={{ metric: "heatmap", range: "7d" }}
+          className="glass shadow-card-soft block rounded-2xl p-4 transition hover:bg-white/5"
+        >
           <div className="mb-3 flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-fuchsia-400" />
             <h3 className="font-display text-sm font-bold tracking-tight">User Activity Heatmap</h3>
@@ -888,8 +1392,12 @@ export function UserManagementFlow() {
               const max = heatmap.data?.max ?? 1;
               const intensity = max > 0 ? Math.max(0.06, v / max) : 0.06;
               return (
-                <div key={i} className="aspect-square rounded-sm" title={`${v} login(s)`}
-                  style={{ background: `rgba(168, 85, 247, ${intensity.toFixed(2)})` }} />
+                <div
+                  key={i}
+                  className="aspect-square rounded-sm"
+                  title={`${v} login(s)`}
+                  style={{ background: `rgba(168, 85, 247, ${intensity.toFixed(2)})` }}
+                />
               );
             })}
           </div>
@@ -907,10 +1415,15 @@ export function UserManagementFlow() {
             <div>
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-muted-foreground">Verified</span>
-                <span className="font-semibold">{((s?.active ?? 0)).toLocaleString()}</span>
+                <span className="font-semibold">{(s?.active ?? 0).toLocaleString()}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-background/40">
-                <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" style={{ width: `${Math.min(100, ((s?.active ?? 0) / Math.max(s?.total ?? 1, 1)) * 100)}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"
+                  style={{
+                    width: `${Math.min(100, ((s?.active ?? 0) / Math.max(s?.total ?? 1, 1)) * 100)}%`,
+                  }}
+                />
               </div>
             </div>
             <div>
@@ -919,7 +1432,12 @@ export function UserManagementFlow() {
                 <span className="font-semibold">{(s?.pending ?? 0).toLocaleString()}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-background/40">
-                <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${Math.min(100, ((s?.pending ?? 0) / Math.max(s?.total ?? 1, 1)) * 100)}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
+                  style={{
+                    width: `${Math.min(100, ((s?.pending ?? 0) / Math.max(s?.total ?? 1, 1)) * 100)}%`,
+                  }}
+                />
               </div>
             </div>
             <div>
@@ -928,7 +1446,12 @@ export function UserManagementFlow() {
                 <span className="font-semibold">{(s?.suspended ?? 0).toLocaleString()}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-background/40">
-                <div className="h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500" style={{ width: `${Math.min(100, ((s?.suspended ?? 0) / Math.max(s?.total ?? 1, 1)) * 100)}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500"
+                  style={{
+                    width: `${Math.min(100, ((s?.suspended ?? 0) / Math.max(s?.total ?? 1, 1)) * 100)}%`,
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -936,11 +1459,14 @@ export function UserManagementFlow() {
       </section>
 
       {/* Referral analytics */}
-      {((referralStats.data?.sources ?? []).length > 0 || (referralStats.data?.unknown ?? 0) > 0) && (
+      {((referralStats.data?.sources ?? []).length > 0 ||
+        (referralStats.data?.unknown ?? 0) > 0) && (
         <section className="glass shadow-card-soft rounded-2xl p-4">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="font-display text-sm font-bold tracking-tight">Where users came from</h3>
+              <h3 className="font-display text-sm font-bold tracking-tight">
+                Where users came from
+              </h3>
               <p className="text-[11px] text-muted-foreground">
                 Signup attribution across {referralStats.data?.total ?? 0} profiles
               </p>
@@ -950,7 +1476,10 @@ export function UserManagementFlow() {
             {(referralStats.data?.sources ?? []).map((src) => (
               <button
                 key={src.source}
-                onClick={() => { setReferralFilter(src.source); setPage(1); }}
+                onClick={() => {
+                  setReferralFilter(src.source);
+                  setPage(1);
+                }}
                 className={`rounded-full border px-3 py-1 text-[11px] transition ${
                   referralFilter === src.source
                     ? "border-violet-500/60 bg-violet-500/15 text-foreground"
@@ -979,7 +1508,11 @@ export function UserManagementFlow() {
       )}
 
       {viewing && (
-        <UserDetailsDialog user={viewing} onClose={() => setViewing(null)} sessionsFn={useServerFn(adminUserSessions)} />
+        <UserDetailsDialog
+          user={viewing}
+          onClose={() => setViewing(null)}
+          sessionsFn={useServerFn(adminUserSessions)}
+        />
       )}
 
       {confirmDelete && (
@@ -1003,7 +1536,17 @@ export function UserManagementFlow() {
   );
 }
 
-function IconBtn({ children, title, onClick, disabled }: { children: React.ReactNode; title: string; onClick: () => void; disabled?: boolean }) {
+function IconBtn({
+  children,
+  title,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  title: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
@@ -1021,7 +1564,10 @@ function IconBtn({ children, title, onClick, disabled }: { children: React.React
 // Editor dialog
 // ============================================================
 function UserEditorDialog({
-  user, levels, onClose, onSaved,
+  user,
+  levels,
+  onClose,
+  onSaved,
 }: {
   user: User;
   levels: Array<{ code: string; name: string }>;
@@ -1041,7 +1587,14 @@ function UserEditorDialog({
 
   const save = useMutation({
     mutationFn: async () => {
-      await profileFn({ data: { id: user.id, display_name: form.display_name, level: form.level, bio: form.bio || null } });
+      await profileFn({
+        data: {
+          id: user.id,
+          display_name: form.display_name,
+          level: form.level,
+          bio: form.bio || null,
+        },
+      });
       // sync role grants/revokes
       const target = new Set(roles);
       const current = new Set(user.roles);
@@ -1053,13 +1606,20 @@ function UserEditorDialog({
         if (want !== had) await roleFn({ data: { id: user.id, role: r, grant: want } });
       }
     },
-    onSuccess: () => { toast.success("User updated"); onSaved(); onClose(); },
+    onSuccess: () => {
+      toast.success("User updated");
+      onSaved();
+      onClose();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const statusM = useMutation({
     mutationFn: (s: User["status"]) => statusFn({ data: { id: user.id, status: s } }),
-    onSuccess: (_d, s) => { toast.success(`Marked ${s}`); onSaved(); },
+    onSuccess: (_d, s) => {
+      toast.success(`Marked ${s}`);
+      onSaved();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -1076,38 +1636,61 @@ function UserEditorDialog({
         <div className="grid gap-3">
           <div>
             <Label>Display name</Label>
-            <Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} />
+            <Input
+              value={form.display_name}
+              onChange={(e) => setForm({ ...form, display_name: e.target.value })}
+            />
           </div>
           <div>
             <Label>Level</Label>
             <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                {levels.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Bio</Label>
-            <Textarea rows={2} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+            <Textarea
+              rows={2}
+              value={form.bio}
+              onChange={(e) => setForm({ ...form, bio: e.target.value })}
+            />
           </div>
 
           <div>
             <Label className="mb-2 block">Roles</Label>
             <p className="mb-2 text-[11px] text-muted-foreground">
-              Admin promotion is restricted to the system owner. You may only manage student/moderator status.
+              Admin promotion is restricted to the system owner. You may only manage
+              student/moderator status.
             </p>
             <div className="grid gap-2">
               {(["student", "moderator", "admin"] as const).map((r) => {
                 const isAdminRole = r === "admin";
                 return (
-                  <div key={r} className="flex items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2">
+                  <div
+                    key={r}
+                    className="flex items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2"
+                  >
                     <div className="flex items-center gap-2 text-sm capitalize">
-                      {isAdminRole ? <Crown className="h-4 w-4 text-amber-400" /> :
-                       r === "moderator" ? <ShieldCheck className="h-4 w-4 text-sky-400" /> :
-                       <UserPlus className="h-4 w-4 text-emerald-400" />}
+                      {isAdminRole ? (
+                        <Crown className="h-4 w-4 text-amber-400" />
+                      ) : r === "moderator" ? (
+                        <ShieldCheck className="h-4 w-4 text-sky-400" />
+                      ) : (
+                        <UserPlus className="h-4 w-4 text-emerald-400" />
+                      )}
                       {r}
-                      {isAdminRole && <span className="ml-1 text-[10px] text-muted-foreground">(read-only)</span>}
+                      {isAdminRole && (
+                        <span className="ml-1 text-[10px] text-muted-foreground">(read-only)</span>
+                      )}
                     </div>
                     <Switch
                       checked={roles.has(r)}
@@ -1115,7 +1698,8 @@ function UserEditorDialog({
                       onCheckedChange={(v) => {
                         if (isAdminRole) return;
                         const next = new Set(roles);
-                        if (v) next.add(r); else next.delete(r);
+                        if (v) next.add(r);
+                        else next.delete(r);
                         setRoles(next);
                       }}
                     />
@@ -1137,9 +1721,13 @@ function UserEditorDialog({
                   disabled={statusM.isPending}
                   className="capitalize"
                 >
-                  {s === "active" ? <CheckCircle2 className="mr-1 h-3 w-3" /> :
-                   s === "suspended" ? <UserX className="mr-1 h-3 w-3" /> :
-                   <Activity className="mr-1 h-3 w-3" />}
+                  {s === "active" ? (
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                  ) : s === "suspended" ? (
+                    <UserX className="mr-1 h-3 w-3" />
+                  ) : (
+                    <Activity className="mr-1 h-3 w-3" />
+                  )}
                   {s}
                 </Button>
               ))}
@@ -1148,9 +1736,20 @@ function UserEditorDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Close</Button>
-          <Button className="bg-cta-gradient text-white" disabled={save.isPending} onClick={() => save.mutate()}>
-            {save.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Close
+          </Button>
+          <Button
+            className="bg-cta-gradient text-white"
+            disabled={save.isPending}
+            onClick={() => save.mutate()}
+          >
+            {save.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-1 h-4 w-4" />
+            )}
             Save changes
           </Button>
         </DialogFooter>
@@ -1163,7 +1762,9 @@ function UserEditorDialog({
 // View details dialog (sessions, device, activity)
 // ============================================================
 function UserDetailsDialog({
-  user, onClose, sessionsFn,
+  user,
+  onClose,
+  sessionsFn,
 }: {
   user: User;
   onClose: () => void;
@@ -1186,10 +1787,22 @@ function UserDetailsDialog({
         </DialogHeader>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <DetailCard label="Total logins" value={(user.total_login_count ?? 0).toLocaleString()} icon={LogIn} />
-          <DetailCard label="Total usage time" value={fmtDuration(user.total_usage_seconds ?? 0)} icon={Clock} />
+          <DetailCard
+            label="Total logins"
+            value={(user.total_login_count ?? 0).toLocaleString()}
+            icon={LogIn}
+          />
+          <DetailCard
+            label="Total usage time"
+            value={fmtDuration(user.total_usage_seconds ?? 0)}
+            icon={Clock}
+          />
           <DetailCard label="Last login" value={fmtDateTime(user.last_login_at)} icon={Activity} />
-          <DetailCard label="Last device" value={parseDevice(lastSession?.user_agent)} icon={Monitor} />
+          <DetailCard
+            label="Last device"
+            value={parseDevice(lastSession?.user_agent)}
+            icon={Monitor}
+          />
         </div>
 
         <div>
@@ -1215,9 +1828,19 @@ function UserDetailsDialog({
                 <tbody>
                   {(sessions.data ?? []).map((s) => (
                     <tr key={s.id} className="border-t border-border/30">
-                      <td className="px-2 py-1.5 whitespace-nowrap">{new Date(s.login_at).toLocaleString()}</td>
-                      <td className="px-2 py-1.5">{s.duration_seconds ? fmtDuration(s.duration_seconds) : <span className="text-emerald-400">Active</span>}</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{parseDevice(s.user_agent)}</td>
+                      <td className="px-2 py-1.5 whitespace-nowrap">
+                        {new Date(s.login_at).toLocaleString()}
+                      </td>
+                      <td className="px-2 py-1.5">
+                        {s.duration_seconds ? (
+                          fmtDuration(s.duration_seconds)
+                        ) : (
+                          <span className="text-emerald-400">Active</span>
+                        )}
+                      </td>
+                      <td className="px-2 py-1.5 text-muted-foreground">
+                        {parseDevice(s.user_agent)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -1227,14 +1850,25 @@ function UserDetailsDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Close</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function DetailCard({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Eye }) {
+function DetailCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: typeof Eye;
+}) {
   return (
     <div className="rounded-xl border border-border/40 bg-background/40 p-3">
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -1249,7 +1883,12 @@ function DetailCard({ label, value, icon: Icon }: { label: string; value: string
 // Confirm soft / hard delete
 // ============================================================
 function ConfirmDeleteDialog({
-  user, mode, onClose, onSoft, onHard, pending,
+  user,
+  mode,
+  onClose,
+  onSoft,
+  onHard,
+  pending,
 }: {
   user: User;
   mode: "soft" | "hard";
@@ -1266,7 +1905,9 @@ function ConfirmDeleteDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className={`h-5 w-5 ${mode === "hard" ? "text-rose-400" : "text-amber-400"}`} />
+            <AlertTriangle
+              className={`h-5 w-5 ${mode === "hard" ? "text-rose-400" : "text-amber-400"}`}
+            />
             {mode === "hard" ? "Permanently delete user?" : "Remove user?"}
           </DialogTitle>
           <DialogDescription>
@@ -1296,14 +1937,17 @@ function ConfirmDeleteDialog({
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Cancel
+          </Button>
           {mode === "soft" ? (
-            <Button
-              variant="destructive"
-              disabled={pending}
-              onClick={() => onSoft(user.id)}
-            >
-              {pending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <UserX className="mr-1 h-4 w-4" />}
+            <Button variant="destructive" disabled={pending} onClick={() => onSoft(user.id)}>
+              {pending ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <UserX className="mr-1 h-4 w-4" />
+              )}
               Remove (archive)
             </Button>
           ) : (
@@ -1312,7 +1956,11 @@ function ConfirmDeleteDialog({
               disabled={pending || !canHardDelete}
               onClick={() => onHard(user.id, typed)}
             >
-              {pending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
+              {pending ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-1 h-4 w-4" />
+              )}
               Permanently delete
             </Button>
           )}
@@ -1326,7 +1974,9 @@ function ConfirmDeleteDialog({
 // Create Student dialog (Admin → Add New Student)
 // ============================================================
 function CreateStudentDialog({
-  levels, onClose, onCreated,
+  levels,
+  onClose,
+  onCreated,
 }: {
   levels: Array<{ code: string; name: string }>;
   onClose: () => void;
@@ -1342,16 +1992,21 @@ function CreateStudentDialog({
   });
 
   const create = useMutation({
-    mutationFn: () => createFn({
-      data: {
-        display_name: form.display_name.trim(),
-        email: form.email.trim(),
-        password: form.password,
-        level: form.level,
-        phone: form.phone.trim() || undefined,
-      },
-    }),
-    onSuccess: () => { toast.success("Student account created"); onCreated(); onClose(); },
+    mutationFn: () =>
+      createFn({
+        data: {
+          display_name: form.display_name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          level: form.level,
+          phone: form.phone.trim() || undefined,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Student account created");
+      onCreated();
+      onClose();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -1411,9 +2066,15 @@ function CreateStudentDialog({
           <div>
             <Label>Level</Label>
             <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
-              <SelectTrigger><SelectValue placeholder="Select a level" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a level" />
+              </SelectTrigger>
               <SelectContent>
-                {levels.map((l) => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}
+                {levels.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    {l.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -1423,13 +2084,20 @@ function CreateStudentDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-1 h-4 w-4" />Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            <X className="mr-1 h-4 w-4" />
+            Cancel
+          </Button>
           <Button
             className="bg-cta-gradient text-white"
             disabled={!canSubmit || create.isPending}
             onClick={() => create.mutate()}
           >
-            {create.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <UserPlus className="mr-1 h-4 w-4" />}
+            {create.isPending ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <UserPlus className="mr-1 h-4 w-4" />
+            )}
             Create Student
           </Button>
         </DialogFooter>
@@ -1443,16 +2111,70 @@ function CreateStudentDialog({
 // ============================================================
 type TabPanelProps = {
   tab: "analytics" | "roles" | "activity" | "logins" | "security" | "permissions" | "overview";
-  analytics: { active_24h?: number; active_7d?: number; active_30d?: number; lifetime_active?: number; total_logins?: number; avg_session_seconds?: number; usage_24h?: number; usage_7d?: number; usage_30d?: number } | undefined;
-  stats: { total?: number; active?: number; pending?: number; suspended?: number; admins?: number; verified?: number } | undefined;
-  devices: { devices: Array<{ label: string; count: number; percent: number }>; browsers: Array<{ label: string; count: number; percent: number }>; total: number } | undefined;
+  analytics:
+    | {
+        active_24h?: number;
+        active_7d?: number;
+        active_30d?: number;
+        lifetime_active?: number;
+        total_logins?: number;
+        avg_session_seconds?: number;
+        usage_24h?: number;
+        usage_7d?: number;
+        usage_30d?: number;
+      }
+    | undefined;
+  stats:
+    | {
+        total?: number;
+        active?: number;
+        pending?: number;
+        suspended?: number;
+        admins?: number;
+        verified?: number;
+      }
+    | undefined;
+  devices:
+    | {
+        devices: Array<{ label: string; count: number; percent: number }>;
+        browsers: Array<{ label: string; count: number; percent: number }>;
+        total: number;
+      }
+    | undefined;
   heatmap: { grid: number[]; max: number; days: number } | undefined;
-  loginHistory: Array<{ id: string; user_id: string; display_name: string; login_at: string; logout_at: string | null; duration_seconds: number | null; ip: string | null; device: string | null; browser: string | null }>;
+  loginHistory: Array<{
+    id: string;
+    user_id: string;
+    display_name: string;
+    login_at: string;
+    logout_at: string | null;
+    duration_seconds: number | null;
+    ip: string | null;
+    device: string | null;
+    browser: string | null;
+  }>;
   loginHistoryLoading: boolean;
-  activity: Array<{ id: string; event_type: string; page_path: string | null; element_label: string | null; module: string | null; created_at: string; display_name?: string | null }>;
+  activity: Array<{
+    id: string;
+    event_type: string;
+    page_path: string | null;
+    element_label: string | null;
+    module: string | null;
+    created_at: string;
+    display_name?: string | null;
+  }>;
   activityLoading: boolean;
   roles: Array<{ role: string; count: number }>;
-  security: { suspended: number; unverified: number; logins_in_window: number; admin_actions: number; suspicious_multi_ip: number; range_hours: number } | undefined;
+  security:
+    | {
+        suspended: number;
+        unverified: number;
+        logins_in_window: number;
+        admin_actions: number;
+        suspicious_multi_ip: number;
+        range_hours: number;
+      }
+    | undefined;
 };
 
 function TabPanel(p: TabPanelProps) {
@@ -1471,7 +2193,9 @@ function TabPanel(p: TabPanelProps) {
         ].map((x) => (
           <div key={x.l} className="glass shadow-card-soft rounded-2xl p-4">
             <p className="text-[11px] text-muted-foreground">{x.l}</p>
-            <p className="mt-2 font-display text-xl font-bold">{typeof x.v === "number" ? x.v.toLocaleString() : x.v}</p>
+            <p className="mt-2 font-display text-xl font-bold">
+              {typeof x.v === "number" ? x.v.toLocaleString() : x.v}
+            </p>
           </div>
         ))}
       </section>
@@ -1493,10 +2217,15 @@ function TabPanel(p: TabPanelProps) {
                 <div key={r.role}>
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="capitalize">{r.role}</span>
-                    <span className="text-muted-foreground">{r.count} · {pct}%</span>
+                    <span className="text-muted-foreground">
+                      {r.count} · {pct}%
+                    </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-background/40">
-                    <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" style={{ width: `${pct}%` }} />
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
               );
@@ -1510,7 +2239,9 @@ function TabPanel(p: TabPanelProps) {
   if (p.tab === "activity") {
     return (
       <section className="glass shadow-card-soft rounded-2xl p-4">
-        <h3 className="mb-3 font-display text-sm font-bold tracking-tight">Activity Logs · last 24h</h3>
+        <h3 className="mb-3 font-display text-sm font-bold tracking-tight">
+          Activity Logs · last 24h
+        </h3>
         {p.activityLoading ? (
           <p className="text-xs text-muted-foreground">Loading…</p>
         ) : p.activity.length === 0 ? (
@@ -1519,15 +2250,28 @@ function TabPanel(p: TabPanelProps) {
           <div className="max-h-[480px] overflow-y-auto">
             <table className="w-full text-xs">
               <thead className="sticky top-0 bg-background/60 text-muted-foreground">
-                <tr className="text-left"><th className="px-2 py-1.5">User</th><th className="px-2 py-1.5">Event</th><th className="px-2 py-1.5">Target</th><th className="px-2 py-1.5">Time</th></tr>
+                <tr className="text-left">
+                  <th className="px-2 py-1.5">User</th>
+                  <th className="px-2 py-1.5">Event</th>
+                  <th className="px-2 py-1.5">Target</th>
+                  <th className="px-2 py-1.5">Time</th>
+                </tr>
               </thead>
               <tbody>
                 {p.activity.map((ev) => (
                   <tr key={ev.id} className="border-t border-border/30">
                     <td className="px-2 py-1.5">{ev.display_name ?? "—"}</td>
-                    <td className="px-2 py-1.5"><span className="rounded-full border border-border/40 bg-background/40 px-2 py-0.5 text-[10px] capitalize">{ev.event_type}</span></td>
-                    <td className="px-2 py-1.5 text-muted-foreground truncate max-w-[280px]">{ev.element_label ?? ev.page_path ?? ev.module ?? "—"}</td>
-                    <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">{new Date(ev.created_at).toLocaleString()}</td>
+                    <td className="px-2 py-1.5">
+                      <span className="rounded-full border border-border/40 bg-background/40 px-2 py-0.5 text-[10px] capitalize">
+                        {ev.event_type}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1.5 text-muted-foreground truncate max-w-[280px]">
+                      {ev.element_label ?? ev.page_path ?? ev.module ?? "—"}
+                    </td>
+                    <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">
+                      {new Date(ev.created_at).toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1541,7 +2285,9 @@ function TabPanel(p: TabPanelProps) {
   if (p.tab === "logins") {
     return (
       <section className="glass shadow-card-soft rounded-2xl p-4">
-        <h3 className="mb-3 font-display text-sm font-bold tracking-tight">Login History · last 14 days</h3>
+        <h3 className="mb-3 font-display text-sm font-bold tracking-tight">
+          Login History · last 14 days
+        </h3>
         {p.loginHistoryLoading ? (
           <p className="text-xs text-muted-foreground">Loading…</p>
         ) : p.loginHistory.length === 0 ? (
@@ -1551,9 +2297,12 @@ function TabPanel(p: TabPanelProps) {
             <table className="w-full text-xs">
               <thead className="sticky top-0 bg-background/60 text-muted-foreground">
                 <tr className="text-left">
-                  <th className="px-2 py-1.5">User</th><th className="px-2 py-1.5">Login</th>
-                  <th className="px-2 py-1.5">Logout</th><th className="px-2 py-1.5">Duration</th>
-                  <th className="px-2 py-1.5">Device</th><th className="px-2 py-1.5">Browser</th>
+                  <th className="px-2 py-1.5">User</th>
+                  <th className="px-2 py-1.5">Login</th>
+                  <th className="px-2 py-1.5">Logout</th>
+                  <th className="px-2 py-1.5">Duration</th>
+                  <th className="px-2 py-1.5">Device</th>
+                  <th className="px-2 py-1.5">Browser</th>
                   <th className="px-2 py-1.5">IP</th>
                 </tr>
               </thead>
@@ -1561,12 +2310,24 @@ function TabPanel(p: TabPanelProps) {
                 {p.loginHistory.map((r) => (
                   <tr key={r.id} className="border-t border-border/30">
                     <td className="px-2 py-1.5">{r.display_name}</td>
-                    <td className="px-2 py-1.5 whitespace-nowrap">{new Date(r.login_at).toLocaleString()}</td>
-                    <td className="px-2 py-1.5 whitespace-nowrap text-muted-foreground">{r.logout_at ? new Date(r.logout_at).toLocaleString() : <span className="text-emerald-400">Active</span>}</td>
-                    <td className="px-2 py-1.5">{r.duration_seconds ? fmtDuration(r.duration_seconds) : "—"}</td>
+                    <td className="px-2 py-1.5 whitespace-nowrap">
+                      {new Date(r.login_at).toLocaleString()}
+                    </td>
+                    <td className="px-2 py-1.5 whitespace-nowrap text-muted-foreground">
+                      {r.logout_at ? (
+                        new Date(r.logout_at).toLocaleString()
+                      ) : (
+                        <span className="text-emerald-400">Active</span>
+                      )}
+                    </td>
+                    <td className="px-2 py-1.5">
+                      {r.duration_seconds ? fmtDuration(r.duration_seconds) : "—"}
+                    </td>
                     <td className="px-2 py-1.5 text-muted-foreground">{r.device ?? "—"}</td>
                     <td className="px-2 py-1.5 text-muted-foreground">{r.browser ?? "—"}</td>
-                    <td className="px-2 py-1.5 font-mono text-[10px] text-muted-foreground">{r.ip ?? "—"}</td>
+                    <td className="px-2 py-1.5 font-mono text-[10px] text-muted-foreground">
+                      {r.ip ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1622,14 +2383,20 @@ function PermissionsMatrix() {
         qc.invalidateQueries({ queryKey: ["admin", "role-permissions"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   const mut = useMutation({
-    mutationFn: (v: { role: RbacRole; permission: string; enabled: boolean }) => togglePerm({ data: v }),
+    mutationFn: (v: { role: RbacRole; permission: string; enabled: boolean }) =>
+      togglePerm({ data: v }),
     onMutate: async (v) => {
       await qc.cancelQueries({ queryKey: ["admin", "role-permissions"] });
-      const prev = qc.getQueryData<{ rows: { role: RbacRole; permission: string }[] }>(["admin", "role-permissions"]);
+      const prev = qc.getQueryData<{ rows: { role: RbacRole; permission: string }[] }>([
+        "admin",
+        "role-permissions",
+      ]);
       if (prev) {
         const rows = v.enabled
           ? [...prev.rows, { role: v.role, permission: v.permission }]
@@ -1662,8 +2429,10 @@ function PermissionsMatrix() {
         <div>
           <h3 className="font-display text-sm font-bold tracking-tight">Permission Matrix</h3>
           <p className="text-[11px] text-muted-foreground">
-            Toggle capabilities per role. Changes save instantly and sync across all admin sessions in real-time.
-            <span className="ml-1 text-amber-400">super_admin</span> always has every permission and cannot be edited (fallback safeguard).
+            Toggle capabilities per role. Changes save instantly and sync across all admin sessions
+            in real-time.
+            <span className="ml-1 text-amber-400">super_admin</span> always has every permission and
+            cannot be edited (fallback safeguard).
           </p>
         </div>
         {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -1674,7 +2443,9 @@ function PermissionsMatrix() {
             <tr className="text-left">
               <th className="px-2 py-2">Capability</th>
               {roles.map((r) => (
-                <th key={r} className="px-2 py-2 text-center capitalize">{r.replace("_", " ")}</th>
+                <th key={r} className="px-2 py-2 text-center capitalize">
+                  {r.replace("_", " ")}
+                </th>
               ))}
             </tr>
           </thead>
@@ -1688,13 +2459,18 @@ function PermissionsMatrix() {
                 {roles.map((role) => {
                   const enabled = has(role, perm.key);
                   const locked = role === "super_admin";
-                  const pending = mut.isPending && mut.variables?.role === role && mut.variables?.permission === perm.key;
+                  const pending =
+                    mut.isPending &&
+                    mut.variables?.role === role &&
+                    mut.variables?.permission === perm.key;
                   return (
                     <td key={role} className="px-2 py-2 text-center">
                       <button
                         type="button"
                         disabled={locked || pending}
-                        onClick={() => mut.mutate({ role, permission: perm.key, enabled: !enabled })}
+                        onClick={() =>
+                          mut.mutate({ role, permission: perm.key, enabled: !enabled })
+                        }
                         className={
                           "inline-flex h-6 w-10 items-center rounded-full border transition " +
                           (enabled
@@ -1702,9 +2478,20 @@ function PermissionsMatrix() {
                             : "border-border/40 bg-muted/30 justify-start") +
                           (locked ? " cursor-not-allowed opacity-70" : " hover:opacity-90")
                         }
-                        title={locked ? "super_admin permissions are immutable" : enabled ? "Click to revoke" : "Click to grant"}
+                        title={
+                          locked
+                            ? "super_admin permissions are immutable"
+                            : enabled
+                              ? "Click to revoke"
+                              : "Click to grant"
+                        }
                       >
-                        <span className={"mx-0.5 inline-block h-5 w-5 rounded-full " + (enabled ? "bg-emerald-300" : "bg-muted-foreground/40")} />
+                        <span
+                          className={
+                            "mx-0.5 inline-block h-5 w-5 rounded-full " +
+                            (enabled ? "bg-emerald-300" : "bg-muted-foreground/40")
+                          }
+                        />
                       </button>
                     </td>
                   );
@@ -1715,8 +2502,11 @@ function PermissionsMatrix() {
         </table>
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Backed by <code className="rounded bg-muted/30 px-1">public.role_permissions</code> + <code className="rounded bg-muted/30 px-1">has_permission()</code>.
-        Row Level Security restricts editing to admins; the safeguard trigger prevents removing <code>manage_permissions</code> / <code>manage_users</code> from the admin role unless a super_admin exists.
+        Backed by <code className="rounded bg-muted/30 px-1">public.role_permissions</code> +{" "}
+        <code className="rounded bg-muted/30 px-1">has_permission()</code>. Row Level Security
+        restricts editing to admins; the safeguard trigger prevents removing{" "}
+        <code>manage_permissions</code> / <code>manage_users</code> from the admin role unless a
+        super_admin exists.
       </p>
     </section>
   );

@@ -12,7 +12,6 @@ import {
 import { useModuleVisibility, MODULE_BY_FEATURE_TITLE } from "@/hooks/use-module-visibility";
 import { DEFAULT_STATS, formatStatValue } from "./LandingSections";
 
-
 type Feature = {
   icon: LucideIcon;
   title: string;
@@ -89,7 +88,6 @@ const toneMap: Record<Feature["tone"], { from: string; to: string; glow: string 
 
 const stats = DEFAULT_STATS.map((s) => ({ v: formatStatValue(s), l: s.label }));
 
-
 export function Features() {
   const { isHidden } = useModuleVisibility();
   const visibleFeatures = features.filter((f) => {
@@ -116,7 +114,8 @@ export function Features() {
             A Complete Toolkit for <span className="text-gradient">CA Aspirants</span>
           </h2>
           <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-            Everything ICAB students need — practice, mocks, notes, flash cards and analytics in one place.
+            Everything ICAB students need — practice, mocks, notes, flash cards and analytics in one
+            place.
           </p>
         </div>
 

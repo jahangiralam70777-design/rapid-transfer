@@ -49,12 +49,20 @@ function makeChannel<TRow extends Record<string, unknown>>(
     "postgres_changes" as never,
     { event: "INSERT", schema: "public", table },
     (payload: { new: TRow }) => {
-      try { onInsert(payload.new); } catch { /* swallow listener errors */ }
+      try {
+        onInsert(payload.new);
+      } catch {
+        /* swallow listener errors */
+      }
     },
   );
   channel.subscribe();
   return () => {
-    try { supabase.removeChannel(channel); } catch { /* noop */ }
+    try {
+      supabase.removeChannel(channel);
+    } catch {
+      /* noop */
+    }
   };
 }
 
@@ -115,10 +123,7 @@ export async function fetchDisplayNames(ids: string[]): Promise<Map<string, stri
   const map = new Map<string, string>();
   const unique = Array.from(new Set(ids.filter(Boolean)));
   if (unique.length === 0) return map;
-  const { data } = await supabase
-    .from("profiles")
-    .select("id,display_name")
-    .in("id", unique);
+  const { data } = await supabase.from("profiles").select("id,display_name").in("id", unique);
   for (const p of (data ?? []) as Array<{ id: string; display_name: string | null }>) {
     map.set(p.id, p.display_name ?? "Unknown");
   }

@@ -17,11 +17,26 @@ const ACTIONS: { t: string; i: typeof Upload; to: string; tint: string }[] = [
   { t: "Upload MCQ", i: Upload, to: "/admin/mcq", tint: "from-fuchsia-500 to-purple-500" },
   { t: "Create Quiz", i: Timer, to: "/admin/quiz", tint: "from-sky-500 to-blue-500" },
   { t: "Publish Mock", i: Trophy, to: "/admin/mock-test", tint: "from-amber-500 to-orange-500" },
-  { t: "Add Video Class", i: PlayCircle, to: "/admin/classes", tint: "from-violet-500 to-indigo-500" },
+  {
+    t: "Add Video Class",
+    i: PlayCircle,
+    to: "/admin/classes",
+    tint: "from-violet-500 to-indigo-500",
+  },
   { t: "Upload Notes", i: FileText, to: "/admin/short-notes", tint: "from-cyan-500 to-teal-500" },
   { t: "Add Flash Card", i: Layers, to: "/admin/flash-cards", tint: "from-pink-500 to-rose-500" },
-  { t: "Question Bank", i: Database, to: "/admin/question-bank", tint: "from-emerald-500 to-green-500" },
-  { t: "Send Notification", i: Send, to: "/admin/notifications", tint: "from-lime-500 to-emerald-500" },
+  {
+    t: "Question Bank",
+    i: Database,
+    to: "/admin/question-bank",
+    tint: "from-emerald-500 to-green-500",
+  },
+  {
+    t: "Send Notification",
+    i: Send,
+    to: "/admin/notifications",
+    tint: "from-lime-500 to-emerald-500",
+  },
 ];
 
 export function FloatingQuickActions() {

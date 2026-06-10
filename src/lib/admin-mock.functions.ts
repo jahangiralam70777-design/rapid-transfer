@@ -7,13 +7,10 @@ const levelCode = z.string().trim().min(1).max(40);
 const statusEnum = z.enum(["draft", "published", "archived"]);
 const difficultyEnum = z.enum(["easy", "medium", "hard"]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // ---------- Lookups ----------
 export const adminListSubjectsByLevel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { level?: string }) =>
-    z.object({ level: levelCode.optional() }).parse(i),
-  )
+  .inputValidator((i: { level?: string }) => z.object({ level: levelCode.optional() }).parse(i))
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
     let q = context.supabase
@@ -28,9 +25,7 @@ export const adminListSubjectsByLevel = createServerFn({ method: "POST" })
 
 export const adminListChaptersBySubject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { subjectId: string }) =>
-    z.object({ subjectId: z.string().uuid() }).parse(i),
-  )
+  .inputValidator((i: { subjectId: string }) => z.object({ subjectId: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
     const { data: rows, error } = await context.supabase
@@ -44,22 +39,23 @@ export const adminListChaptersBySubject = createServerFn({ method: "POST" })
 
 export const adminListMcqsForBuilder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: {
-    chapterIds?: string[];
-    subjectId?: string;
-    level?: string;
-    search?: string;
-    difficulty?: string;
-  }) =>
-    z
-      .object({
-        chapterIds: z.array(z.string().uuid()).max(200).optional(),
-        subjectId: z.string().uuid().optional(),
-        level: levelCode.optional(),
-        search: z.string().trim().max(200).optional(),
-        difficulty: difficultyEnum.optional(),
-      })
-      .parse(i),
+  .inputValidator(
+    (i: {
+      chapterIds?: string[];
+      subjectId?: string;
+      level?: string;
+      search?: string;
+      difficulty?: string;
+    }) =>
+      z
+        .object({
+          chapterIds: z.array(z.string().uuid()).max(200).optional(),
+          subjectId: z.string().uuid().optional(),
+          level: levelCode.optional(),
+          search: z.string().trim().max(200).optional(),
+          difficulty: difficultyEnum.optional(),
+        })
+        .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -103,39 +99,41 @@ export const adminListMcqsForBuilder = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-
 // ---------- Mocks (stored in quizzes with kind='mock') ----------
 const mockSelect =
   "id,title,description,level,status,total_questions,duration_seconds,difficulty,starts_at,ends_at,is_public,randomize_questions,randomize_options,negative_marking,passing_marks,subject_id,chapter_id,updated_at,created_at";
 
 export const adminListMocks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: {
-    search?: string;
-    status?: string;
-    level?: string;
-    subjectId?: string;
-    mockType?: "all" | "full" | "chapter" | "level";
-    date?: "all" | "scheduled" | "unscheduled" | "upcoming" | "expired";
-    sortBy?: "updated_at" | "title" | "starts_at" | "total_questions";
-    sortDir?: "asc" | "desc";
-    page?: number;
-    pageSize?: number;
-  }) =>
-    z
-      .object({
-        search: z.string().trim().max(200).optional(),
-        status: statusEnum.optional(),
-        level: levelCode.optional(),
-        subjectId: z.string().uuid().optional(),
-        mockType: z.enum(["all", "full", "chapter", "level"]).default("all"),
-        date: z.enum(["all", "scheduled", "unscheduled", "upcoming", "expired"]).default("all"),
-        sortBy: z.enum(["updated_at", "title", "starts_at", "total_questions"]).default("updated_at"),
-        sortDir: z.enum(["asc", "desc"]).default("desc"),
-        page: z.number().int().min(1).max(2000).default(1),
-        pageSize: z.number().int().min(1).max(100).default(20),
-      })
-      .parse(i),
+  .inputValidator(
+    (i: {
+      search?: string;
+      status?: string;
+      level?: string;
+      subjectId?: string;
+      mockType?: "all" | "full" | "chapter" | "level";
+      date?: "all" | "scheduled" | "unscheduled" | "upcoming" | "expired";
+      sortBy?: "updated_at" | "title" | "starts_at" | "total_questions";
+      sortDir?: "asc" | "desc";
+      page?: number;
+      pageSize?: number;
+    }) =>
+      z
+        .object({
+          search: z.string().trim().max(200).optional(),
+          status: statusEnum.optional(),
+          level: levelCode.optional(),
+          subjectId: z.string().uuid().optional(),
+          mockType: z.enum(["all", "full", "chapter", "level"]).default("all"),
+          date: z.enum(["all", "scheduled", "unscheduled", "upcoming", "expired"]).default("all"),
+          sortBy: z
+            .enum(["updated_at", "title", "starts_at", "total_questions"])
+            .default("updated_at"),
+          sortDir: z.enum(["asc", "desc"]).default("desc"),
+          page: z.number().int().min(1).max(2000).default(1),
+          pageSize: z.number().int().min(1).max(100).default(20),
+        })
+        .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -174,51 +172,45 @@ export const adminMockStats = createServerFn({ method: "POST" })
     const sb = context.supabase;
     const nowIso = new Date().toISOString();
 
-    const base = () => sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "mock");
+    const base = () =>
+      sb.from("quizzes").select("id", { count: "exact", head: true }).eq("kind", "mock");
 
-    const [
-      totalRes,
-      publishedRes,
-      draftsRes,
-      archivedRes,
-      scheduledRes,
-      liveRes,
-      questionsAgg,
-    ] = await Promise.all([
-      base(),
-      base().eq("status", "published"),
-      base().eq("status", "draft"),
-      base().eq("status", "archived"),
-      base().gt("starts_at", nowIso),
-      base()
-        .eq("status", "published")
-        .or(`starts_at.is.null,starts_at.lte.${nowIso}`)
-        .or(`ends_at.is.null,ends_at.gte.${nowIso}`),
-      // Sum + count of total_questions across all mocks (paged to bypass 1000-row cap).
-      (async () => {
-        let from = 0;
-        const pageSize = 1000;
-        let sum = 0;
-        let n = 0;
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { data, error } = await sb
-            .from("quizzes")
-            .select("total_questions")
-            .eq("kind", "mock")
-            .range(from, from + pageSize - 1);
-          if (error) throw error;
-          const batch = (data ?? []) as Array<{ total_questions: number | null }>;
-          for (const r of batch) {
-            sum += r.total_questions ?? 0;
-            n += 1;
+    const [totalRes, publishedRes, draftsRes, archivedRes, scheduledRes, liveRes, questionsAgg] =
+      await Promise.all([
+        base(),
+        base().eq("status", "published"),
+        base().eq("status", "draft"),
+        base().eq("status", "archived"),
+        base().gt("starts_at", nowIso),
+        base()
+          .eq("status", "published")
+          .or(`starts_at.is.null,starts_at.lte.${nowIso}`)
+          .or(`ends_at.is.null,ends_at.gte.${nowIso}`),
+        // Sum + count of total_questions across all mocks (paged to bypass 1000-row cap).
+        (async () => {
+          let from = 0;
+          const pageSize = 1000;
+          let sum = 0;
+          let n = 0;
+
+          while (true) {
+            const { data, error } = await sb
+              .from("quizzes")
+              .select("total_questions")
+              .eq("kind", "mock")
+              .range(from, from + pageSize - 1);
+            if (error) throw error;
+            const batch = (data ?? []) as Array<{ total_questions: number | null }>;
+            for (const r of batch) {
+              sum += r.total_questions ?? 0;
+              n += 1;
+            }
+            if (batch.length < pageSize) break;
+            from += pageSize;
           }
-          if (batch.length < pageSize) break;
-          from += pageSize;
-        }
-        return { sum, n };
-      })(),
-    ]);
+          return { sum, n };
+        })(),
+      ]);
 
     for (const r of [totalRes, publishedRes, draftsRes, archivedRes, scheduledRes, liveRes]) {
       if (r.error) throw r.error;
@@ -246,7 +238,12 @@ const mockInputSchema = z.object({
   level: levelCode.default("professional"),
   subject_id: z.string().uuid().nullable().optional(),
   chapter_id: z.string().uuid().nullable().optional(),
-  duration_seconds: z.number().int().min(60).max(60 * 60 * 8).default(3600),
+  duration_seconds: z
+    .number()
+    .int()
+    .min(60)
+    .max(60 * 60 * 8)
+    .default(3600),
   total_questions: z.number().int().min(1).max(500).default(20),
   difficulty: difficultyEnum.default("medium"),
   status: statusEnum.default("draft"),
@@ -268,7 +265,12 @@ export const adminCreateMock = createServerFn({ method: "POST" })
     const { mcq_ids, ...rest } = data;
     const { data: row, error } = await context.supabase
       .from("quizzes")
-      .insert({ ...rest, kind: "mock", created_by: context.userId, total_questions: mcq_ids?.length || rest.total_questions })
+      .insert({
+        ...rest,
+        kind: "mock",
+        created_by: context.userId,
+        total_questions: mcq_ids?.length || rest.total_questions,
+      })
       .select("id")
       .single();
     if (error) throw error;
@@ -287,7 +289,10 @@ export const adminUpdateMock = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
     const { id, mcq_ids, ...patch } = data;
-    const { error } = await context.supabase.from("quizzes").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", id);
+    const { error } = await context.supabase
+      .from("quizzes")
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq("id", id);
     if (error) throw error;
     if (mcq_ids) {
       await context.supabase.from("quiz_questions").delete().eq("quiz_id", id);
@@ -296,7 +301,10 @@ export const adminUpdateMock = createServerFn({ method: "POST" })
         const { error: le } = await context.supabase.from("quiz_questions").insert(links);
         if (le) throw le;
       }
-      await context.supabase.from("quizzes").update({ total_questions: mcq_ids.length, updated_at: new Date().toISOString() }).eq("id", id);
+      await context.supabase
+        .from("quizzes")
+        .update({ total_questions: mcq_ids.length, updated_at: new Date().toISOString() })
+        .eq("id", id);
     }
     return { ok: true };
   });
@@ -319,7 +327,10 @@ export const adminSetMockStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
-    const { error } = await context.supabase.from("quizzes").update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("quizzes")
+      .update({ status: data.status, updated_at: new Date().toISOString() })
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -338,7 +349,13 @@ export const adminDuplicateMock = createServerFn({ method: "POST" })
     const { id: _omit, updated_at: _u, created_at: _c, ...rest } = src as Record<string, unknown>;
     const { data: copy, error: ce } = await context.supabase
       .from("quizzes")
-      .insert({ ...rest, kind: "mock", status: "draft", title: `${(src as { title: string }).title} (copy)`, created_by: context.userId })
+      .insert({
+        ...rest,
+        kind: "mock",
+        status: "draft",
+        title: `${(src as { title: string }).title} (copy)`,
+        created_by: context.userId,
+      })
       .select("id")
       .single();
     if (ce) throw ce;
@@ -349,7 +366,9 @@ export const adminDuplicateMock = createServerFn({ method: "POST" })
     if (links && links.length) {
       await context.supabase
         .from("quiz_questions")
-        .insert(links.map((l: { mcq_id: string; position: number }) => ({ ...l, quiz_id: copy.id })));
+        .insert(
+          links.map((l: { mcq_id: string; position: number }) => ({ ...l, quiz_id: copy.id })),
+        );
     }
     return { id: copy.id };
   });
@@ -376,26 +395,27 @@ export const adminGetMockQuestions = createServerFn({ method: "POST" })
 // chapter doesn't have enough published MCQs.
 export const adminAutoGenerateMock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: {
-    subjectId: string;
-    chapterId: string;
-    level: string;
-    questionCount?: number;
-    durationMinutes?: number;
-    difficulty?: "easy" | "medium" | "hard" | "mixed";
-    status?: "draft" | "published";
-  }) =>
-    z
-      .object({
-        subjectId: z.string().uuid(),
-        chapterId: z.string().uuid(),
-        level: levelCode,
-        questionCount: z.number().int().min(1).max(200).default(10),
-        durationMinutes: z.number().int().min(1).max(480).default(10),
-        difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
-        status: z.enum(["draft", "published"]).default("draft"),
-      })
-      .parse(i),
+  .inputValidator(
+    (i: {
+      subjectId: string;
+      chapterId: string;
+      level: string;
+      questionCount?: number;
+      durationMinutes?: number;
+      difficulty?: "easy" | "medium" | "hard" | "mixed";
+      status?: "draft" | "published";
+    }) =>
+      z
+        .object({
+          subjectId: z.string().uuid(),
+          chapterId: z.string().uuid(),
+          level: levelCode,
+          questionCount: z.number().int().min(1).max(200).default(10),
+          durationMinutes: z.number().int().min(1).max(480).default(10),
+          difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
+          status: z.enum(["draft", "published"]).default("draft"),
+        })
+        .parse(i),
   )
   .handler(async ({ data, context }) => {
     const log = (...args: unknown[]) => console.log("[adminAutoGenerateMock]", ...args);
@@ -405,7 +425,11 @@ export const adminAutoGenerateMock = createServerFn({ method: "POST" })
       const sb = context.supabase;
       log("start", { userId: context.userId, data });
 
-      type McqRow = { id: string; chapter_id: string | null; difficulty: "easy" | "medium" | "hard" | null };
+      type McqRow = {
+        id: string;
+        chapter_id: string | null;
+        difficulty: "easy" | "medium" | "hard" | null;
+      };
 
       const fetchMcqs = async (chapterIds: string[]): Promise<McqRow[]> => {
         if (chapterIds.length === 0) return [];
@@ -450,7 +474,7 @@ export const adminAutoGenerateMock = createServerFn({ method: "POST" })
       const target = data.questionCount;
 
       // 2) Primary pool — selected chapter only.
-      let primary = await fetchMcqs([data.chapterId]);
+      const primary = await fetchMcqs([data.chapterId]);
       log("primary pool", primary.length);
 
       // 3) Fallback — other chapters of same subject + level.
@@ -463,7 +487,12 @@ export const adminAutoGenerateMock = createServerFn({ method: "POST" })
           .eq("subject_id", data.subjectId)
           .neq("id", data.chapterId);
         if (scErr) errLog("fallback chapters lookup error", scErr);
-        const fallbackChapterIds = ((sameSubjectChapters ?? []) as Array<{ id: string; subjects?: { level?: string | null } | null }>)
+        const fallbackChapterIds = (
+          (sameSubjectChapters ?? []) as Array<{
+            id: string;
+            subjects?: { level?: string | null } | null;
+          }>
+        )
           .filter((c) => !c.subjects?.level || c.subjects.level === data.level)
           .map((c) => c.id);
         if (fallbackChapterIds.length > 0) {
@@ -473,7 +502,7 @@ export const adminAutoGenerateMock = createServerFn({ method: "POST" })
         log("fallback pool", fallback.length);
       }
 
-      const shuffle = <T,>(arr: T[]) => arr.slice().sort(() => Math.random() - 0.5);
+      const shuffle = <T>(arr: T[]) => arr.slice().sort(() => Math.random() - 0.5);
 
       // 4) Selection — apply difficulty mix when "mixed", else straight random.
       const picked: McqRow[] = [];
@@ -539,7 +568,9 @@ export const adminAutoGenerateMock = createServerFn({ method: "POST" })
         kind: "mock",
         title,
         description: `Auto-generated from MCQ Practice Question Bank · ${mcqIds.length} questions from ${scopeLabel}.${
-          usedFallback ? " Some questions were added from related chapters because the selected chapter did not contain enough questions." : ""
+          usedFallback
+            ? " Some questions were added from related chapters because the selected chapter did not contain enough questions."
+            : ""
         }`,
         level: data.level,
         subject_id: data.subjectId,
@@ -591,7 +622,6 @@ export const adminAutoGenerateMock = createServerFn({ method: "POST" })
     }
   });
 
-
 // ---------- Slice 1: card drawers ----------
 
 // Currently-live mocks: published AND inside (or open) active window.
@@ -638,7 +668,7 @@ export const adminMockBreakdowns = createServerFn({ method: "POST" })
     }> = [];
     let from = 0;
     const pageSize = 1000;
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       const { data, error } = await sb
         .from("quizzes")
@@ -671,13 +701,20 @@ export const adminMockBreakdowns = createServerFn({ method: "POST" })
       { label: "100+", min: 101, max: Infinity },
     ].map((b) => ({
       label: b.label,
-      count: rows.filter((r) => (r.total_questions ?? 0) >= b.min && (r.total_questions ?? 0) <= b.max).length,
+      count: rows.filter(
+        (r) => (r.total_questions ?? 0) >= b.min && (r.total_questions ?? 0) <= b.max,
+      ).length,
     }));
 
     const largest = [...rows]
       .sort((a, b) => (b.total_questions ?? 0) - (a.total_questions ?? 0))
       .slice(0, 10)
-      .map((r) => ({ id: r.id, title: r.title, total_questions: r.total_questions ?? 0, status: r.status }));
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        total_questions: r.total_questions ?? 0,
+        status: r.status,
+      }));
 
     const totalQuestions = rows.reduce((s, r) => s + (r.total_questions ?? 0), 0);
     const avgQuestions = rows.length ? Math.round(totalQuestions / rows.length) : 0;
@@ -708,11 +745,19 @@ export const adminMockAttemptsOverview = createServerFn({ method: "POST" })
 
     const [{ count: totalAttempts }, { count: completed }, { data: recent }] = await Promise.all([
       sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("kind", "mock"),
-      sb.from("exam_attempts").select("id", { count: "exact", head: true }).eq("kind", "mock").not("completed_at", "is", null),
       sb
         .from("exam_attempts")
-        .select("quiz_id,status,started_at,completed_at,title,score,duration_seconds,correct_count,total_count")
-        .eq("kind", "mock").gte("started_at", sinceIso).limit(10000),
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "mock")
+        .not("completed_at", "is", null),
+      sb
+        .from("exam_attempts")
+        .select(
+          "quiz_id,status,started_at,completed_at,title,score,duration_seconds,correct_count,total_count",
+        )
+        .eq("kind", "mock")
+        .gte("started_at", sinceIso)
+        .limit(10000),
     ]);
 
     const tot = totalAttempts ?? 0;
@@ -720,15 +765,22 @@ export const adminMockAttemptsOverview = createServerFn({ method: "POST" })
     const abandoned = Math.max(0, tot - done);
 
     type AttemptRow = {
-      quiz_id: string | null; status: string | null;
-      started_at: string | null; completed_at: string | null;
-      title: string | null; score: number | null;
+      quiz_id: string | null;
+      status: string | null;
+      started_at: string | null;
+      completed_at: string | null;
+      title: string | null;
+      score: number | null;
       duration_seconds: number | null;
-      correct_count: number | null; total_count: number | null;
+      correct_count: number | null;
+      total_count: number | null;
     };
     const rows = (recent ?? []) as AttemptRow[];
 
-    const dailyMap = new Map<string, { attempts: number; completed: number; scoreSum: number; scoreN: number }>();
+    const dailyMap = new Map<
+      string,
+      { attempts: number; completed: number; scoreSum: number; scoreN: number }
+    >();
     for (let i = rangeDays - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
       dailyMap.set(d, { attempts: 0, completed: 0, scoreSum: 0, scoreN: 0 });
@@ -740,7 +792,10 @@ export const adminMockAttemptsOverview = createServerFn({ method: "POST" })
       if (!slot) continue;
       slot.attempts += 1;
       if (r.completed_at) slot.completed += 1;
-      if (typeof r.score === "number") { slot.scoreSum += r.score; slot.scoreN += 1; }
+      if (typeof r.score === "number") {
+        slot.scoreSum += r.score;
+        slot.scoreN += 1;
+      }
     }
     const daily = Array.from(dailyMap.entries()).map(([day, v]) => ({
       day,
@@ -758,18 +813,27 @@ export const adminMockAttemptsOverview = createServerFn({ method: "POST" })
     ];
     const scoreHistogram = buckets.map((b) => ({
       label: b.label,
-      count: rows.filter((r) => typeof r.score === "number" && r.score >= b.min && r.score <= b.max).length,
+      count: rows.filter((r) => typeof r.score === "number" && r.score >= b.min && r.score <= b.max)
+        .length,
     }));
 
-    const perMock = new Map<string, { count: number; title: string | null; scoreSum: number; scoreN: number }>();
+    const perMock = new Map<
+      string,
+      { count: number; title: string | null; scoreSum: number; scoreN: number }
+    >();
     for (const r of rows) {
       const key = r.quiz_id ?? `__notitle__:${r.title ?? "unknown"}`;
       const cur = perMock.get(key) ?? { count: 0, title: r.title, scoreSum: 0, scoreN: 0 };
       cur.count += 1;
-      if (typeof r.score === "number") { cur.scoreSum += r.score; cur.scoreN += 1; }
+      if (typeof r.score === "number") {
+        cur.scoreSum += r.score;
+        cur.scoreN += 1;
+      }
       perMock.set(key, cur);
     }
-    const topRaw = Array.from(perMock.entries()).sort((a, b) => b[1].count - a[1].count).slice(0, 10);
+    const topRaw = Array.from(perMock.entries())
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 10);
     const realIds = topRaw.map(([id]) => id).filter((id) => !id.startsWith("__notitle__:"));
     const titleMap = new Map<string, string>();
     if (realIds.length) {
@@ -812,10 +876,12 @@ export const adminMockAttemptsOverview = createServerFn({ method: "POST" })
 export const adminMockDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { quizId: string; rangeDays?: number }) =>
-    z.object({
-      quizId: z.string().uuid(),
-      rangeDays: z.number().int().min(1).max(365).default(30),
-    }).parse(i),
+    z
+      .object({
+        quizId: z.string().uuid(),
+        rangeDays: z.number().int().min(1).max(365).default(30),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_content");
@@ -826,21 +892,34 @@ export const adminMockDetail = createServerFn({ method: "POST" })
       sb.from("quizzes").select(mockSelect).eq("id", data.quizId).maybeSingle(),
       sb
         .from("exam_attempts")
-        .select("id,user_id,status,score,correct_count,total_count,duration_seconds,started_at,completed_at", { count: "exact" })
-        .eq("kind", "mock").eq("quiz_id", data.quizId),
+        .select(
+          "id,user_id,status,score,correct_count,total_count,duration_seconds,started_at,completed_at",
+          { count: "exact" },
+        )
+        .eq("kind", "mock")
+        .eq("quiz_id", data.quizId),
       sb
         .from("exam_attempts")
-        .select("id,user_id,status,score,correct_count,total_count,duration_seconds,started_at,completed_at")
-        .eq("kind", "mock").eq("quiz_id", data.quizId)
-        .gte("started_at", sinceIso).limit(10000),
+        .select(
+          "id,user_id,status,score,correct_count,total_count,duration_seconds,started_at,completed_at",
+        )
+        .eq("kind", "mock")
+        .eq("quiz_id", data.quizId)
+        .gte("started_at", sinceIso)
+        .limit(10000),
     ]);
     if (!mock) throw new Error("Mock not found");
 
     type R = {
-      id: string; user_id: string; status: string | null;
-      score: number | null; correct_count: number | null; total_count: number | null;
+      id: string;
+      user_id: string;
+      status: string | null;
+      score: number | null;
+      correct_count: number | null;
+      total_count: number | null;
       duration_seconds: number | null;
-      started_at: string | null; completed_at: string | null;
+      started_at: string | null;
+      completed_at: string | null;
     };
     const all = (attemptsAllRes.data ?? []) as R[];
     const rangeRows = (attemptsRangeRes.data ?? []) as R[];
@@ -856,7 +935,10 @@ export const adminMockDetail = createServerFn({ method: "POST" })
       ? Math.round(all.reduce((s, r) => s + (r.duration_seconds ?? 0), 0) / all.length)
       : 0;
 
-    const dailyMap = new Map<string, { attempts: number; completed: number; scoreSum: number; scoreN: number }>();
+    const dailyMap = new Map<
+      string,
+      { attempts: number; completed: number; scoreSum: number; scoreN: number }
+    >();
     for (let i = data.rangeDays - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
       dailyMap.set(d, { attempts: 0, completed: 0, scoreSum: 0, scoreN: 0 });
@@ -868,7 +950,10 @@ export const adminMockDetail = createServerFn({ method: "POST" })
       if (!slot) continue;
       slot.attempts += 1;
       if (r.completed_at) slot.completed += 1;
-      if (typeof r.score === "number") { slot.scoreSum += r.score; slot.scoreN += 1; }
+      if (typeof r.score === "number") {
+        slot.scoreSum += r.score;
+        slot.scoreN += 1;
+      }
     }
     const daily = Array.from(dailyMap.entries()).map(([day, v]) => ({
       day,
@@ -886,7 +971,8 @@ export const adminMockDetail = createServerFn({ method: "POST" })
     ];
     const scoreHistogram = buckets.map((b) => ({
       label: b.label,
-      count: all.filter((r) => typeof r.score === "number" && r.score >= b.min && r.score <= b.max).length,
+      count: all.filter((r) => typeof r.score === "number" && r.score >= b.min && r.score <= b.max)
+        .length,
     }));
 
     const perUser = new Map<string, { score: number; attempts: number; lastAt: string | null }>();
@@ -899,13 +985,19 @@ export const adminMockDetail = createServerFn({ method: "POST" })
       perUser.set(r.user_id, cur);
     }
     const topUserIds = Array.from(perUser.entries())
-      .sort((a, b) => b[1].score - a[1].score).slice(0, 10);
+      .sort((a, b) => b[1].score - a[1].score)
+      .slice(0, 10);
     const userIds = topUserIds.map(([id]) => id);
     const profileMap = new Map<string, { name: string }>();
     if (userIds.length) {
       const { data: profiles } = await sb
-        .from("profiles").select("id,display_name").in("id", userIds);
-      for (const p of (profiles ?? []) as unknown as Array<{ id: string; display_name: string | null }>) {
+        .from("profiles")
+        .select("id,display_name")
+        .in("id", userIds);
+      for (const p of (profiles ?? []) as unknown as Array<{
+        id: string;
+        display_name: string | null;
+      }>) {
         profileMap.set(p.id, { name: p.display_name ?? "User" });
       }
     }
@@ -988,7 +1080,9 @@ export const adminMockActivity = createServerFn({ method: "POST" })
     if (qerr) throw qerr;
 
     const userIds = Array.from(
-      new Set(((attempts ?? []) as Array<{ user_id: string }>).map((a) => a.user_id).filter(Boolean)),
+      new Set(
+        ((attempts ?? []) as Array<{ user_id: string }>).map((a) => a.user_id).filter(Boolean),
+      ),
     );
     const profileMap = new Map<string, string>();
     if (userIds.length) {
@@ -1012,26 +1106,51 @@ export const adminMockActivity = createServerFn({ method: "POST" })
     const events: Event[] = [];
 
     for (const a of (attempts ?? []) as Array<{
-      id: string; user_id: string; quiz_id: string | null; title: string | null;
-      status: string | null; score: number | null;
-      started_at: string | null; completed_at: string | null; duration_seconds: number | null;
+      id: string;
+      user_id: string;
+      quiz_id: string | null;
+      title: string | null;
+      status: string | null;
+      score: number | null;
+      started_at: string | null;
+      completed_at: string | null;
+      duration_seconds: number | null;
     }>) {
       const actor = profileMap.get(a.user_id) ?? "User";
       const target = a.title ?? "Mock";
       if (a.completed_at) {
         events.push({
-          at: a.completed_at, kind: "completed", actor, target, quizId: a.quiz_id,
-          meta: a.score != null ? `${a.score}% · ${Math.round((a.duration_seconds ?? 0) / 60)}m` : "—",
+          at: a.completed_at,
+          kind: "completed",
+          actor,
+          target,
+          quizId: a.quiz_id,
+          meta:
+            a.score != null ? `${a.score}% · ${Math.round((a.duration_seconds ?? 0) / 60)}m` : "—",
         });
       } else if (a.started_at) {
         events.push({
-          at: a.started_at, kind: "started", actor, target, quizId: a.quiz_id, meta: "in progress",
+          at: a.started_at,
+          kind: "started",
+          actor,
+          target,
+          quizId: a.quiz_id,
+          meta: "in progress",
         });
       }
     }
 
-    for (const q of (quizEdits ?? []) as Array<{ id: string; title: string; status: string; updated_at: string; created_at: string }>) {
-      const isNew = q.created_at && q.updated_at && Math.abs(new Date(q.updated_at).getTime() - new Date(q.created_at).getTime()) < 5000;
+    for (const q of (quizEdits ?? []) as Array<{
+      id: string;
+      title: string;
+      status: string;
+      updated_at: string;
+      created_at: string;
+    }>) {
+      const isNew =
+        q.created_at &&
+        q.updated_at &&
+        Math.abs(new Date(q.updated_at).getTime() - new Date(q.created_at).getTime()) < 5000;
       events.push({
         at: q.updated_at,
         kind: isNew ? "created" : "edited",

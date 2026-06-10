@@ -2,28 +2,65 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart,
-  ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis,
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import {
-  ArrowDownRight, ArrowUpRight, Brain, Calendar, CheckCircle2,
-  Flame, Goal, ListChecks, Pencil, Sparkles, Target, TrendingDown, TrendingUp, XCircle, Zap,
+  ArrowDownRight,
+  ArrowUpRight,
+  Brain,
+  Calendar,
+  CheckCircle2,
+  Flame,
+  Goal,
+  ListChecks,
+  Pencil,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  XCircle,
+  Zap,
 } from "lucide-react";
-import { studentAdvancedAnalytics, updateStudentMcqGoals } from "@/lib/student-advanced-analytics.functions";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  studentAdvancedAnalytics,
+  updateStudentMcqGoals,
+} from "@/lib/student-advanced-analytics.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-
-
-
 function PremiumCard({
-  title, value, sub, icon, accent, trend,
+  title,
+  value,
+  sub,
+  icon,
+  accent,
+  trend,
 }: {
-  title: string; value: string; sub?: string;
-  icon: React.ReactNode; accent: string;
+  title: string;
+  value: string;
+  sub?: string;
+  icon: React.ReactNode;
+  accent: string;
   trend?: { value: number; positive: boolean };
 }) {
   return (
@@ -40,16 +77,26 @@ function PremiumCard({
           {icon}
         </div>
         {trend && (
-          <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-            trend.positive ? "bg-emerald-500/15 text-emerald-500" : "bg-rose-500/15 text-rose-500"
-          }`}>
-            {trend.positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          <span
+            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+              trend.positive ? "bg-emerald-500/15 text-emerald-500" : "bg-rose-500/15 text-rose-500"
+            }`}
+          >
+            {trend.positive ? (
+              <ArrowUpRight className="h-3 w-3" />
+            ) : (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
             {Math.abs(trend.value)}%
           </span>
         )}
       </div>
-      <p className="relative mt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
-      <p className="relative mt-1 font-display text-3xl font-bold tabular-nums text-foreground">{value}</p>
+      <p className="relative mt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      <p className="relative mt-1 font-display text-3xl font-bold tabular-nums text-foreground">
+        {value}
+      </p>
       {sub && <p className="relative mt-1 text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
@@ -60,22 +107,51 @@ function Skeleton({ className = "h-32" }: { className?: string }) {
 }
 
 const INSIGHT_STYLES: Record<string, { bg: string; ring: string; icon: React.ReactNode }> = {
-  up: { bg: "from-emerald-500/15 to-emerald-500/5", ring: "ring-emerald-500/30", icon: <TrendingUp className="h-4 w-4 text-emerald-500" /> },
-  down: { bg: "from-rose-500/15 to-rose-500/5", ring: "ring-rose-500/30", icon: <TrendingDown className="h-4 w-4 text-rose-500" /> },
-  info: { bg: "from-violet-500/15 to-violet-500/5", ring: "ring-violet-500/30", icon: <Sparkles className="h-4 w-4 text-violet-500" /> },
-  goal: { bg: "from-amber-500/15 to-amber-500/5", ring: "ring-amber-500/30", icon: <Goal className="h-4 w-4 text-amber-500" /> },
+  up: {
+    bg: "from-emerald-500/15 to-emerald-500/5",
+    ring: "ring-emerald-500/30",
+    icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
+  },
+  down: {
+    bg: "from-rose-500/15 to-rose-500/5",
+    ring: "ring-rose-500/30",
+    icon: <TrendingDown className="h-4 w-4 text-rose-500" />,
+  },
+  info: {
+    bg: "from-violet-500/15 to-violet-500/5",
+    ring: "ring-violet-500/30",
+    icon: <Sparkles className="h-4 w-4 text-violet-500" />,
+  },
+  goal: {
+    bg: "from-amber-500/15 to-amber-500/5",
+    ring: "ring-amber-500/30",
+    icon: <Goal className="h-4 w-4 text-amber-500" />,
+  },
 };
 
 function GoalCard({
-  label, solved, target, percent, tone, iconColor, onEdit,
+  label,
+  solved,
+  target,
+  percent,
+  tone,
+  iconColor,
+  onEdit,
 }: {
-  label: string; solved: number; target: number; percent: number;
-  tone: string; iconColor: string; onEdit: () => void;
+  label: string;
+  solved: number;
+  target: number;
+  percent: number;
+  tone: string;
+  iconColor: string;
+  onEdit: () => void;
 }) {
   return (
     <div className="glass shadow-card-soft rounded-3xl p-5">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -102,10 +178,15 @@ function GoalCard({
 }
 
 function EditGoalsDialog({
-  open, onOpenChange, initialDaily, initialWeekly,
+  open,
+  onOpenChange,
+  initialDaily,
+  initialWeekly,
 }: {
-  open: boolean; onOpenChange: (v: boolean) => void;
-  initialDaily: number; initialWeekly: number;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  initialDaily: number;
+  initialWeekly: number;
 }) {
   const qc = useQueryClient();
   const saveGoals = useServerFn(updateStudentMcqGoals);
@@ -145,17 +226,33 @@ function EditGoalsDialog({
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="daily-goal">Daily MCQ Goal</Label>
-            <Input id="daily-goal" type="number" min={1} max={5000} value={daily} onChange={(e) => setDaily(e.target.value)} />
+            <Input
+              id="daily-goal"
+              type="number"
+              min={1}
+              max={5000}
+              value={daily}
+              onChange={(e) => setDaily(e.target.value)}
+            />
             <p className="text-[11px] text-muted-foreground">Number of MCQs to solve each day.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="weekly-goal">Weekly MCQ Goal</Label>
-            <Input id="weekly-goal" type="number" min={1} max={50000} value={weekly} onChange={(e) => setWeekly(e.target.value)} />
+            <Input
+              id="weekly-goal"
+              type="number"
+              min={1}
+              max={50000}
+              value={weekly}
+              onChange={(e) => setWeekly(e.target.value)}
+            />
             <p className="text-[11px] text-muted-foreground">Number of MCQs to solve each week.</p>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>
+            Cancel
+          </Button>
           <Button onClick={submit} disabled={mutation.isPending}>
             {mutation.isPending ? "Saving…" : "Save Goals"}
           </Button>
@@ -175,19 +272,32 @@ export function AdvancedAnalyticsSection() {
   });
   const [editOpen, setEditOpen] = useState(false);
 
-
   if (isLoading || !data) {
     return (
       <div className="space-y-5">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
         </div>
         <Skeleton className="h-64" />
       </div>
     );
   }
 
-  const { mcqCounts, totals, byKind, subjectAccuracy, chapterAccuracy, strongTopics, weakTopics, heatmap, streak, insights, goals } = data;
+  const {
+    mcqCounts,
+    totals,
+    byKind,
+    subjectAccuracy,
+    chapterAccuracy,
+    strongTopics,
+    weakTopics,
+    heatmap,
+    streak,
+    insights,
+    goals,
+  } = data;
 
   const accuracyPie = [
     { name: "Correct", value: totals.correct, color: "oklch(0.72 0.18 155)" },
@@ -195,9 +305,24 @@ export function AdvancedAnalyticsSection() {
   ];
 
   const kindData = [
-    { name: "Mock", accuracy: byKind.mock?.accuracy ?? 0, attempts: byKind.mock?.attempts ?? 0, color: "var(--neon-pink)" },
-    { name: "Quiz", accuracy: byKind.quiz?.accuracy ?? 0, attempts: byKind.quiz?.attempts ?? 0, color: "var(--neon-blue)" },
-    { name: "Practice", accuracy: byKind.mcq_practice?.accuracy ?? 0, attempts: byKind.mcq_practice?.attempts ?? 0, color: "var(--neon-purple)" },
+    {
+      name: "Mock",
+      accuracy: byKind.mock?.accuracy ?? 0,
+      attempts: byKind.mock?.attempts ?? 0,
+      color: "var(--neon-pink)",
+    },
+    {
+      name: "Quiz",
+      accuracy: byKind.quiz?.accuracy ?? 0,
+      attempts: byKind.quiz?.attempts ?? 0,
+      color: "var(--neon-blue)",
+    },
+    {
+      name: "Practice",
+      accuracy: byKind.mcq_practice?.accuracy ?? 0,
+      attempts: byKind.mcq_practice?.attempts ?? 0,
+      color: "var(--neon-purple)",
+    },
   ];
 
   return (
@@ -235,7 +360,6 @@ export function AdvancedAnalyticsSection() {
         />
       </section>
 
-
       {/* === Smart Insights === */}
       {insights.length > 0 && (
         <section>
@@ -271,7 +395,9 @@ export function AdvancedAnalyticsSection() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-display text-lg font-bold">Daily MCQs Solved</h3>
-              <p className="text-xs text-muted-foreground">Questions answered per day · last 7 days</p>
+              <p className="text-xs text-muted-foreground">
+                Questions answered per day · last 7 days
+              </p>
             </div>
             <div className="glass rounded-xl px-3 py-1.5 text-xs">{mcqCounts.week} this week</div>
           </div>
@@ -287,25 +413,40 @@ export function AdvancedAnalyticsSection() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(d) => new Date(d).toLocaleDateString(undefined, { weekday: "short" })}
-                  axisLine={false} tickLine={false}
+                  tickFormatter={(d) =>
+                    new Date(d).toLocaleDateString(undefined, { weekday: "short" })
+                  }
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                 />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} allowDecimals={false} />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                  allowDecimals={false}
+                />
                 <RTooltip
                   contentStyle={{
-                    borderRadius: 12, border: "1px solid var(--border)",
-                    background: "var(--popover)", fontSize: 12,
+                    borderRadius: 12,
+                    border: "1px solid var(--border)",
+                    background: "var(--popover)",
+                    fontSize: 12,
                   }}
                   labelStyle={{ color: "var(--foreground)" }}
                   formatter={(v: number) => [`${v} MCQs`, "Solved"]}
                 />
-                <Area type="monotone" dataKey="count" stroke="var(--neon-purple)" strokeWidth={2.5} fill="url(#mcqAreaFill)" />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke="var(--neon-purple)"
+                  strokeWidth={2.5}
+                  fill="url(#mcqAreaFill)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
-
 
         <div className="glass shadow-card-soft rounded-3xl p-5">
           <div className="flex items-center justify-between">
@@ -319,12 +460,28 @@ export function AdvancedAnalyticsSection() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={accuracyPie.filter((d) => d.value > 0).length ? accuracyPie : [{ name: "No data", value: 1, color: "var(--muted)" }]}
-                  innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={2}
+                  data={
+                    accuracyPie.filter((d) => d.value > 0).length
+                      ? accuracyPie
+                      : [{ name: "No data", value: 1, color: "var(--muted)" }]
+                  }
+                  innerRadius={50}
+                  outerRadius={75}
+                  dataKey="value"
+                  paddingAngle={2}
                 >
-                  {accuracyPie.map((e, i) => (<Cell key={i} fill={e.color} />))}
+                  {accuracyPie.map((e, i) => (
+                    <Cell key={i} fill={e.color} />
+                  ))}
                 </Pie>
-                <RTooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--popover)", fontSize: 12 }} />
+                <RTooltip
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid var(--border)",
+                    background: "var(--popover)",
+                    fontSize: 12,
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -364,22 +521,26 @@ export function AdvancedAnalyticsSection() {
           onEdit={() => setEditOpen(true)}
         />
 
-
         <div className="relative overflow-hidden rounded-3xl p-px">
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 opacity-90" />
           <div className="relative flex h-full flex-col rounded-[calc(theme(borderRadius.3xl)-1px)] bg-background/85 p-5 backdrop-blur">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Learning Streak</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Learning Streak
+              </p>
               <Flame className="h-5 w-5 text-amber-500" />
             </div>
             <p className="font-display mt-2 text-3xl font-bold">
               {streak.current}
               <span className="ml-1 text-sm font-semibold text-muted-foreground">days</span>
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Longest streak: {streak.longest} days</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Longest streak: {streak.longest} days
+            </p>
             <div className="mt-3 flex gap-1">
               {Array.from({ length: 7 }).map((_, i) => (
-                <span key={i}
+                <span
+                  key={i}
                   className={`h-7 flex-1 rounded-md ${i < Math.min(7, streak.current) ? "bg-gradient-to-t from-amber-500 to-orange-400 shadow-[0_0_12px_var(--neon-pink)]" : "bg-muted"}`}
                 />
               ))}
@@ -397,14 +558,33 @@ export function AdvancedAnalyticsSection() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={kindData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                />
                 <RTooltip
-                  contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--popover)", fontSize: 12 }}
-                  formatter={(v: number, _n, p) => [`${v}% · ${p.payload.attempts} attempts`, "Accuracy"]}
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid var(--border)",
+                    background: "var(--popover)",
+                    fontSize: 12,
+                  }}
+                  formatter={(v: number, _n, p) => [
+                    `${v}% · ${p.payload.attempts} attempts`,
+                    "Accuracy",
+                  ]}
                 />
                 <Bar dataKey="accuracy" radius={[8, 8, 0, 0]}>
-                  {kindData.map((e, i) => (<Cell key={i} fill={e.color} />))}
+                  {kindData.map((e, i) => (
+                    <Cell key={i} fill={e.color} />
+                  ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -420,25 +600,31 @@ export function AdvancedAnalyticsSection() {
             <Zap className="h-4 w-4 text-[var(--neon-blue)]" />
           </div>
           <div className="mt-4 space-y-3">
-            {subjectAccuracy.length ? subjectAccuracy.map((s) => (
-              <div key={s.id}>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="truncate font-medium">{s.name}</span>
-                  <span className="text-muted-foreground tabular-nums">{s.accuracy}% · {s.attempts} Qs</span>
+            {subjectAccuracy.length ? (
+              subjectAccuracy.map((s) => (
+                <div key={s.id}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="truncate font-medium">{s.name}</span>
+                    <span className="text-muted-foreground tabular-nums">
+                      {s.accuracy}% · {s.attempts} Qs
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${s.accuracy}%`,
+                        background: `linear-gradient(90deg, ${s.color ?? "var(--neon-purple)"}, var(--neon-blue))`,
+                        boxShadow: `0 0 12px ${s.color ?? "var(--neon-purple)"}`,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${s.accuracy}%`,
-                      background: `linear-gradient(90deg, ${s.color ?? "var(--neon-purple)"}, var(--neon-blue))`,
-                      boxShadow: `0 0 12px ${s.color ?? "var(--neon-purple)"}`,
-                    }}
-                  />
-                </div>
-              </div>
-            )) : (
-              <p className="text-sm text-muted-foreground">No attempts yet — start practising to see subject accuracy.</p>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No attempts yet — start practising to see subject accuracy.
+              </p>
             )}
           </div>
         </div>
@@ -452,16 +638,25 @@ export function AdvancedAnalyticsSection() {
             <TrendingUp className="h-4 w-4 text-emerald-500" />
           </div>
           <ul className="mt-3 space-y-2">
-            {strongTopics.length ? strongTopics.map((t) => (
-              <li key={t.id} className="flex items-center justify-between rounded-xl bg-emerald-500/5 px-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{t.name}</p>
-                  {t.subject && <p className="text-[10px] text-muted-foreground">{t.subject}</p>}
-                </div>
-                <span className="text-sm font-bold text-emerald-500 tabular-nums">{t.accuracy}%</span>
+            {strongTopics.length ? (
+              strongTopics.map((t) => (
+                <li
+                  key={t.id}
+                  className="flex items-center justify-between rounded-xl bg-emerald-500/5 px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{t.name}</p>
+                    {t.subject && <p className="text-[10px] text-muted-foreground">{t.subject}</p>}
+                  </div>
+                  <span className="text-sm font-bold text-emerald-500 tabular-nums">
+                    {t.accuracy}%
+                  </span>
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-muted-foreground">
+                Answer 3+ questions per chapter to see your strong topics.
               </li>
-            )) : (
-              <li className="text-sm text-muted-foreground">Answer 3+ questions per chapter to see your strong topics.</li>
             )}
           </ul>
         </div>
@@ -471,16 +666,25 @@ export function AdvancedAnalyticsSection() {
             <TrendingDown className="h-4 w-4 text-rose-500" />
           </div>
           <ul className="mt-3 space-y-2">
-            {weakTopics.length ? weakTopics.map((t) => (
-              <li key={t.id} className="flex items-center justify-between rounded-xl bg-rose-500/5 px-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{t.name}</p>
-                  {t.subject && <p className="text-[10px] text-muted-foreground">{t.subject}</p>}
-                </div>
-                <span className="text-sm font-bold text-rose-500 tabular-nums">{t.accuracy}%</span>
+            {weakTopics.length ? (
+              weakTopics.map((t) => (
+                <li
+                  key={t.id}
+                  className="flex items-center justify-between rounded-xl bg-rose-500/5 px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{t.name}</p>
+                    {t.subject && <p className="text-[10px] text-muted-foreground">{t.subject}</p>}
+                  </div>
+                  <span className="text-sm font-bold text-rose-500 tabular-nums">
+                    {t.accuracy}%
+                  </span>
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-muted-foreground">
+                No weak topics yet — keep practising.
               </li>
-            )) : (
-              <li className="text-sm text-muted-foreground">No weak topics yet — keep practising.</li>
             )}
           </ul>
         </div>
@@ -496,7 +700,11 @@ export function AdvancedAnalyticsSection() {
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
             Less
             {[0.15, 0.35, 0.6, 0.85, 1].map((o, i) => (
-              <span key={i} className="h-3 w-3 rounded-sm" style={{ background: `oklch(0.6 0.27 295 / ${o})` }} />
+              <span
+                key={i}
+                className="h-3 w-3 rounded-sm"
+                style={{ background: `oklch(0.6 0.27 295 / ${o})` }}
+              />
             ))}
             More
           </div>
@@ -527,15 +735,29 @@ export function AdvancedAnalyticsSection() {
               <div key={c.id} className="rounded-xl border border-border bg-background/40 p-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="truncate font-medium">{c.name}</span>
-                  <span className="font-bold tabular-nums" style={{ color: c.accuracy >= 70 ? "rgb(16 185 129)" : c.accuracy >= 40 ? "rgb(245 158 11)" : "rgb(244 63 94)" }}>
+                  <span
+                    className="font-bold tabular-nums"
+                    style={{
+                      color:
+                        c.accuracy >= 70
+                          ? "rgb(16 185 129)"
+                          : c.accuracy >= 40
+                            ? "rgb(245 158 11)"
+                            : "rgb(244 63 94)",
+                    }}
+                  >
                     {c.accuracy}%
                   </span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)]"
-                    style={{ width: `${c.accuracy}%` }} />
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-blue)]"
+                    style={{ width: `${c.accuracy}%` }}
+                  />
                 </div>
-                <p className="mt-1 text-[10px] text-muted-foreground">{c.subject ?? "—"} · {c.attempts} answered</p>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {c.subject ?? "—"} · {c.attempts} answered
+                </p>
               </div>
             ))}
           </div>
@@ -550,4 +772,3 @@ export function AdvancedAnalyticsSection() {
     </div>
   );
 }
-

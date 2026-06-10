@@ -3,31 +3,28 @@ import { useEffect, useState } from "react";
 import { Mail, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { AuthShell } from "@/components/auth/AuthShell";
-import {
-  NeoInput,
-  PasswordInput,
-  NeonButton,
-  FieldLabel,
-} from "@/components/auth/AuthPrimitives";
+import { NeoInput, PasswordInput, NeonButton, FieldLabel } from "@/components/auth/AuthPrimitives";
 import { useAppStore } from "@/stores/app-store";
 import { signInWithEmail } from "@/lib/auth-client";
 import { setRememberMe } from "@/lib/session-timeout";
-
 
 export const Route = createFileRoute("/login")({
   component: StudentLogin,
   head: () => ({
     meta: [
       { title: "Sign In · CA Aspire BD" },
-      { name: "description", content: "Sign in to continue your smart learning journey on CA Aspire BD." },
+      {
+        name: "description",
+        content: "Sign in to continue your smart learning journey on CA Aspire BD.",
+      },
       { property: "og:title", content: "Sign In · CA Aspire BD" },
-      { property: "og:description", content: "Secure access to your AI-personalized study dashboard." },
+      {
+        property: "og:description",
+        content: "Secure access to your AI-personalized study dashboard.",
+      },
     ],
   }),
 });
-
-
-
 
 function StudentLogin() {
   const [pw, setPw] = useState("");
@@ -70,9 +67,6 @@ function StudentLogin() {
     handleSignIn(email, pw);
   };
 
-
-
-
   return (
     <AuthShell variant="student">
       <h2 className="font-display text-3xl font-bold tracking-tight">Welcome back</h2>
@@ -100,7 +94,10 @@ function StudentLogin() {
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <FieldLabel>Password</FieldLabel>
-            <Link to="/forgot-password" className="text-[11px] font-medium text-[var(--neon-purple)] hover:underline">
+            <Link
+              to="/forgot-password"
+              className="text-[11px] font-medium text-[var(--neon-purple)] hover:underline"
+            >
               Forgot password?
             </Link>
           </div>
@@ -108,7 +105,13 @@ function StudentLogin() {
         </div>
 
         <NeonButton type="submit" disabled={loading}>
-          {loading ? "Signing in…" : <>Sign in <ArrowRight className="h-4 w-4" /></>}
+          {loading ? (
+            "Signing in…"
+          ) : (
+            <>
+              Sign in <ArrowRight className="h-4 w-4" />
+            </>
+          )}
         </NeonButton>
 
         <label className="flex cursor-pointer select-none items-center gap-2 text-xs text-muted-foreground">

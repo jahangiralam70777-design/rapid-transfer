@@ -136,7 +136,10 @@ export function trackEvent(input: TrackInput): void {
 
   queue.push(evt);
   if (queue.length >= BATCH_SIZE) {
-    if (timer) { clearTimeout(timer); timer = null; }
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
     void flush();
   } else {
     scheduleFlush();
@@ -169,7 +172,8 @@ export function trackSubmit(form: HTMLFormElement): void {
   trackEvent({
     event_type: "submit",
     element_id: form.id || form.getAttribute("name") || form.getAttribute("data-track") || "form",
-    element_label: form.getAttribute("aria-label") || form.getAttribute("data-track-label") || "form",
+    element_label:
+      form.getAttribute("aria-label") || form.getAttribute("data-track-label") || "form",
     element_role: "form",
     module: inferModuleFromPath(window.location.pathname),
   });
@@ -216,11 +220,15 @@ function findTrackTarget(start: Element): { id: string; label: string; role: str
     const tag = el.tagName?.toLowerCase();
     const role = el.getAttribute?.("role");
     if (dt || tag === "button" || tag === "a" || role === "button") {
-      const text = (el.getAttribute?.("aria-label") ||
+      const text = (
+        el.getAttribute?.("aria-label") ||
         el.getAttribute?.("data-track-label") ||
         (el as HTMLElement).innerText ||
         el.getAttribute?.("title") ||
-        "").replace(/\s+/g, " ").trim();
+        ""
+      )
+        .replace(/\s+/g, " ")
+        .trim();
       return {
         id: dt || el.id || text.slice(0, 40) || tag || "el",
         label: text || dt || tag || "element",

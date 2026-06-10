@@ -43,7 +43,12 @@ export function ThemeInjector() {
   }
   // Radius: numeric → px, string preserved.
   if (theme.radius != null) {
-    const r = typeof theme.radius === "number" ? `${theme.radius}px` : String(theme.radius).replace(/[;{}<>]/g, "").trim();
+    const r =
+      typeof theme.radius === "number"
+        ? `${theme.radius}px`
+        : String(theme.radius)
+            .replace(/[;{}<>]/g, "")
+            .trim();
     if (r) lines.push(`--radius:${r};`);
   }
 

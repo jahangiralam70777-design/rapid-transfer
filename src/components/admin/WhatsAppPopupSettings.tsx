@@ -24,8 +24,11 @@ function coerce(v: unknown): WAPopupValue {
   return {
     enabled: Boolean(o.enabled),
     number: typeof o.number === "string" ? o.number : "",
-    message: typeof o.message === "string" && o.message.length > 0 ? o.message : WHATSAPP_DEFAULTS.message,
-    delay_seconds: Number.isFinite(o.delay_seconds as number) ? Number(o.delay_seconds) : WHATSAPP_DEFAULTS.delay_seconds,
+    message:
+      typeof o.message === "string" && o.message.length > 0 ? o.message : WHATSAPP_DEFAULTS.message,
+    delay_seconds: Number.isFinite(o.delay_seconds as number)
+      ? Number(o.delay_seconds)
+      : WHATSAPP_DEFAULTS.delay_seconds,
   };
 }
 
@@ -151,9 +154,7 @@ export function WhatsAppPopupSettingsPanel() {
               min={0}
               max={60}
               value={form.delay_seconds}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, delay_seconds: Number(e.target.value) }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, delay_seconds: Number(e.target.value) }))}
             />
           </label>
 

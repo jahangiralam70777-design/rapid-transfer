@@ -23,17 +23,12 @@ export const listLevels = createServerFn({ method: "GET" })
     }));
   });
 
-
 // ---- Subjects ----
-const subjectsSchema = z
-  .object({ level: z.string().trim().min(1).max(40).optional() })
-  .partial();
+const subjectsSchema = z.object({ level: z.string().trim().min(1).max(40).optional() }).partial();
 
 export const listSubjects = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof subjectsSchema> | undefined) =>
-    subjectsSchema.parse(i ?? {}),
-  )
+  .inputValidator((i: z.infer<typeof subjectsSchema> | undefined) => subjectsSchema.parse(i ?? {}))
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("subjects")
@@ -65,7 +60,8 @@ export const listSubjectProgress = createServerFn({ method: "POST" })
     const { data: subjects, error: se } = await sq;
     if (se) throw se;
     const subjectIds = (subjects ?? []).map((s) => s.id);
-    if (!subjectIds.length) return [] as Array<{ subject_id: string; total: number; completed: number; percent: number }>;
+    if (!subjectIds.length)
+      return [] as Array<{ subject_id: string; total: number; completed: number; percent: number }>;
     // 2. Chapters under those subjects
     const { data: chapters, error: ce } = await supabase
       .from("chapters")
@@ -131,9 +127,7 @@ const chapterProgressSchema = z.object({ subjectId: z.string().uuid() });
 
 export const listChapterProgress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: z.infer<typeof chapterProgressSchema>) =>
-    chapterProgressSchema.parse(i),
-  )
+  .inputValidator((i: z.infer<typeof chapterProgressSchema>) => chapterProgressSchema.parse(i))
   .handler(async ({ data, context }) => {
     const supabase = context.supabase;
     const userId = context.userId;
@@ -144,7 +138,15 @@ export const listChapterProgress = createServerFn({ method: "POST" })
       .eq("status", "published");
     if (ce) throw ce;
     const chapterIds = (chapters ?? []).map((c) => c.id);
-    if (!chapterIds.length) return [] as Array<{ chapter_id: string; total: number; completed: number; percent: number; correct: number; accuracy: number }>;
+    if (!chapterIds.length)
+      return [] as Array<{
+        chapter_id: string;
+        total: number;
+        completed: number;
+        percent: number;
+        correct: number;
+        accuracy: number;
+      }>;
     const { data: mcqs, error: me } = await supabase
       .from("mcqs")
       .select("id,chapter_id")
@@ -232,7 +234,10 @@ export const listMcqs = createServerFn({ method: "POST" })
     let chapterIds: string[] | null = null;
     if (!data.chapterId) {
       // "All Chapters" mode — gather chapter ids for the subject/level.
-      let cq = sb.from("chapters").select("id,subject_id,subjects!inner(level)").eq("status", "published");
+      let cq = sb
+        .from("chapters")
+        .select("id,subject_id,subjects!inner(level)")
+        .eq("status", "published");
       if (data.subjectId) cq = cq.eq("subject_id", data.subjectId);
       if (data.level) cq = cq.ilike("subjects.level", data.level);
       const { data: cRows, error: cErr } = await cq;
@@ -340,13 +345,21 @@ export const getQuiz = createServerFn({ method: "POST" })
 // ---- Attempts ----
 const submitSchema = z.object({
   quizId: z.string().uuid(),
-  durationSeconds: z.number().int().min(0).max(60 * 60 * 4),
+  durationSeconds: z
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 60 * 4),
   answers: z
     .array(
       z.object({
         mcqId: z.string().uuid(),
         chosen: z.enum(["A", "B", "C", "D"]).nullable(),
-        timeMs: z.number().int().min(0).max(60 * 60 * 1000),
+        timeMs: z
+          .number()
+          .int()
+          .min(0)
+          .max(60 * 60 * 1000),
       }),
     )
     .max(200),
@@ -395,9 +408,7 @@ export const submitAttempt = createServerFn({ method: "POST" })
 
     const total = data.answers.length;
     const score = total === 0 ? 0 : Math.round((correct / total) * 100);
-    const attemptKind = (quizMeta?.kind === "mock" ? "mock" : "quiz") as
-      | "quiz"
-      | "mock";
+    const attemptKind = (quizMeta?.kind === "mock" ? "mock" : "quiz") as "quiz" | "mock";
 
     // attempt_number per quiz for this user
     let attemptNumber = 1;
@@ -461,7 +472,10 @@ export const submitAttempt = createServerFn({ method: "POST" })
           .eq("user_id", userId)
           .in("mcq_id", allIds);
         const existMap = new Map(
-          (existing ?? []).map((r: { mcq_id: string; retry_count: number; mastered: boolean }) => [r.mcq_id, r]),
+          (existing ?? []).map((r: { mcq_id: string; retry_count: number; mastered: boolean }) => [
+            r.mcq_id,
+            r,
+          ]),
         );
         const nowIso = new Date().toISOString();
         for (const a of affected) {
@@ -485,7 +499,9 @@ export const submitAttempt = createServerFn({ method: "POST" })
             { onConflict: "user_id,mcq_id" },
           );
         }
-        const masterIds = correctIds.filter((id) => existMap.has(id) && !existMap.get(id)!.mastered);
+        const masterIds = correctIds.filter(
+          (id) => existMap.has(id) && !existMap.get(id)!.mastered,
+        );
         if (masterIds.length) {
           await supabase
             .from("mcq_wrong_questions")

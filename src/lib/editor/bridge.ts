@@ -1,11 +1,7 @@
 // Secure postMessage bridge between the editor host and the preview iframe.
 // Both sides validate the namespace AND the expected origin before acting.
 
-import {
-  EDITOR_BRIDGE_NAMESPACE,
-  type BridgeCommand,
-  type BridgeMessage,
-} from "./types";
+import { EDITOR_BRIDGE_NAMESPACE, type BridgeCommand, type BridgeMessage } from "./types";
 
 export function isBridgeMessage(data: unknown): data is BridgeMessage {
   if (!data || typeof data !== "object") return false;
@@ -17,11 +13,7 @@ export function isBridgeMessage(data: unknown): data is BridgeMessage {
   );
 }
 
-export function sendBridgeCommand(
-  target: Window,
-  origin: string,
-  command: BridgeCommand,
-) {
+export function sendBridgeCommand(target: Window, origin: string, command: BridgeCommand) {
   const msg: BridgeMessage = { __ns: EDITOR_BRIDGE_NAMESPACE, command };
   target.postMessage(msg, origin);
 }

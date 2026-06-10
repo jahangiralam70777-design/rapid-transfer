@@ -28,7 +28,6 @@ import {
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-
 function timeAgo(iso?: string | null) {
   if (!iso) return "";
   const diff = Date.now() - new Date(iso).getTime();
@@ -56,7 +55,14 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
     .join(" ");
   return (
     <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full">
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        points={pts}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <polyline points={`0,30 ${pts} 100,30`} fill={color} opacity="0.12" />
     </svg>
   );
@@ -89,8 +95,16 @@ export function DashContent() {
   const bars = data?.bars ?? [0, 0, 0, 0, 0, 0, 0];
   const subjects = useMemo(() => {
     const list = data?.subjects ?? [];
-    const palette = ["var(--neon-purple)", "var(--neon-blue)", "var(--neon-pink)", "oklch(0.75 0.15 200)", "oklch(0.7 0.2 140)"];
-    return list.slice(0, 5).map((s, i) => ({ n: s.name, p: s.progress, c: s.color ?? palette[i % palette.length] }));
+    const palette = [
+      "var(--neon-purple)",
+      "var(--neon-blue)",
+      "var(--neon-pink)",
+      "oklch(0.75 0.15 200)",
+      "oklch(0.7 0.2 140)",
+    ];
+    return list
+      .slice(0, 5)
+      .map((s, i) => ({ n: s.name, p: s.progress, c: s.color ?? palette[i % palette.length] }));
   }, [data]);
 
   // Real MCQ-derived numbers (questions, not sessions)
@@ -102,16 +116,50 @@ export function DashContent() {
   const dailyPercent = adv?.goals.daily.percent ?? 0;
 
   const stats = [
-    { i: Flame, l: "Current Streak", v: data?.streak ?? 0, suffix: " days", d: "Keep it going", tone: "var(--neon-pink)" },
-    { i: Target, l: "Accuracy", v: data?.accuracy ?? 0, suffix: "%", d: `${counts?.attempts ?? 0} attempts`, tone: "var(--neon-purple)" },
-    { i: ListChecks, l: "Questions Solved", v: mcqsAnswered, suffix: "", d: `+${mcqsWeek} this week`, tone: "var(--neon-blue)" },
-    { i: Trophy, l: "Mock Tests", v: counts?.mocks ?? 0, suffix: "", d: `+${counts?.mocksThisWeek ?? 0} this week`, tone: "oklch(0.78 0.17 70)" },
-    { i: BookOpen, l: "Quizzes", v: counts?.quizzes ?? 0, suffix: "", d: `${counts?.notes ?? 0} notes ready`, tone: "oklch(0.7 0.2 200)" },
+    {
+      i: Flame,
+      l: "Current Streak",
+      v: data?.streak ?? 0,
+      suffix: " days",
+      d: "Keep it going",
+      tone: "var(--neon-pink)",
+    },
+    {
+      i: Target,
+      l: "Accuracy",
+      v: data?.accuracy ?? 0,
+      suffix: "%",
+      d: `${counts?.attempts ?? 0} attempts`,
+      tone: "var(--neon-purple)",
+    },
+    {
+      i: ListChecks,
+      l: "Questions Solved",
+      v: mcqsAnswered,
+      suffix: "",
+      d: `+${mcqsWeek} this week`,
+      tone: "var(--neon-blue)",
+    },
+    {
+      i: Trophy,
+      l: "Mock Tests",
+      v: counts?.mocks ?? 0,
+      suffix: "",
+      d: `+${counts?.mocksThisWeek ?? 0} this week`,
+      tone: "oklch(0.78 0.17 70)",
+    },
+    {
+      i: BookOpen,
+      l: "Quizzes",
+      v: counts?.quizzes ?? 0,
+      suffix: "",
+      d: `${counts?.notes ?? 0} notes ready`,
+      tone: "oklch(0.7 0.2 200)",
+    },
   ];
 
-  const monthlyPct = dailyTarget > 0
-    ? Math.min(100, Math.round((mcqsMonth / (dailyTarget * 30)) * 100))
-    : 0;
+  const monthlyPct =
+    dailyTarget > 0 ? Math.min(100, Math.round((mcqsMonth / (dailyTarget * 30)) * 100)) : 0;
   const todayPct = dailyPercent;
 
   const recommendations = data?.recommendations ?? [];
@@ -125,9 +173,7 @@ export function DashContent() {
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const startWeekday = (monthStart.getDay() + 6) % 7; // Mon=0
   const activeDays = new Set(
-    (recentActivity ?? [])
-      .map((a) => (a.completed_at ?? "").slice(0, 10))
-      .filter(Boolean),
+    (recentActivity ?? []).map((a) => (a.completed_at ?? "").slice(0, 10)).filter(Boolean),
   );
   const calendarCells: Array<{ d?: number; active?: boolean; isToday?: boolean }> = [];
   for (let i = 0; i < startWeekday; i++) calendarCells.push({});
@@ -147,15 +193,26 @@ export function DashContent() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--neon-purple)] via-[oklch(0.55_0.2_270)] to-[var(--neon-blue)]" />
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/25 blur-3xl animate-float" />
         <div className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-[var(--neon-pink)]/40 blur-3xl animate-float-slow" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.15]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.15]"
+          style={{
+            backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+            backgroundSize: "24px 24px",
+          }}
+        />
 
         <div className="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.4fr_1fr]">
           <div className="text-white">
             <p className="text-xs uppercase tracking-[0.2em] text-white/70">
-              {today.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+              {today.toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
             </p>
             <h1 className="font-display mt-2 text-3xl font-bold sm:text-4xl lg:text-5xl">
-              {greeting()}, {userName.split(" ")[0]} <span className="inline-block animate-float">👋</span>
+              {greeting()}, {userName.split(" ")[0]}{" "}
+              <span className="inline-block animate-float">👋</span>
             </h1>
             <p className="mt-3 max-w-lg text-sm text-white/85 sm:text-base">
               {(data?.streak ?? 0) > 0
@@ -197,7 +254,8 @@ export function DashContent() {
               >
                 <m.i className="h-4 w-4 opacity-80" />
                 <p className="font-display mt-2 text-xl font-bold">
-                  <CountUp value={Number(m.v) || 0} />{m.s}
+                  <CountUp value={Number(m.v) || 0} />
+                  {m.s}
                 </p>
                 <p className="text-[10px] uppercase tracking-wider text-white/70">{m.l}</p>
               </div>
@@ -234,10 +292,7 @@ export function DashContent() {
               {s.suffix}
             </p>
             <div className="mt-2">
-              <Sparkline
-                values={bars}
-                color={s.tone}
-              />
+              <Sparkline values={bars} color={s.tone} />
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">{s.d}</p>
           </div>
@@ -263,7 +318,10 @@ export function DashContent() {
                   </span>
                   <div
                     className="w-full rounded-t-xl bg-gradient-to-t from-[var(--neon-purple)] to-[var(--neon-blue)] transition-all duration-700 group-hover/bar:opacity-90"
-                    style={{ height: `${Math.max(4, h)}%`, boxShadow: "0 -8px 30px -8px var(--neon-purple)" }}
+                    style={{
+                      height: `${Math.max(4, h)}%`,
+                      boxShadow: "0 -8px 30px -8px var(--neon-purple)",
+                    }}
                   />
                 </div>
                 <span className="text-[10px] text-muted-foreground">{days[i]}</span>
@@ -291,9 +349,19 @@ export function DashContent() {
                     <stop offset="100%" stopColor="oklch(0.72 0.2 235)" />
                   </linearGradient>
                 </defs>
-                <circle cx="60" cy="60" r="52" stroke="currentColor" strokeWidth="10" fill="none" className="text-muted/30" />
                 <circle
-                  cx="60" cy="60" r="52"
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  stroke="currentColor"
+                  strokeWidth="10"
+                  fill="none"
+                  className="text-muted/30"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
                   stroke="url(#todayGrad)"
                   strokeWidth="10"
                   fill="none"
@@ -304,21 +372,29 @@ export function DashContent() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="font-display text-3xl font-bold"><CountUp value={todayPct} />%</p>
+                <p className="font-display text-3xl font-bold">
+                  <CountUp value={todayPct} />%
+                </p>
                 <p className="text-[10px] text-muted-foreground">of daily goal</p>
               </div>
             </div>
             <div className="mt-4 grid w-full grid-cols-3 gap-2 text-center">
               <div>
-                <p className="font-display text-sm font-bold"><CountUp value={mcqsToday} /></p>
+                <p className="font-display text-sm font-bold">
+                  <CountUp value={mcqsToday} />
+                </p>
                 <p className="text-[10px] text-muted-foreground">Today</p>
               </div>
               <div>
-                <p className="font-display text-sm font-bold"><CountUp value={data?.streak ?? 0} /></p>
+                <p className="font-display text-sm font-bold">
+                  <CountUp value={data?.streak ?? 0} />
+                </p>
                 <p className="text-[10px] text-muted-foreground">Streak</p>
               </div>
               <div>
-                <p className="font-display text-sm font-bold"><CountUp value={monthlyPct} />%</p>
+                <p className="font-display text-sm font-bold">
+                  <CountUp value={monthlyPct} />%
+                </p>
                 <p className="text-[10px] text-muted-foreground">Month</p>
               </div>
             </div>
@@ -334,10 +410,18 @@ export function DashContent() {
               <h3 className="font-display text-lg font-bold">Subject Performance</h3>
               <p className="text-xs text-muted-foreground">Accuracy by subject · live</p>
             </div>
-            <Link to="/mcq-practice" className="text-xs font-medium text-muted-foreground hover:text-foreground">View all</Link>
+            <Link
+              to="/mcq-practice"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              View all
+            </Link>
           </div>
           <div className="mt-5 space-y-4">
-            {(subjects.length ? subjects : [{ n: "No subjects yet", p: 0, c: "var(--neon-purple)" }]).map((s) => {
+            {(subjects.length
+              ? subjects
+              : [{ n: "No subjects yet", p: 0, c: "var(--neon-purple)" }]
+            ).map((s) => {
               const weak = s.p > 0 && s.p < 60;
               return (
                 <div key={s.n}>
@@ -407,8 +491,13 @@ export function DashContent() {
             ))}
           </div>
           <div className="mt-4 flex items-center gap-3 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--neon-purple)]/60" /> Active</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)]" /> Today</span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-[var(--neon-purple)]/60" /> Active
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[var(--neon-purple)] to-[var(--neon-blue)]" />{" "}
+              Today
+            </span>
           </div>
         </div>
       </section>
@@ -424,29 +513,46 @@ export function DashContent() {
             <div className="relative flex h-full flex-col rounded-[calc(theme(borderRadius.3xl)-1px)] bg-background/90 p-5 backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Upcoming Mock</p>
-                  <h3 className="font-display mt-1 text-lg font-bold line-clamp-1">{upcoming?.title ?? "No mock scheduled"}</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Upcoming Mock
+                  </p>
+                  <h3 className="font-display mt-1 text-lg font-bold line-clamp-1">
+                    {upcoming?.title ?? "No mock scheduled"}
+                  </h3>
                 </div>
                 <Clock className="h-5 w-5 text-[var(--neon-purple)]" />
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <div className="glass rounded-xl py-2 text-center">
-                  <p className="font-display text-lg font-bold text-gradient">{upcoming?.total_questions ?? 0}</p>
-                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Questions</p>
+                  <p className="font-display text-lg font-bold text-gradient">
+                    {upcoming?.total_questions ?? 0}
+                  </p>
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                    Questions
+                  </p>
                 </div>
                 <div className="glass rounded-xl py-2 text-center">
-                  <p className="font-display text-lg font-bold text-gradient">{Math.round((upcoming?.duration_seconds ?? 0) / 60)}</p>
-                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Minutes</p>
+                  <p className="font-display text-lg font-bold text-gradient">
+                    {Math.round((upcoming?.duration_seconds ?? 0) / 60)}
+                  </p>
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                    Minutes
+                  </p>
                 </div>
               </div>
 
               <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                <p>· <CountUp value={counts?.mocks ?? 0} /> mocks available</p>
+                <p>
+                  · <CountUp value={counts?.mocks ?? 0} /> mocks available
+                </p>
                 <p>· Updated {timeAgo(upcoming?.created_at)}</p>
               </div>
 
-              <Link to="/mock-test" className="bg-cta-gradient mt-auto inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]">
+              <Link
+                to="/mock-test"
+                className="bg-cta-gradient mt-auto inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]"
+              >
                 Join Mock Test <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -462,21 +568,28 @@ export function DashContent() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </div>
           <ul className="mt-4 space-y-2">
-            {recentActivity.length ? recentActivity.slice(0, 5).map((a, idx) => (
-              <li key={a.id} className="relative flex items-start gap-3 rounded-xl bg-background/40 p-3 text-xs">
-                <div className="bg-cta-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white shadow-glow">
-                  <Trophy className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">Attempt · {a.correct}/{a.total}</p>
-                  <p className="text-[10px] text-muted-foreground">{timeAgo(a.completed_at)}</p>
-                </div>
-                <span className="font-display text-sm font-bold text-gradient">{a.score}%</span>
-                {idx < Math.min(4, recentActivity.length - 1) && (
-                  <span className="absolute left-[27px] top-12 h-2 w-px bg-border" />
-                )}
-              </li>
-            )) : (
+            {recentActivity.length ? (
+              recentActivity.slice(0, 5).map((a, idx) => (
+                <li
+                  key={a.id}
+                  className="relative flex items-start gap-3 rounded-xl bg-background/40 p-3 text-xs"
+                >
+                  <div className="bg-cta-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white shadow-glow">
+                    <Trophy className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">
+                      Attempt · {a.correct}/{a.total}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">{timeAgo(a.completed_at)}</p>
+                  </div>
+                  <span className="font-display text-sm font-bold text-gradient">{a.score}%</span>
+                  {idx < Math.min(4, recentActivity.length - 1) && (
+                    <span className="absolute left-[27px] top-12 h-2 w-px bg-border" />
+                  )}
+                </li>
+              ))
+            ) : (
               <li className="text-xs text-muted-foreground">No activity yet.</li>
             )}
           </ul>
@@ -489,7 +602,12 @@ export function DashContent() {
           </div>
           <ul className="mt-4 space-y-3">
             {liveNotifications.slice(0, 4).map((n) => {
-              const tone = n.priority === "high" ? "var(--neon-pink)" : n.priority === "low" ? "var(--neon-blue)" : "var(--neon-purple)";
+              const tone =
+                n.priority === "high"
+                  ? "var(--neon-pink)"
+                  : n.priority === "low"
+                    ? "var(--neon-blue)"
+                    : "var(--neon-purple)";
               return (
                 <li key={n.id} className="flex items-start gap-3 rounded-xl bg-background/40 p-3">
                   <span
@@ -498,7 +616,9 @@ export function DashContent() {
                   />
                   <div className="min-w-0">
                     <p className="text-xs font-medium line-clamp-2">{n.title}</p>
-                    <p className="text-[10px] text-muted-foreground">{timeAgo(n.sent_at ?? n.created_at)}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {timeAgo(n.sent_at ?? n.created_at)}
+                    </p>
                   </div>
                 </li>
               );
@@ -507,7 +627,10 @@ export function DashContent() {
               <li className="text-xs text-muted-foreground">No notifications yet.</li>
             )}
           </ul>
-          <Link to="/notifications" className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-border bg-background/40 py-2 text-xs font-semibold transition-colors hover:bg-muted">
+          <Link
+            to="/notifications"
+            className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-border bg-background/40 py-2 text-xs font-semibold transition-colors hover:bg-muted"
+          >
             View all
           </Link>
         </div>
@@ -518,31 +641,32 @@ export function DashContent() {
             <Sparkles className="h-4 w-4 text-[var(--neon-purple)]" />
           </div>
           <div className="mt-4 space-y-2">
-            {recommendations.length ? recommendations.slice(0, 4).map((r) => (
-              <Link
-                key={r.id}
-                to="/quiz"
-                className="glass group flex items-center justify-between rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:shadow-glow"
-              >
-                <div className="min-w-0">
-                  <p className="font-display text-sm font-bold line-clamp-1">{r.title}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {r.total_questions} Qs · {Math.round((r.duration_seconds ?? 0) / 60)} min · {r.difficulty}
-                  </p>
-                </div>
-                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            )) : (
+            {recommendations.length ? (
+              recommendations.slice(0, 4).map((r) => (
+                <Link
+                  key={r.id}
+                  to="/quiz"
+                  className="glass group flex items-center justify-between rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:shadow-glow"
+                >
+                  <div className="min-w-0">
+                    <p className="font-display text-sm font-bold line-clamp-1">{r.title}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {r.total_questions} Qs · {Math.round((r.duration_seconds ?? 0) / 60)} min ·{" "}
+                      {r.difficulty}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              ))
+            ) : (
               <p className="text-xs text-muted-foreground">No recommendations yet.</p>
             )}
           </div>
         </div>
       </section>
 
-
       {/* ============ COMPLETION TRACKER (existing) ============ */}
       <CompletionTracker />
-
     </div>
   );
 }

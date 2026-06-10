@@ -3,12 +3,7 @@ import { useState } from "react";
 import { Mail, ShieldCheck, Lock, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { AuthShell } from "@/components/auth/AuthShell";
-import {
-  NeoInput,
-  PasswordInput,
-  NeonButton,
-  FieldLabel,
-} from "@/components/auth/AuthPrimitives";
+import { NeoInput, PasswordInput, NeonButton, FieldLabel } from "@/components/auth/AuthPrimitives";
 import { useAppStore } from "@/stores/app-store";
 import { signInWithEmail, signOut } from "@/lib/auth-client";
 
@@ -74,7 +69,13 @@ function AdminLogin() {
       <form className="mt-4 space-y-4" onSubmit={onSubmit}>
         <div>
           <FieldLabel>Admin email</FieldLabel>
-          <NeoInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@caaspirebd.com" icon={<Mail className="h-4 w-4" />} />
+          <NeoInput
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@caaspirebd.com"
+            icon={<Mail className="h-4 w-4" />}
+          />
         </div>
         <div>
           <FieldLabel>Password</FieldLabel>

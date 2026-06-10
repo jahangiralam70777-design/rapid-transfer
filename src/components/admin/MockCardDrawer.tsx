@@ -2,26 +2,64 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Loader2, Search, Download, CheckCircle2, ArrowLeft, ExternalLink,
-  Activity, FileSpreadsheet, FileText, ChevronDown,
-  PlayCircle, Trophy, Pencil, Plus,
+  Loader2,
+  Search,
+  Download,
+  CheckCircle2,
+  ArrowLeft,
+  ExternalLink,
+  Activity,
+  FileSpreadsheet,
+  FileText,
+  ChevronDown,
+  PlayCircle,
+  Trophy,
+  Pencil,
+  Plus,
 } from "lucide-react";
 import {
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend, RadialBarChart, RadialBar,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  RadialBarChart,
+  RadialBar,
 } from "recharts";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -37,35 +75,59 @@ import {
 } from "@/lib/admin-mock.functions";
 
 export type MockCardKey =
-  | "total" | "published" | "drafts" | "scheduled" | "live" | "archived"
-  | "attempts" | "completion" | "avgQuestions" | "topStatus" | "liveMocks";
+  | "total"
+  | "published"
+  | "drafts"
+  | "scheduled"
+  | "live"
+  | "archived"
+  | "attempts"
+  | "completion"
+  | "avgQuestions"
+  | "topStatus"
+  | "liveMocks";
 
 const TITLES: Record<MockCardKey, { title: string; description: string }> = {
-  total:         { title: "All mock tests",        description: "Every mock in the library with search and quick actions." },
-  published:     { title: "Published mocks",       description: "Currently live in the catalog with publish dates." },
-  drafts:        { title: "Draft mocks",           description: "In-progress mocks awaiting review or publish." },
-  scheduled:     { title: "Scheduled mocks",       description: "Mocks with an upcoming start window." },
-  live:          { title: "Live now",              description: "Published mocks inside their active window." },
-  archived:      { title: "Archived mocks",        description: "Retired mocks — restore or audit history." },
-  attempts:      { title: "Attempts overview",     description: "Real attempts pulled from exam_attempts." },
-  completion:    { title: "Completion rate",       description: "Completed vs. abandoned mock attempts." },
-  avgQuestions:  { title: "Question distribution", description: "How many questions each mock carries." },
-  topStatus:     { title: "Status breakdown",      description: "Library composition by publish status." },
-  liveMocks:     { title: "Live mocks",            description: "Active mocks running right now." },
+  total: {
+    title: "All mock tests",
+    description: "Every mock in the library with search and quick actions.",
+  },
+  published: {
+    title: "Published mocks",
+    description: "Currently live in the catalog with publish dates.",
+  },
+  drafts: { title: "Draft mocks", description: "In-progress mocks awaiting review or publish." },
+  scheduled: { title: "Scheduled mocks", description: "Mocks with an upcoming start window." },
+  live: { title: "Live now", description: "Published mocks inside their active window." },
+  archived: { title: "Archived mocks", description: "Retired mocks — restore or audit history." },
+  attempts: { title: "Attempts overview", description: "Real attempts pulled from exam_attempts." },
+  completion: { title: "Completion rate", description: "Completed vs. abandoned mock attempts." },
+  avgQuestions: {
+    title: "Question distribution",
+    description: "How many questions each mock carries.",
+  },
+  topStatus: { title: "Status breakdown", description: "Library composition by publish status." },
+  liveMocks: { title: "Live mocks", description: "Active mocks running right now." },
 };
 
 type Row = {
-  id: string; title: string; status: string; level: string;
-  total_questions: number; duration_seconds: number;
-  starts_at: string | null; ends_at: string | null; updated_at: string;
+  id: string;
+  title: string;
+  status: string;
+  level: string;
+  total_questions: number;
+  duration_seconds: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  updated_at: string;
 };
 
 const CHART_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#f43f5e", "#06b6d4"];
 
 function statusTone(s: string) {
   if (s === "published") return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-  if (s === "draft")     return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-  if (s === "archived")  return "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
+  if (s === "draft") return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+  if (s === "archived") return "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
   return "bg-muted text-foreground";
 }
 
@@ -75,7 +137,9 @@ function exportCsv(filename: string, header: string[], rows: (string | number)[]
     .join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
+  a.href = url;
+  a.download = filename;
+  a.click();
   URL.revokeObjectURL(url);
 }
 function exportXlsx(filename: string, header: string[], rows: (string | number)[][]) {
@@ -100,8 +164,16 @@ function exportPdf(filename: string, title: string, header: string[], rows: (str
   doc.save(filename);
 }
 
-function ExportMenu({ baseName, title, header, rows }: {
-  baseName: string; title: string; header: string[]; rows: (string | number)[][];
+function ExportMenu({
+  baseName,
+  title,
+  header,
+  rows,
+}: {
+  baseName: string;
+  title: string;
+  header: string[];
+  rows: (string | number)[][];
 }) {
   return (
     <DropdownMenu>
@@ -145,12 +217,18 @@ function useMockRealtimePulse(enabled: boolean, invalidateKeys: string[]) {
         setPulse(Date.now());
         for (const k of keysRef.current) qc.invalidateQueries({ queryKey: [k] });
       })
-      .on("postgres_changes" as never, { event: "*", schema: "public", table: "exam_attempts" }, () => {
-        setPulse(Date.now());
-        for (const k of keysRef.current) qc.invalidateQueries({ queryKey: [k] });
-      })
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "exam_attempts" },
+        () => {
+          setPulse(Date.now());
+          for (const k of keysRef.current) qc.invalidateQueries({ queryKey: [k] });
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [enabled, qc]);
   return pulse;
 }
@@ -182,10 +260,15 @@ function ActivityFeed({ quizId }: { quizId?: string }) {
   });
   const events = data?.events ?? [];
   const iconFor = (k: string) =>
-    k === "completed" ? <Trophy className="h-3.5 w-3.5 text-emerald-400" /> :
-    k === "started"   ? <PlayCircle className="h-3.5 w-3.5 text-blue-400" /> :
-    k === "created"   ? <Plus className="h-3.5 w-3.5 text-violet-400" /> :
-                        <Pencil className="h-3.5 w-3.5 text-amber-400" />;
+    k === "completed" ? (
+      <Trophy className="h-3.5 w-3.5 text-emerald-400" />
+    ) : k === "started" ? (
+      <PlayCircle className="h-3.5 w-3.5 text-blue-400" />
+    ) : k === "created" ? (
+      <Plus className="h-3.5 w-3.5 text-violet-400" />
+    ) : (
+      <Pencil className="h-3.5 w-3.5 text-amber-400" />
+    );
   return (
     <div className="rounded-xl border border-white/10 bg-background/40">
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
@@ -197,11 +280,17 @@ function ActivityFeed({ quizId }: { quizId?: string }) {
           title="Mock test activity"
           header={["Time", "Event", "Actor", "Target", "Details"]}
           rows={events.map((e) => [
-            new Date(e.at).toLocaleString(), e.kind, e.actor, e.target, e.meta,
+            new Date(e.at).toLocaleString(),
+            e.kind,
+            e.actor,
+            e.target,
+            e.meta,
           ])}
         />
       </div>
-      {isLoading ? <LoadingRow /> : events.length === 0 ? (
+      {isLoading ? (
+        <LoadingRow />
+      ) : events.length === 0 ? (
         <Empty message="No activity recorded yet." />
       ) : (
         <ul className="max-h-[320px] divide-y divide-white/5 overflow-y-auto">
@@ -227,23 +316,36 @@ function ActivityFeed({ quizId }: { quizId?: string }) {
 }
 
 export function MockCardDrawer({
-  cardKey, open, onClose,
-}: { cardKey: MockCardKey | null; open: boolean; onClose: () => void }) {
+  cardKey,
+  open,
+  onClose,
+}: {
+  cardKey: MockCardKey | null;
+  open: boolean;
+  onClose: () => void;
+}) {
   const [drilledMockId, setDrilledMockId] = useState<string | null>(null);
   return (
     <Sheet open={open} onOpenChange={(o) => !o && (setDrilledMockId(null), onClose())}>
       <SheetContent side="right" className="w-full overflow-hidden p-0 sm:max-w-2xl lg:max-w-3xl">
-        {cardKey && (
-          drilledMockId
-            ? <MockDetailView quizId={drilledMockId} onBack={() => setDrilledMockId(null)} />
-            : <DrawerBody cardKey={cardKey} onDrillMock={setDrilledMockId} />
-        )}
+        {cardKey &&
+          (drilledMockId ? (
+            <MockDetailView quizId={drilledMockId} onBack={() => setDrilledMockId(null)} />
+          ) : (
+            <DrawerBody cardKey={cardKey} onDrillMock={setDrilledMockId} />
+          ))}
       </SheetContent>
     </Sheet>
   );
 }
 
-function DrawerBody({ cardKey, onDrillMock }: { cardKey: MockCardKey; onDrillMock: (id: string) => void }) {
+function DrawerBody({
+  cardKey,
+  onDrillMock,
+}: {
+  cardKey: MockCardKey;
+  onDrillMock: (id: string) => void;
+}) {
   const meta = TITLES[cardKey];
   return (
     <div className="flex h-full flex-col">
@@ -253,17 +355,29 @@ function DrawerBody({ cardKey, onDrillMock }: { cardKey: MockCardKey; onDrillMoc
       </SheetHeader>
       <ScrollArea className="flex-1">
         <div className="px-6 py-4">
-          {cardKey === "total"      && <MockListView preset={{}}                          onDrillMock={onDrillMock} />}
-          {cardKey === "published"  && <MockListView preset={{ status: "published" }}     onDrillMock={onDrillMock} />}
-          {cardKey === "drafts"     && <MockListView preset={{ status: "draft" }}         onDrillMock={onDrillMock} />}
-          {cardKey === "scheduled"  && <MockListView preset={{ date: "upcoming" }}        onDrillMock={onDrillMock} />}
-          {cardKey === "archived"   && <MockListView preset={{ status: "archived" }}      onDrillMock={onDrillMock} />}
-          {cardKey === "live"       && <LiveMocksView onDrillMock={onDrillMock} />}
-          {cardKey === "liveMocks"  && <LiveMocksView onDrillMock={onDrillMock} />}
-          {cardKey === "attempts"   && <AttemptsView onDrillMock={onDrillMock} />}
-          {cardKey === "completion" && <AttemptsView focus="completion" onDrillMock={onDrillMock} />}
-          {cardKey === "avgQuestions" && <BreakdownView focus="questions" onDrillMock={onDrillMock} />}
-          {cardKey === "topStatus"  && <BreakdownView focus="status"    onDrillMock={onDrillMock} />}
+          {cardKey === "total" && <MockListView preset={{}} onDrillMock={onDrillMock} />}
+          {cardKey === "published" && (
+            <MockListView preset={{ status: "published" }} onDrillMock={onDrillMock} />
+          )}
+          {cardKey === "drafts" && (
+            <MockListView preset={{ status: "draft" }} onDrillMock={onDrillMock} />
+          )}
+          {cardKey === "scheduled" && (
+            <MockListView preset={{ date: "upcoming" }} onDrillMock={onDrillMock} />
+          )}
+          {cardKey === "archived" && (
+            <MockListView preset={{ status: "archived" }} onDrillMock={onDrillMock} />
+          )}
+          {cardKey === "live" && <LiveMocksView onDrillMock={onDrillMock} />}
+          {cardKey === "liveMocks" && <LiveMocksView onDrillMock={onDrillMock} />}
+          {cardKey === "attempts" && <AttemptsView onDrillMock={onDrillMock} />}
+          {cardKey === "completion" && (
+            <AttemptsView focus="completion" onDrillMock={onDrillMock} />
+          )}
+          {cardKey === "avgQuestions" && (
+            <BreakdownView focus="questions" onDrillMock={onDrillMock} />
+          )}
+          {cardKey === "topStatus" && <BreakdownView focus="status" onDrillMock={onDrillMock} />}
         </div>
       </ScrollArea>
     </div>
@@ -275,14 +389,21 @@ type Preset = {
   date?: "all" | "scheduled" | "unscheduled" | "upcoming" | "expired";
 };
 
-function MockListView({ preset, onDrillMock }: { preset: Preset; onDrillMock: (id: string) => void }) {
+function MockListView({
+  preset,
+  onDrillMock,
+}: {
+  preset: Preset;
+  onDrillMock: (id: string) => void;
+}) {
   const [search, setSearch] = useState("");
   const listFn = useServerFn(adminListMocks);
   const { data, isLoading } = useQuery({
     queryKey: ["mock-card-list", preset, search],
-    queryFn: () => listFn({
-      data: { ...preset, search: search || undefined, pageSize: 50, page: 1 },
-    }),
+    queryFn: () =>
+      listFn({
+        data: { ...preset, search: search || undefined, pageSize: 50, page: 1 },
+      }),
   });
   const rows = (data?.rows ?? []) as Row[];
 
@@ -302,11 +423,25 @@ function MockListView({ preset, onDrillMock }: { preset: Preset; onDrillMock: (i
         <ExportMenu
           baseName={`mocks-${preset.status ?? preset.date ?? "all"}`}
           title={`Mocks · ${preset.status ?? preset.date ?? "all"}`}
-          header={["Title", "Status", "Level", "Questions", "Duration (min)", "Starts", "Ends", "Updated"]}
+          header={[
+            "Title",
+            "Status",
+            "Level",
+            "Questions",
+            "Duration (min)",
+            "Starts",
+            "Ends",
+            "Updated",
+          ]}
           rows={rows.map((r) => [
-            r.title, r.status, r.level, r.total_questions,
+            r.title,
+            r.status,
+            r.level,
+            r.total_questions,
             Math.round(r.duration_seconds / 60),
-            r.starts_at ?? "", r.ends_at ?? "", r.updated_at,
+            r.starts_at ?? "",
+            r.ends_at ?? "",
+            r.updated_at,
           ])}
         />
       </div>
@@ -316,8 +451,14 @@ function MockListView({ preset, onDrillMock }: { preset: Preset; onDrillMock: (i
   );
 }
 
-function MockTable({ rows, isLoading, onRowClick }: {
-  rows: Row[]; isLoading: boolean; onRowClick?: (id: string) => void;
+function MockTable({
+  rows,
+  isLoading,
+  onRowClick,
+}: {
+  rows: Row[];
+  isLoading: boolean;
+  onRowClick?: (id: string) => void;
 }) {
   if (isLoading) return <LoadingRow />;
   if (!rows.length) return <Empty message="No mocks match this view yet." />;
@@ -341,15 +482,20 @@ function MockTable({ rows, isLoading, onRowClick }: {
               className={onRowClick ? "cursor-pointer hover:bg-white/[0.03]" : undefined}
             >
               <TableCell className="max-w-[220px] truncate font-medium">
-                <div className="flex items-center gap-2">{r.title}
+                <div className="flex items-center gap-2">
+                  {r.title}
                   {onRowClick && <ExternalLink className="h-3 w-3 text-muted-foreground" />}
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className={statusTone(r.status)}>{r.status}</Badge>
+                <Badge variant="outline" className={statusTone(r.status)}>
+                  {r.status}
+                </Badge>
               </TableCell>
               <TableCell className="text-right tabular-nums">{r.total_questions}</TableCell>
-              <TableCell className="text-right tabular-nums">{Math.round(r.duration_seconds / 60)}</TableCell>
+              <TableCell className="text-right tabular-nums">
+                {Math.round(r.duration_seconds / 60)}
+              </TableCell>
               <TableCell className="text-xs text-muted-foreground">
                 {r.starts_at ? new Date(r.starts_at).toLocaleString() : "—"}
                 {r.ends_at ? ` → ${new Date(r.ends_at).toLocaleString()}` : ""}
@@ -380,9 +526,13 @@ function LiveMocksView({ onDrillMock }: { onDrillMock: (id: string) => void }) {
           title="Live mocks"
           header={["Title", "Status", "Level", "Questions", "Duration (min)", "Starts", "Ends"]}
           rows={rows.map((r) => [
-            r.title, r.status, r.level, r.total_questions,
+            r.title,
+            r.status,
+            r.level,
+            r.total_questions,
             Math.round(r.duration_seconds / 60),
-            r.starts_at ?? "", r.ends_at ?? "",
+            r.starts_at ?? "",
+            r.ends_at ?? "",
           ])}
         />
       </div>
@@ -408,7 +558,13 @@ function RangeTabs({ value, onChange }: { value: number; onChange: (n: number) =
   );
 }
 
-function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMock: (id: string) => void }) {
+function AttemptsView({
+  focus,
+  onDrillMock,
+}: {
+  focus?: "completion";
+  onDrillMock: (id: string) => void;
+}) {
   const [rangeDays, setRangeDays] = useState(30);
   const fn = useServerFn(adminMockAttemptsOverview);
   const { data, isLoading } = useQuery({
@@ -438,7 +594,6 @@ function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMoc
         />
       </div>
 
-
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="Total attempts" value={data.totalAttempts} />
         <Stat label="Completed" value={data.completed} accent="emerald" />
@@ -457,9 +612,19 @@ function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMoc
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-              <XAxis dataKey="day" tick={{ fontSize: 10, fill: "#94a3b8" }} hide={data.daily.length > 30} />
+              <XAxis
+                dataKey="day"
+                tick={{ fontSize: 10, fill: "#94a3b8" }}
+                hide={data.daily.length > 30}
+              />
               <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-              <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+              <Tooltip
+                contentStyle={{
+                  background: "#0b1020",
+                  border: "1px solid #ffffff20",
+                  borderRadius: 8,
+                }}
+              />
               <Area type="monotone" dataKey="count" stroke="#8b5cf6" fill="url(#atGrad)" />
               <Area type="monotone" dataKey="completed" stroke="#10b981" fill="transparent" />
             </AreaChart>
@@ -469,10 +634,25 @@ function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMoc
         <ChartCard title="Completion split">
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={completionPieData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
-                {completionPieData.map((_e, i) => <Cell key={i} fill={i === 0 ? "#10b981" : "#f43f5e"} />)}
+              <Pie
+                data={completionPieData}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={50}
+                outerRadius={80}
+                paddingAngle={2}
+              >
+                {completionPieData.map((_e, i) => (
+                  <Cell key={i} fill={i === 0 ? "#10b981" : "#f43f5e"} />
+                ))}
               </Pie>
-              <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+              <Tooltip
+                contentStyle={{
+                  background: "#0b1020",
+                  border: "1px solid #ffffff20",
+                  borderRadius: 8,
+                }}
+              />
               <Legend wrapperStyle={{ fontSize: 11 }} />
             </PieChart>
           </ResponsiveContainer>
@@ -485,15 +665,25 @@ function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMoc
             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
             <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} />
             <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-            <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+            <Tooltip
+              contentStyle={{
+                background: "#0b1020",
+                border: "1px solid #ffffff20",
+                borderRadius: 8,
+              }}
+            />
             <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
 
       <div>
-        <p className="mb-2 text-xs font-semibold text-muted-foreground">Top mocks by attempts — click to drill in</p>
-        {data.topMocks.length === 0 ? <Empty message="No attempts yet." /> : (
+        <p className="mb-2 text-xs font-semibold text-muted-foreground">
+          Top mocks by attempts — click to drill in
+        </p>
+        {data.topMocks.length === 0 ? (
+          <Empty message="No attempts yet." />
+        ) : (
           <div className="overflow-hidden rounded-xl border border-white/10">
             <Table>
               <TableHeader>
@@ -511,7 +701,8 @@ function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMoc
                     className={m.id ? "cursor-pointer hover:bg-white/[0.03]" : "opacity-60"}
                   >
                     <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">{m.title}
+                      <div className="flex items-center gap-2">
+                        {m.title}
                         {m.id && <ExternalLink className="h-3 w-3 text-muted-foreground" />}
                       </div>
                     </TableCell>
@@ -529,7 +720,13 @@ function AttemptsView({ focus, onDrillMock }: { focus?: "completion"; onDrillMoc
   );
 }
 
-function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; onDrillMock: (id: string) => void }) {
+function BreakdownView({
+  focus,
+  onDrillMock,
+}: {
+  focus: "status" | "questions";
+  onDrillMock: (id: string) => void;
+}) {
   const fn = useServerFn(adminMockBreakdowns);
   const { data, isLoading } = useQuery({
     queryKey: ["mock-card-breakdowns"],
@@ -550,10 +747,24 @@ function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; 
           <ChartCard title="By status">
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={data.byStatus} dataKey="count" nameKey="label" innerRadius={48} outerRadius={80}>
-                  {data.byStatus.map((_e, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                <Pie
+                  data={data.byStatus}
+                  dataKey="count"
+                  nameKey="label"
+                  innerRadius={48}
+                  outerRadius={80}
+                >
+                  {data.byStatus.map((_e, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#0b1020",
+                    border: "1px solid #ffffff20",
+                    borderRadius: 8,
+                  }}
+                />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
@@ -563,8 +774,19 @@ function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; 
               <BarChart data={data.byLevel} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                 <XAxis type="number" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <YAxis type="category" dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} width={100} />
-                <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                <YAxis
+                  type="category"
+                  dataKey="label"
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  width={100}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "#0b1020",
+                    border: "1px solid #ffffff20",
+                    borderRadius: 8,
+                  }}
+                />
                 <Bar dataKey="count" fill="#3b82f6" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -575,7 +797,13 @@ function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; 
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#0b1020",
+                    border: "1px solid #ffffff20",
+                    borderRadius: 8,
+                  }}
+                />
                 <Bar dataKey="count" fill="#10b981" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -589,7 +817,13 @@ function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; 
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#0b1020",
+                    border: "1px solid #ffffff20",
+                    borderRadius: 8,
+                  }}
+                />
                 <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -597,16 +831,32 @@ function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; 
           <ChartCard title="By difficulty">
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
-                <Pie data={data.byDifficulty} dataKey="count" nameKey="label" innerRadius={42} outerRadius={72}>
-                  {data.byDifficulty.map((_e, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                <Pie
+                  data={data.byDifficulty}
+                  dataKey="count"
+                  nameKey="label"
+                  innerRadius={42}
+                  outerRadius={72}
+                >
+                  {data.byDifficulty.map((_e, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "#0b1020",
+                    border: "1px solid #ffffff20",
+                    borderRadius: 8,
+                  }}
+                />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
           </ChartCard>
           <div>
-            <p className="mb-2 text-xs font-semibold text-muted-foreground">Largest mocks — click to open</p>
+            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+              Largest mocks — click to open
+            </p>
             <div className="overflow-hidden rounded-xl border border-white/10">
               <Table>
                 <TableHeader>
@@ -618,13 +868,22 @@ function BreakdownView({ focus, onDrillMock }: { focus: "status" | "questions"; 
                 </TableHeader>
                 <TableBody>
                   {data.largest.map((r) => (
-                    <TableRow key={r.id} onClick={() => onDrillMock(r.id)} className="cursor-pointer hover:bg-white/[0.03]">
+                    <TableRow
+                      key={r.id}
+                      onClick={() => onDrillMock(r.id)}
+                      className="cursor-pointer hover:bg-white/[0.03]"
+                    >
                       <TableCell className="max-w-[260px] truncate font-medium">
-                        <div className="flex items-center gap-2">{r.title}
+                        <div className="flex items-center gap-2">
+                          {r.title}
                           <ExternalLink className="h-3 w-3 text-muted-foreground" />
                         </div>
                       </TableCell>
-                      <TableCell><Badge variant="outline" className={statusTone(r.status)}>{r.status}</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={statusTone(r.status)}>
+                          {r.status}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right tabular-nums">{r.total_questions}</TableCell>
                     </TableRow>
                   ))}
@@ -668,13 +927,19 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
           <SheetTitle className="font-display text-xl flex-1 truncate">
             {mock?.title ?? "Mock detail"}
           </SheetTitle>
-          {mock && <Badge variant="outline" className={statusTone(mock.status)}>{mock.status}</Badge>}
+          {mock && (
+            <Badge variant="outline" className={statusTone(mock.status)}>
+              {mock.status}
+            </Badge>
+          )}
         </div>
         <SheetDescription>Real-time analytics for this mock from exam_attempts.</SheetDescription>
       </SheetHeader>
       <ScrollArea className="flex-1">
         <div className="space-y-4 px-6 py-4">
-          {isLoading || !data ? <LoadingRow /> : (
+          {isLoading || !data ? (
+            <LoadingRow />
+          ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -689,23 +954,40 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
                 />
               </div>
 
-
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <Stat label="Attempts" value={data.stats.totalAttempts} />
                 <Stat label="Completed" value={data.stats.completed} accent="emerald" />
                 <Stat label="Avg score" value={data.stats.avgScore} suffix="%" />
-                <Stat label="Avg time" value={Math.round(data.stats.avgDurationSeconds / 60)} suffix="m" />
+                <Stat
+                  label="Avg time"
+                  value={Math.round(data.stats.avgDurationSeconds / 60)}
+                  suffix="m"
+                />
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
                 <ChartCard title="Completion rate">
                   <ResponsiveContainer width="100%" height={180}>
-                    <RadialBarChart innerRadius="60%" outerRadius="100%" data={completionGauge} startAngle={90} endAngle={-270}>
+                    <RadialBarChart
+                      innerRadius="60%"
+                      outerRadius="100%"
+                      data={completionGauge}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
                       <RadialBar background dataKey="value" cornerRadius={10} />
-                      <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#0b1020",
+                          border: "1px solid #ffffff20",
+                          borderRadius: 8,
+                        }}
+                      />
                     </RadialBarChart>
                   </ResponsiveContainer>
-                  <p className="text-center font-display text-xl font-bold -mt-10">{data.stats.completionRate}%</p>
+                  <p className="text-center font-display text-xl font-bold -mt-10">
+                    {data.stats.completionRate}%
+                  </p>
                 </ChartCard>
                 <ChartCard title="Score distribution">
                   <ResponsiveContainer width="100%" height={180}>
@@ -713,7 +995,13 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                       <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} />
                       <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                      <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#0b1020",
+                          border: "1px solid #ffffff20",
+                          borderRadius: 8,
+                        }}
+                      />
                       <Bar dataKey="count" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -724,14 +1012,52 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={data.daily}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                    <XAxis dataKey="day" tick={{ fontSize: 10, fill: "#94a3b8" }} hide={data.daily.length > 30} />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 10, fill: "#94a3b8" }}
+                      hide={data.daily.length > 30}
+                    />
                     <YAxis yAxisId="l" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                    <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                    <Tooltip contentStyle={{ background: "#0b1020", border: "1px solid #ffffff20", borderRadius: 8 }} />
+                    <YAxis
+                      yAxisId="r"
+                      orientation="right"
+                      tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0b1020",
+                        border: "1px solid #ffffff20",
+                        borderRadius: 8,
+                      }}
+                    />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Line yAxisId="l" type="monotone" dataKey="count" stroke="#8b5cf6" name="Attempts" strokeWidth={2} dot={false} />
-                    <Line yAxisId="l" type="monotone" dataKey="completed" stroke="#10b981" name="Completed" strokeWidth={2} dot={false} />
-                    <Line yAxisId="r" type="monotone" dataKey="avgScore" stroke="#f59e0b" name="Avg score" strokeWidth={2} dot={false} />
+                    <Line
+                      yAxisId="l"
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#8b5cf6"
+                      name="Attempts"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
+                      yAxisId="l"
+                      type="monotone"
+                      dataKey="completed"
+                      stroke="#10b981"
+                      name="Completed"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
+                      yAxisId="r"
+                      type="monotone"
+                      dataKey="avgScore"
+                      stroke="#f59e0b"
+                      name="Avg score"
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -744,11 +1070,18 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
                       baseName={`mock-${quizId}-top-scorers`}
                       title="Top scorers"
                       header={["User", "Best %", "Attempts", "Last"]}
-                      rows={data.topScorers.map((u) => [u.name, u.score, u.attempts, u.lastAt ?? ""])}
+                      rows={data.topScorers.map((u) => [
+                        u.name,
+                        u.score,
+                        u.attempts,
+                        u.lastAt ?? "",
+                      ])}
                     />
                   )}
                 </div>
-                {data.topScorers.length === 0 ? <Empty message="No scorers yet." /> : (
+                {data.topScorers.length === 0 ? (
+                  <Empty message="No scorers yet." />
+                ) : (
                   <div className="overflow-hidden rounded-xl border border-white/10">
                     <Table>
                       <TableHeader>
@@ -785,13 +1118,19 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
                       title="Recent attempts"
                       header={["User", "Status", "Score", "Duration (s)", "Started", "Completed"]}
                       rows={data.recent.map((r) => [
-                        r.userName, r.status, r.score ?? "",
-                        r.duration_seconds, r.started_at ?? "", r.completed_at ?? "",
+                        r.userName,
+                        r.status,
+                        r.score ?? "",
+                        r.duration_seconds,
+                        r.started_at ?? "",
+                        r.completed_at ?? "",
                       ])}
                     />
                   )}
                 </div>
-                {data.recent.length === 0 ? <Empty message="No attempts yet." /> : (
+                {data.recent.length === 0 ? (
+                  <Empty message="No attempts yet." />
+                ) : (
                   <div className="overflow-hidden rounded-xl border border-white/10">
                     <Table>
                       <TableHeader>
@@ -807,9 +1146,23 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
                         {data.recent.map((r) => (
                           <TableRow key={r.id}>
                             <TableCell className="font-medium">{r.userName}</TableCell>
-                            <TableCell><Badge variant="outline" className={statusTone(r.status === "completed" ? "published" : "draft")}>{r.status}</Badge></TableCell>
-                            <TableCell className="text-right tabular-nums">{r.score ?? "—"}{r.score != null ? "%" : ""}</TableCell>
-                            <TableCell className="text-right tabular-nums">{fmtMins(r.duration_seconds)}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={statusTone(
+                                  r.status === "completed" ? "published" : "draft",
+                                )}
+                              >
+                                {r.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {r.score ?? "—"}
+                              {r.score != null ? "%" : ""}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">
+                              {fmtMins(r.duration_seconds)}
+                            </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
                               {r.started_at ? new Date(r.started_at).toLocaleString() : "—"}
                             </TableCell>
@@ -824,7 +1177,6 @@ function MockDetailView({ quizId, onBack }: { quizId: string; onBack: () => void
               <ActivityFeed quizId={quizId} />
             </>
           )}
-
         </div>
       </ScrollArea>
     </div>
@@ -840,12 +1192,25 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   );
 }
 
-function Stat({ label, value, accent, suffix }: { label: string; value: number; accent?: "emerald" | "rose"; suffix?: string }) {
+function Stat({
+  label,
+  value,
+  accent,
+  suffix,
+}: {
+  label: string;
+  value: number;
+  accent?: "emerald" | "rose";
+  suffix?: string;
+}) {
   const tone = accent === "emerald" ? "text-emerald-400" : accent === "rose" ? "text-rose-400" : "";
   return (
     <div className="rounded-xl border border-white/10 bg-background/40 p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className={`font-display text-2xl font-bold ${tone}`}>{value.toLocaleString()}{suffix ?? ""}</p>
+      <p className={`font-display text-2xl font-bold ${tone}`}>
+        {value.toLocaleString()}
+        {suffix ?? ""}
+      </p>
     </div>
   );
 }

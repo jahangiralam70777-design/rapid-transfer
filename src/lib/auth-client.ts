@@ -29,7 +29,11 @@ export async function signInWithEmail(email: string, password: string) {
     if (typeof window !== "undefined" && res?.event_id) {
       localStorage.setItem(LOGIN_EVENT_KEY, res.event_id);
     }
-    try { trackEvent({ event_type: "login", metadata: { method: "password" } }); } catch { /* swallow */ }
+    try {
+      trackEvent({ event_type: "login", metadata: { method: "password" } });
+    } catch {
+      /* swallow */
+    }
   } catch (err) {
     console.warn("[auth] login event tracking failed", err);
   }
@@ -44,7 +48,8 @@ export async function signUpWithEmail(input: {
   level?: string;
   referralSource?: string;
 }) {
-  const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
+  const redirectTo =
+    typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
   const { data, error } = await supabase.auth.signUp({
     email: input.email,
     password: input.password,
@@ -63,7 +68,8 @@ export async function signUpWithEmail(input: {
 }
 
 export async function resetPasswordForEmail(email: string) {
-  const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+  const redirectTo =
+    typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) throw error;
 }
@@ -83,7 +89,11 @@ export async function signOut() {
         await recordLogoutEvent({ data: { event_id: eventId } });
         localStorage.removeItem(LOGIN_EVENT_KEY);
       }
-      try { trackEvent({ event_type: "logout" }); } catch { /* swallow */ }
+      try {
+        trackEvent({ event_type: "logout" });
+      } catch {
+        /* swallow */
+      }
     }
   } catch (err) {
     console.warn("[auth] logout event tracking failed", err);
@@ -107,26 +117,39 @@ export async function fetchSessionUser(session?: Session | null): Promise<AuthUs
   // on production never blocks the auth state from settling. If a lookup
   // times out we still return a usable AuthUser from the verified session,
   // but the role is downgraded to "student" — see H-3 below.
-  const withTimeout = <T,>(p: PromiseLike<T>, ms: number, fallback: T): Promise<T> =>
+  const withTimeout = <T>(p: PromiseLike<T>, ms: number, fallback: T): Promise<T> =>
     new Promise((resolve) => {
       const t = setTimeout(() => {
         console.warn("[auth] profile/role lookup timed out after", ms, "ms");
         resolve(fallback);
       }, ms);
       Promise.resolve(p).then(
-        (v) => { clearTimeout(t); resolve(v); },
-        (e) => { clearTimeout(t); console.warn("[auth] lookup error", e); resolve(fallback); },
+        (v) => {
+          clearTimeout(t);
+          resolve(v);
+        },
+        (e) => {
+          clearTimeout(t);
+          console.warn("[auth] lookup error", e);
+          resolve(fallback);
+        },
       );
     });
 
   const [profileRes, rolesRes] = await Promise.all([
     withTimeout(
-      supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle() as unknown as PromiseLike<{ data: { display_name?: string } | null }>,
+      supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", userId)
+        .maybeSingle() as unknown as PromiseLike<{ data: { display_name?: string } | null }>,
       8000,
       { data: null } as { data: { display_name?: string } | null },
     ),
     withTimeout(
-      supabase.from("user_roles").select("role").eq("user_id", userId) as unknown as PromiseLike<{ data: { role: string }[] | null }>,
+      supabase.from("user_roles").select("role").eq("user_id", userId) as unknown as PromiseLike<{
+        data: { role: string }[] | null;
+      }>,
       8000,
       { data: null } as { data: { role: string }[] | null },
     ),
@@ -139,9 +162,8 @@ export async function fetchSessionUser(session?: Session | null): Promise<AuthUs
   // network blip. Fail closed to "student" — admin routes still gate
   // on a fresh server-verified `verifyAdminAccess()` call (H-4), so a
   // legitimate admin sees the real role within one round trip.
-  const role: AppRole = Array.isArray(roles) && roles.some((r) => r.role === "admin")
-    ? "admin"
-    : "student";
+  const role: AppRole =
+    Array.isArray(roles) && roles.some((r) => r.role === "admin") ? "admin" : "student";
 
   return {
     id: userId,

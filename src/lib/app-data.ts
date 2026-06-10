@@ -22,8 +22,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-
-
 export type AppRole = "student" | "admin";
 
 export type NavItem = {
@@ -35,39 +33,93 @@ export type NavItem = {
 
 export const studentNavItems: NavItem[] = [
   { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { title: "Daily Progress", to: "/daily-progress", icon: LineChart, keywords: ["progress", "analytics", "tracking", "streak"] },
+  {
+    title: "Daily Progress",
+    to: "/daily-progress",
+    icon: LineChart,
+    keywords: ["progress", "analytics", "tracking", "streak"],
+  },
   { title: "MCQ Practice", to: "/mcq-practice", icon: ListChecks, keywords: ["practice", "mcq"] },
   { title: "Quiz", to: "/quiz", icon: Timer },
-  { title: "Custom Exam", to: "/custom-exam", icon: SlidersHorizontal, keywords: ["exam", "custom"] },
+  {
+    title: "Custom Exam",
+    to: "/custom-exam",
+    icon: SlidersHorizontal,
+    keywords: ["exam", "custom"],
+  },
   { title: "Mock Test", to: "/mock-test", icon: Trophy, keywords: ["mock"] },
   { title: "Flash Cards", to: "/flash-cards", icon: Layers, keywords: ["flash"] },
   { title: "Short Notes", to: "/short-notes", icon: FileText, keywords: ["notes", "pdf"] },
   { title: "Qns Bank", to: "/qns-bank", icon: Database, keywords: ["question", "bank"] },
   { title: "Classes", to: "/classes", icon: PlayCircle, keywords: ["video", "watch"] },
-  { title: "Wrong Questions", to: "/wrong-questions", icon: XCircle, keywords: ["wrong", "mistakes", "review"] },
+  {
+    title: "Wrong Questions",
+    to: "/wrong-questions",
+    icon: XCircle,
+    keywords: ["wrong", "mistakes", "review"],
+  },
   { title: "Bookmarks", to: "/bookmarks", icon: Bookmark, keywords: ["bookmark", "saved"] },
   { title: "Notifications", to: "/notifications", icon: Bell },
   { title: "Profile", to: "/profile", icon: User, keywords: ["settings", "goals"] },
 ];
 
-
 export const adminNavItems: NavItem[] = [
   { title: "Dashboard", to: "/admin", icon: LayoutDashboard },
-  { title: "Academic Manager", to: "/admin/academic-manager", icon: FolderTree, keywords: ["level", "subject", "chapter", "academic", "structure"] },
+  {
+    title: "Academic Manager",
+    to: "/admin/academic-manager",
+    icon: FolderTree,
+    keywords: ["level", "subject", "chapter", "academic", "structure"],
+  },
   { title: "MCQ Manager", to: "/admin/mcq", icon: ListChecks, keywords: ["upload mcq", "mcq"] },
 
   { title: "Quiz Manager", to: "/admin/quiz", icon: Timer, keywords: ["quiz"] },
   { title: "Mock Test Manager", to: "/admin/mock-test", icon: Trophy, keywords: ["mock"] },
   { title: "Flash Card Manager", to: "/admin/flash-cards", icon: Layers, keywords: ["flash"] },
   { title: "Short Notes Manager", to: "/admin/short-notes", icon: FileText, keywords: ["notes"] },
-  { title: "Qns Bank Manager", to: "/admin/question-bank", icon: Database, keywords: ["question", "bank"] },
-  { title: "Classes Manager", to: "/admin/classes", icon: PlayCircle, keywords: ["class", "video"] },
+  {
+    title: "Qns Bank Manager",
+    to: "/admin/question-bank",
+    icon: Database,
+    keywords: ["question", "bank"],
+  },
+  {
+    title: "Classes Manager",
+    to: "/admin/classes",
+    icon: PlayCircle,
+    keywords: ["class", "video"],
+  },
   { title: "User Management", to: "/admin/users", icon: Users, keywords: ["user"] },
-  { title: "Notification Manager", to: "/admin/notifications", icon: Bell, keywords: ["broadcast", "send"] },
-  { title: "Analytics", to: "/admin/analytics", icon: BarChart3, keywords: ["report", "result", "analytics"] },
-  { title: "Site Management", to: "/admin/site", icon: Globe, keywords: ["homepage", "cms", "site", "theme", "content"] },
-  { title: "Database Manager", to: "/admin/database", icon: Database, keywords: ["storage", "size", "monitor", "database", "stats", "system"] },
-  { title: "System Health", to: "/admin/system-health", icon: Activity, keywords: ["errors", "logs", "monitoring", "debug", "incidents", "health"] },
+  {
+    title: "Notification Manager",
+    to: "/admin/notifications",
+    icon: Bell,
+    keywords: ["broadcast", "send"],
+  },
+  {
+    title: "Analytics",
+    to: "/admin/analytics",
+    icon: BarChart3,
+    keywords: ["report", "result", "analytics"],
+  },
+  {
+    title: "Site Management",
+    to: "/admin/site",
+    icon: Globe,
+    keywords: ["homepage", "cms", "site", "theme", "content"],
+  },
+  {
+    title: "Database Manager",
+    to: "/admin/database",
+    icon: Database,
+    keywords: ["storage", "size", "monitor", "database", "stats", "system"],
+  },
+  {
+    title: "System Health",
+    to: "/admin/system-health",
+    icon: Activity,
+    keywords: ["errors", "logs", "monitoring", "debug", "incidents", "health"],
+  },
   { title: "Settings", to: "/admin/settings", icon: Settings, keywords: ["save", "platform"] },
 ];
 
@@ -78,7 +130,13 @@ export function getRouteTitle(pathname: string) {
   if (pathname === "/login") return "Student Login";
   if (pathname === "/signup" || pathname === "/register") return "Sign Up";
   if (pathname === "/admin/login") return "Admin Login";
-  return pathname.split("/").filter(Boolean).map((p) => p.replace(/-/g, " ")).join(" / ") || "CA Aspire BD";
+  return (
+    pathname
+      .split("/")
+      .filter(Boolean)
+      .map((p) => p.replace(/-/g, " "))
+      .join(" / ") || "CA Aspire BD"
+  );
 }
 
 export function routeForAction(label: string, role: AppRole = "student") {
@@ -88,8 +146,19 @@ export function routeForAction(label: string, role: AppRole = "student") {
     [item.title.toLowerCase(), ...(item.keywords ?? [])].some((key) => normalized.includes(key)),
   );
   if (direct) return direct.to;
-  if (normalized.includes("login") || normalized.includes("sign in")) return role === "admin" ? "/admin/login" : "/login";
-  if (normalized.includes("register") || normalized.includes("sign up") || normalized.includes("create account")) return "/signup";
-  if (normalized.includes("start") || normalized.includes("continue") || normalized.includes("resume")) return "/dashboard";
+  if (normalized.includes("login") || normalized.includes("sign in"))
+    return role === "admin" ? "/admin/login" : "/login";
+  if (
+    normalized.includes("register") ||
+    normalized.includes("sign up") ||
+    normalized.includes("create account")
+  )
+    return "/signup";
+  if (
+    normalized.includes("start") ||
+    normalized.includes("continue") ||
+    normalized.includes("resume")
+  )
+    return "/dashboard";
   return null;
 }

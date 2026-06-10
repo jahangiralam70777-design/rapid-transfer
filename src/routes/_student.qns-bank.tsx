@@ -14,7 +14,8 @@ export const Route = createFileRoute("/_student/qns-bank")({
       { property: "og:title", content: "Smart Question Bank · CA Aspire BD" },
       {
         property: "og:description",
-        content: "Premium glassmorphism resource viewer with PDF/text modes, highlights and AI recommendations.",
+        content:
+          "Premium glassmorphism resource viewer with PDF/text modes, highlights and AI recommendations.",
       },
     ],
   }),

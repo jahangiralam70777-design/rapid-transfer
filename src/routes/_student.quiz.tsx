@@ -6,7 +6,10 @@ export const Route = createFileRoute("/_student/quiz")({
   head: () => ({
     meta: [
       { title: "Quiz · CA Aspire BD" },
-      { name: "description", content: "Timer-based 10 MCQ quizzes with instant scoring, accuracy and review." },
+      {
+        name: "description",
+        content: "Timer-based 10 MCQ quizzes with instant scoring, accuracy and review.",
+      },
     ],
   }),
 });

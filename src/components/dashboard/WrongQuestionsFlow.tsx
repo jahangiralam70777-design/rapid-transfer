@@ -23,11 +23,7 @@ import {
   BookOpen,
 } from "lucide-react";
 
-import {
-  listWrongMcqs,
-  markWrongMcqsMastered,
-  removeWrongMcqs,
-} from "@/lib/mcq-review.functions";
+import { listWrongMcqs, markWrongMcqsMastered, removeWrongMcqs } from "@/lib/mcq-review.functions";
 import { listSubjects, listChapters } from "@/lib/learning.functions";
 import { useLevels } from "@/hooks/use-levels";
 
@@ -50,9 +46,7 @@ function Sparkline({
   const min = Math.min(...values, 0);
   const span = Math.max(max - min, 1);
   const step = values.length > 1 ? w / (values.length - 1) : w;
-  const pts = values
-    .map((v, i) => `${i * step},${h - ((v - min) / span) * h}`)
-    .join(" ");
+  const pts = values.map((v, i) => `${i * step},${h - ((v - min) / span) * h}`).join(" ");
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className={className} preserveAspectRatio="none">
       <polyline
@@ -120,10 +114,14 @@ function StatCard({
   return (
     <div className="glass shadow-card-soft group rounded-2xl p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow">
       <div className="flex items-center gap-2">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${t.bg} ${t.ring}`}>
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${t.bg} ${t.ring}`}
+        >
           <Icon className={`h-4 w-4 ${t.text}`} />
         </div>
-        <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${t.bg} ${t.text}`}>
+        <span
+          className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${t.bg} ${t.text}`}
+        >
           {label}
         </span>
       </div>
@@ -295,8 +293,10 @@ export function WrongQuestionsFlow() {
       return d > 7 * day && d <= 14 * day;
     }).length;
     const reviewPct = total > 0 ? Math.round((mastered / total) * 100) : 0;
-    const accuracyImpact = total > 0 ? -Math.min(100, Math.round((pending / Math.max(total, 1)) * 100)) : 0;
-    const potentialGain = pending > 0 ? Math.min(100, Math.round((pending / Math.max(total, pending + 1)) * 100)) : 0;
+    const accuracyImpact =
+      total > 0 ? -Math.min(100, Math.round((pending / Math.max(total, 1)) * 100)) : 0;
+    const potentialGain =
+      pending > 0 ? Math.min(100, Math.round((pending / Math.max(total, pending + 1)) * 100)) : 0;
 
     return {
       pending,
@@ -319,13 +319,29 @@ export function WrongQuestionsFlow() {
       const k = i.subject_id ?? "—";
       counts.set(k, (counts.get(k) ?? 0) + 1);
     });
-    const top = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const top = Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
     return top.map(([id, n]) => ({ id, name: subjectName.get(id) ?? "Other", n }));
   }, [items, subjectName]);
 
   // Sparkline series (per metric)
-  const sparkAll = useMemo(() => weekBuckets(allItems.map((i) => i.last_wrong_at), 8), [allItems]);
-  const sparkRecent = useMemo(() => weekBuckets(allItems.map((i) => i.last_wrong_at), 6), [allItems]);
+  const sparkAll = useMemo(
+    () =>
+      weekBuckets(
+        allItems.map((i) => i.last_wrong_at),
+        8,
+      ),
+    [allItems],
+  );
+  const sparkRecent = useMemo(
+    () =>
+      weekBuckets(
+        allItems.map((i) => i.last_wrong_at),
+        6,
+      ),
+    [allItems],
+  );
 
   function invalidateAll() {
     qc.invalidateQueries({ queryKey: ["mcq-wrong"] });
@@ -391,7 +407,9 @@ export function WrongQuestionsFlow() {
           >
             <option value="">All Levels</option>
             {levelsList.map((l) => (
-              <option key={l.code} value={l.code}>{l.name}</option>
+              <option key={l.code} value={l.code}>
+                {l.name}
+              </option>
             ))}
           </select>
           <select
@@ -404,7 +422,9 @@ export function WrongQuestionsFlow() {
           >
             <option value="">All Subjects</option>
             {(subjectsQ.data ?? []).map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
             ))}
           </select>
           <select
@@ -415,7 +435,9 @@ export function WrongQuestionsFlow() {
           >
             <option value="">All Chapters</option>
             {(chaptersQ.data ?? []).map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
           <button
@@ -503,8 +525,8 @@ export function WrongQuestionsFlow() {
                     {displayed.map((w, idx) => {
                       const m = w.mcq!;
                       const open = openId === m.id;
-                      const subj = w.subject_id ? subjectName.get(w.subject_id) ?? "—" : "—";
-                      const chap = w.chapter_id ? chapterName.get(w.chapter_id) ?? "" : "";
+                      const subj = w.subject_id ? (subjectName.get(w.subject_id) ?? "—") : "—";
+                      const chap = w.chapter_id ? (chapterName.get(w.chapter_id) ?? "") : "";
                       const { date, time } = fmtDate(w.last_wrong_at);
                       const correct = w.correct_option ?? m.correct_option;
                       return (
@@ -517,7 +539,9 @@ export function WrongQuestionsFlow() {
                               {String(idx + 1).padStart(2, "0")}
                             </td>
                             <td className="px-4 py-4 align-top">
-                              <p className="line-clamp-2 max-w-md font-medium">{sanitizeOptionText(m.question)}</p>
+                              <p className="line-clamp-2 max-w-md font-medium">
+                                {sanitizeOptionText(m.question)}
+                              </p>
                               {chap && (
                                 <p className="mt-1 text-[11px] text-muted-foreground">{chap}</p>
                               )}
@@ -575,7 +599,10 @@ export function WrongQuestionsFlow() {
                             </td>
                           </tr>
                           {open && (
-                            <tr key={`${m.id}-exp`} className="border-b border-border/40 bg-muted/20">
+                            <tr
+                              key={`${m.id}-exp`}
+                              className="border-b border-border/40 bg-muted/20"
+                            >
                               <td colSpan={7} className="px-4 py-4">
                                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                   {[
@@ -583,27 +610,38 @@ export function WrongQuestionsFlow() {
                                     { k: "B", t: sanitizeOptionText(m.option_b) },
                                     { k: "C", t: sanitizeOptionText(m.option_c) },
                                     { k: "D", t: sanitizeOptionText(m.option_d) },
-                                  ].filter((o) => o.t && o.t.length > 0).map((o) => {
-                                    const isCorrect = correct === o.k;
-                                    const isPicked = w.last_chosen_option === o.k;
-                                    const tone = isCorrect
-                                      ? "border-emerald-400/60 bg-emerald-400/10"
-                                      : isPicked
-                                      ? "border-rose-400/60 bg-rose-400/10"
-                                      : "border-border bg-background/40";
-                                    return (
-                                      <div key={o.k} className={`rounded-xl border p-3 text-sm ${tone}`}>
-                                        <span className="mr-2 font-display font-bold">{o.k}.</span>
-                                        {o.t}
-                                        {isCorrect && (
-                                          <span className="ml-2 text-[10px] font-bold text-emerald-500">CORRECT</span>
-                                        )}
-                                        {isPicked && !isCorrect && (
-                                          <span className="ml-2 text-[10px] font-bold text-rose-500">YOUR PICK</span>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                                  ]
+                                    .filter((o) => o.t && o.t.length > 0)
+                                    .map((o) => {
+                                      const isCorrect = correct === o.k;
+                                      const isPicked = w.last_chosen_option === o.k;
+                                      const tone = isCorrect
+                                        ? "border-emerald-400/60 bg-emerald-400/10"
+                                        : isPicked
+                                          ? "border-rose-400/60 bg-rose-400/10"
+                                          : "border-border bg-background/40";
+                                      return (
+                                        <div
+                                          key={o.k}
+                                          className={`rounded-xl border p-3 text-sm ${tone}`}
+                                        >
+                                          <span className="mr-2 font-display font-bold">
+                                            {o.k}.
+                                          </span>
+                                          {o.t}
+                                          {isCorrect && (
+                                            <span className="ml-2 text-[10px] font-bold text-emerald-500">
+                                              CORRECT
+                                            </span>
+                                          )}
+                                          {isPicked && !isCorrect && (
+                                            <span className="ml-2 text-[10px] font-bold text-rose-500">
+                                              YOUR PICK
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
                                   {m.explanation && (
                                     <div className="rounded-xl border border-dashed border-border bg-background/30 p-3 text-xs text-muted-foreground sm:col-span-2">
                                       <b className="text-foreground">Explanation: </b>
@@ -652,8 +690,12 @@ export function WrongQuestionsFlow() {
               <div className="relative flex-shrink-0">
                 <ProgressRing percent={stats.reviewPct} />
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-display text-2xl font-bold tabular-nums">{stats.reviewPct}%</span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Completed</span>
+                  <span className="font-display text-2xl font-bold tabular-nums">
+                    {stats.reviewPct}%
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Completed
+                  </span>
                 </div>
               </div>
               <ul className="flex-1 space-y-2 text-xs">

@@ -3,7 +3,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertPermission } from "@/lib/admin-permissions";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseUA(ua: string | null | undefined) {
   const s = ua ?? "";
   let browser = "Unknown";
@@ -11,14 +10,23 @@ function parseUA(ua: string | null | undefined) {
   else if (/Chrome\//.test(s)) browser = "Chrome";
   else if (/Safari\//.test(s)) browser = "Safari";
   else if (/Firefox\//.test(s)) browser = "Firefox";
-  const device = /Mobile|Android|iPhone/.test(s) ? "Mobile" : /iPad|Tablet/.test(s) ? "Tablet" : "Desktop";
+  const device = /Mobile|Android|iPhone/.test(s)
+    ? "Mobile"
+    : /iPad|Tablet/.test(s)
+      ? "Tablet"
+      : "Desktop";
   return { browser, device };
 }
 
 const historyInput = z.object({
   limit: z.number().int().min(1).max(200).default(50),
   search: z.string().trim().max(120).optional(),
-  rangeHours: z.number().int().min(1).max(24 * 90).default(24 * 7),
+  rangeHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 90)
+    .default(24 * 7),
 });
 
 export const adminLoginHistory = createServerFn({ method: "POST" })
@@ -68,8 +76,9 @@ export const adminLoginHistory = createServerFn({ method: "POST" })
     });
     if (data.search) {
       const s = data.search.toLowerCase();
-      out = out.filter((r: { display_name: string; ip: string | null }) =>
-        (r.display_name ?? "").toLowerCase().includes(s) || (r.ip ?? "").includes(s),
+      out = out.filter(
+        (r: { display_name: string; ip: string | null }) =>
+          (r.display_name ?? "").toLowerCase().includes(s) || (r.ip ?? "").includes(s),
       );
     }
     return out;
@@ -78,7 +87,16 @@ export const adminLoginHistory = createServerFn({ method: "POST" })
 export const adminDeviceBreakdown = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { rangeHours?: number }) =>
-    z.object({ rangeHours: z.number().int().min(1).max(24 * 90).default(24 * 7) }).parse(i ?? {}),
+    z
+      .object({
+        rangeHours: z
+          .number()
+          .int()
+          .min(1)
+          .max(24 * 90)
+          .default(24 * 7),
+      })
+      .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_users");
@@ -91,7 +109,11 @@ export const adminDeviceBreakdown = createServerFn({ method: "POST" })
     if (error) throw error;
     const devCounts = new Map<string, number>();
     const browCounts = new Map<string, number>();
-    for (const r of (rows ?? []) as Array<{ user_agent: string | null; device: string | null; browser: string | null }>) {
+    for (const r of (rows ?? []) as Array<{
+      user_agent: string | null;
+      device: string | null;
+      browser: string | null;
+    }>) {
       const p = parseUA(r.user_agent);
       const d = r.device ?? p.device;
       const b = r.browser ?? p.browser;
@@ -101,7 +123,11 @@ export const adminDeviceBreakdown = createServerFn({ method: "POST" })
     const total = rows?.length ?? 0;
     const toArr = (m: Map<string, number>) =>
       [...m.entries()]
-        .map(([k, v]) => ({ label: k, count: v, percent: total ? Math.round((v / total) * 100) : 0 }))
+        .map(([k, v]) => ({
+          label: k,
+          count: v,
+          percent: total ? Math.round((v / total) * 100) : 0,
+        }))
         .sort((a, b) => b.count - a.count);
     return { devices: toArr(devCounts), browsers: toArr(browCounts), total };
   });
@@ -159,7 +185,16 @@ export const adminRoleBreakdown = createServerFn({ method: "GET" })
 export const adminSecuritySummary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { rangeHours?: number }) =>
-    z.object({ rangeHours: z.number().int().min(1).max(24 * 30).default(24 * 7) }).parse(i ?? {}),
+    z
+      .object({
+        rangeHours: z
+          .number()
+          .int()
+          .min(1)
+          .max(24 * 30)
+          .default(24 * 7),
+      })
+      .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertPermission(context.supabase, context.userId, "manage_users");
@@ -169,8 +204,11 @@ export const adminSecuritySummary = createServerFn({ method: "POST" })
       sb.from("profiles").select("id", { count: "exact", head: true }).eq("status", "suspended"),
       sb.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
       sb.from("user_login_events").select("user_id,ip,login_at").gte("login_at", since).limit(5000),
-      sb.from("activity_events").select("id", { count: "exact", head: true })
-        .gte("created_at", since).eq("event_type", "admin_action"),
+      sb
+        .from("activity_events")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since)
+        .eq("event_type", "admin_action"),
     ]);
     // Suspicious = users with >1 distinct IP in the window
     const ipsByUser = new Map<string, Set<string>>();
@@ -231,32 +269,75 @@ export const adminUserTrends = createServerFn({ method: "POST" })
       prev === 0 ? (cur > 0 ? 100 : 0) : Math.round(((cur - prev) / prev) * 100);
 
     const [
-      newCur, newPrev,
-      activeCur, activePrev,
-      suspendedCur, suspendedPrev,
-      verifiedCur, verifiedPrev,
+      newCur,
+      newPrev,
+      activeCur,
+      activePrev,
+      suspendedCur,
+      suspendedPrev,
+      verifiedCur,
+      verifiedPrev,
     ] = await Promise.all([
       sb.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", curStart),
-      sb.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", prevStart).lt("created_at", prevEnd),
-      sb.from("profiles").select("id", { count: "exact", head: true }).gte("last_login_at", curStart),
-      sb.from("profiles").select("id", { count: "exact", head: true }).gte("last_login_at", prevStart).lt("last_login_at", prevEnd),
-      sb.from("admin_action_log").select("id", { count: "exact", head: true })
+      sb
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", prevStart)
+        .lt("created_at", prevEnd),
+      sb
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("last_login_at", curStart),
+      sb
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("last_login_at", prevStart)
+        .lt("last_login_at", prevEnd),
+      sb
+        .from("admin_action_log")
+        .select("id", { count: "exact", head: true })
         .eq("action", "user_status_change")
         .gte("created_at", curStart),
-      sb.from("admin_action_log").select("id", { count: "exact", head: true })
+      sb
+        .from("admin_action_log")
+        .select("id", { count: "exact", head: true })
         .eq("action", "user_status_change")
-        .gte("created_at", prevStart).lt("created_at", prevEnd),
-      sb.from("admin_action_log").select("id", { count: "exact", head: true })
-        .eq("action", "user_verify").gte("created_at", curStart),
-      sb.from("admin_action_log").select("id", { count: "exact", head: true })
-        .eq("action", "user_verify").gte("created_at", prevStart).lt("created_at", prevEnd),
+        .gte("created_at", prevStart)
+        .lt("created_at", prevEnd),
+      sb
+        .from("admin_action_log")
+        .select("id", { count: "exact", head: true })
+        .eq("action", "user_verify")
+        .gte("created_at", curStart),
+      sb
+        .from("admin_action_log")
+        .select("id", { count: "exact", head: true })
+        .eq("action", "user_verify")
+        .gte("created_at", prevStart)
+        .lt("created_at", prevEnd),
     ]);
 
     return {
       days: data.days,
-      new_users: { current: newCur.count ?? 0, previous: newPrev.count ?? 0, pct: trend(newCur.count ?? 0, newPrev.count ?? 0) },
-      active: { current: activeCur.count ?? 0, previous: activePrev.count ?? 0, pct: trend(activeCur.count ?? 0, activePrev.count ?? 0) },
-      suspended_actions: { current: suspendedCur.count ?? 0, previous: suspendedPrev.count ?? 0, pct: trend(suspendedCur.count ?? 0, suspendedPrev.count ?? 0) },
-      verifications: { current: verifiedCur.count ?? 0, previous: verifiedPrev.count ?? 0, pct: trend(verifiedCur.count ?? 0, verifiedPrev.count ?? 0) },
+      new_users: {
+        current: newCur.count ?? 0,
+        previous: newPrev.count ?? 0,
+        pct: trend(newCur.count ?? 0, newPrev.count ?? 0),
+      },
+      active: {
+        current: activeCur.count ?? 0,
+        previous: activePrev.count ?? 0,
+        pct: trend(activeCur.count ?? 0, activePrev.count ?? 0),
+      },
+      suspended_actions: {
+        current: suspendedCur.count ?? 0,
+        previous: suspendedPrev.count ?? 0,
+        pct: trend(suspendedCur.count ?? 0, suspendedPrev.count ?? 0),
+      },
+      verifications: {
+        current: verifiedCur.count ?? 0,
+        previous: verifiedPrev.count ?? 0,
+        pct: trend(verifiedCur.count ?? 0, verifiedPrev.count ?? 0),
+      },
     };
   });

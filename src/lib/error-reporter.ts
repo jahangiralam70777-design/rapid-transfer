@@ -66,7 +66,7 @@ async function flush() {
       });
     } catch (err) {
       // Never throw from the reporter.
-      // eslint-disable-next-line no-console
+
       console.debug("[error-reporter] flush failed", err);
     }
   }
@@ -88,7 +88,8 @@ export function reportError(input: ErrorReport): void {
       ...input,
       fingerprint: finger,
       route: input.route ?? (typeof window !== "undefined" ? window.location.pathname : undefined),
-      userAgent: input.userAgent ?? (typeof navigator !== "undefined" ? navigator.userAgent : undefined),
+      userAgent:
+        input.userAgent ?? (typeof navigator !== "undefined" ? navigator.userAgent : undefined),
       message: String(input.message ?? "Unknown error").slice(0, 2000),
       stack: input.stack ? String(input.stack).slice(0, 8000) : undefined,
     });
@@ -115,9 +116,11 @@ export function installGlobalErrorReporter(): void {
   window.addEventListener("unhandledrejection", (event) => {
     const reason = event.reason;
     const message =
-      reason instanceof Error ? reason.message :
-      typeof reason === "string" ? reason :
-      "Unhandled promise rejection";
+      reason instanceof Error
+        ? reason.message
+        : typeof reason === "string"
+          ? reason
+          : "Unhandled promise rejection";
     reportError({
       source: "frontend",
       severity: "high",
